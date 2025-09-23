@@ -1,4 +1,4 @@
-# Projeto NMOG
+# Projeto SegurAuto
 
 Sistema de sensoriamento e controle de motores com comunicação CAN para aplicações automotivas de segurança.
 
@@ -44,6 +44,20 @@ Este projeto implementa um sistema de monitoramento de temperatura e controle de
 - `0x422-0x426`: Respostas e dados de sensores  
 - `0x510-0x530`: Dados de temperatura
 - `0x243`: Reset remoto para bootloader
+
+### Configuração do Hardware
+
+Para configurar o bootloader CAN no ATmega2560, consulte o **[bootloader.md](bootloader.md)** que contém o passo a passo completo para:
+
+- Configuração do Arduino Nano como programador ISP
+- Programação dos fuses corretos
+- Upload do bootloader MCP-CAN-Boot
+- Configuração para atualizações remotas via CAN
+
+⚠️ **Importante**: O bootloader remove a capacidade de upload USB. Atualizações devem ser feitas via CAN usando:
+```bash
+mcp-can-boot-flash-app -f firmware.hex -p m2560 -m 0x0042
+```
 
 ### Desenvolvimento
 
