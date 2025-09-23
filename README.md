@@ -1,4 +1,4 @@
-# Projeto SegurAuto
+# Projeto NMOG
 
 Sistema de sensoriamento e controle de motores com comunicação CAN para aplicações automotivas de segurança.
 
@@ -61,7 +61,7 @@ mcp-can-boot-flash-app -f firmware.hex -p m2560 -m 0x0042
 
 ### Desenvolvimento
 
-Desenvolvido na **Universidade de Brasília (UnB) - Faculdade do Gama** para o projeto **SegurAuto**.
+Desenvolvido na **Universidade de Brasília (UnB) - Faculdade do Gama** para o projeto **NMOG**.
 
 **Plataforma**: PlatformIO com Arduino Framework  
 **Dependências**: mcp_can, TimerInterrupt_Generic, SimpleTimer
