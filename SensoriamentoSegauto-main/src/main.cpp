@@ -556,15 +556,33 @@ void setup()
 	// MCP_8MHZ: frequência do cristal do MCP2515
 	if(CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK){
 		Serial.println("MCP2515 Initialized Successfully!");
+		Serial.println("TEste se esta funcionando");
 	} else {
 		Serial.println("Error Initializing MCP2515...");
 		// ⚠️ Nota: O código continua mesmo com erro. Melhor seria:
 		// while(1);  // Trava aqui se CAN não inicializar
 	}
-	
-	// Muda para modo normal (permite transmitir e receber)
+
+		// Muda para modo normal (permite transmitir e receber)
 	// Outros modos disponíveis: MCP_LOOPBACK (teste), MCP_LISTENONLY (só lê)
 	CAN0.setMode(MCP_NORMAL);
+	
+	byte tempLen;
+    byte tempBuf[8];
+    unsigned long tempId;
+    for(int i = 0; i < 100; i++) {
+        if(CAN0.checkReceive() == CAN_MSGAVAIL) {
+            CAN0.readMsgBuf(&tempId, &tempLen, tempBuf);
+        } else {
+            break;
+        }
+    }
+    Serial.println("Buffer CAN limpo!");
+    
+
+
+
+
 	
 	//───────────────────────────────────────────────────────────────────────
 	// CARREGA CONFIGURAÇÕES SALVAS DA EEPROM
@@ -584,64 +602,72 @@ void setup()
 
 void loop()
 {
-	//═══════════════════════════════════════════════════════════════════════
-	// BLOCO 1: TIMEOUT DE TEMPERATURA (Sistema de Segurança)
-	//═══════════════════════════════════════════════════════════════════════
-	// Se não receber mensagem de temperatura há mais de 500ms,
-	// força o filtro a usar o último valor conhecido
-	// ⚠️ MOTIVO: Se o sensor de temperatura falhar, queremos usar o último
-	//    valor conhecido ao invés de assumir que está OK
-	// 
-	// TODO: Melhor seria acionar um alarme se timeout for muito longo!
-	//───────────────────────────────────────────────────────────────────────
-	if((timetempmess + 500) < millis()){
-		// Força atualização do filtro com última leitura válida
-		temp1f = filterSensorValue1(temp1s.BLtemp);
-		temp2f = filterSensorValue2(temp2);
-		timetempmess = millis();
-	}
 
-	//═══════════════════════════════════════════════════════════════════════
-	// BLOCO 2: LEITURA DE MENSAGENS CAN
-	//═══════════════════════════════════════════════════════════════════════
-	// Verifica se há mensagem CAN pendente no buffer
-	// readMsgBuf() lê do buffer interno do MCP2515
-	//───────────────────────────────────────────────────────────────────────
-	CAN0.readMsgBuf(&rxId, &len, rxBuf);
-
-	//═══════════════════════════════════════════════════════════════════════
-	// MENSAGEM 0x243 - RESET REMOTO PARA BOOTLOADER
-	//═══════════════════════════════════════════════════════════════════════
-	// ⚠️ CRÍTICO: NÃO DELETAR ESTA FUNÇÃO!
-	// Esta é a ÚNICA forma de atualizar o firmware remotamente via CAN
-	// Se você remover isso, o MCU ficará "brickado" e precisará de programador
-	// 
-	// FUNCIONAMENTO:
-	//   1. Recebe 0x243
-	//   2. Desabilita todas as interrupções (cli)
-	//   3. Ativa watchdog timer para 15ms
-	//   4. Entra em loop infinito
-	//   5. Watchdog reseta o MCU após 15ms
-	//   6. Bootloader CAN assume o controle
-	//   7. PC pode enviar novo firmware via: mcp-can-boot-flash-app
-	//───────────────────────────────────────────────────────────────────────
-	if(rxId == 0x243){
-		cli();                 // Desabilita todas as interrupções
-		wdt_enable(WDTO_15MS); // Ativa watchdog para resetar em 15ms
-		while(1);              // Loop infinito - watchdog vai resetar o MCU
-	}
-	
-	//═══════════════════════════════════════════════════════════════════════
-	// MENSAGEM 0x401 - HEARTBEAT (Verificar se placa está viva)
-	//═══════════════════════════════════════════════════════════════════════
-	// PROTOCOLO:
-	//   RX: Remote Frame 0x401 (sem dados)
-	//   TX: Data Frame 0x401 (sem dados) = ACK
-	//───────────────────────────────────────────────────────────────────────
-	if(rxId == 0x401){
-		CAN0.sendMsgBuf(0x401, 0, 0);  // Responde com mensagem vazia
-		// Isso confirma que o MCU está vivo e respondendo
-	}
+	// LED pisca = loop está rodando
+    static unsigned long lastBlink = 0;
+    if(millis() - lastBlink > 1000) {
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+        Serial.println("Loop rodando...");
+        lastBlink = millis();
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // DEBUG: Verifica pino INT
+    // ═══════════════════════════════════════════════════════════
+    static bool lastIntState = HIGH;
+    bool currentIntState = digitalRead(CAN0_INT);
+    
+    if(currentIntState != lastIntState) {
+        Serial.print("INT mudou para: ");
+        Serial.println(currentIntState ? "HIGH" : "LOW");
+        lastIntState = currentIntState;
+    }
+    
+    // ═══════════════════════════════════════════════════════════
+    // Verifica se tem mensagem
+    // ═══════════════════════════════════════════════════════════
+    if(!digitalRead(CAN0_INT)) {
+        Serial.println("INT = LOW, lendo mensagem...");
+        
+        // Lê mensagem
+        if(CAN0.readMsgBuf(&rxId, &len, rxBuf) == CAN_OK) {
+            Serial.print("RX: 0x");
+            Serial.print(rxId, HEX);
+            Serial.print(" [");
+            Serial.print(len);
+            Serial.println("]");
+            
+            // Responde ao heartbeat
+            if(rxId == 0x401) {
+                Serial.println("  -> HEARTBEAT! Respondendo...");
+                
+                byte result = CAN0.sendMsgBuf(0x401, 0, 0);
+                
+                if(result == CAN_OK) {
+                    Serial.println("  -> Resposta enviada OK!");
+                } else {
+                    Serial.print("  -> ERRO ao enviar! Código: ");
+                    Serial.println(result);
+                }
+                
+                // Pisca 3x rápido quando responde
+                for(int i=0; i<6; i++) {
+                    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+                    delay(100);
+                }
+            }
+            
+            // Reset
+            if(rxId == 0x243) {
+                Serial.println("  -> RESET!");
+                delay(100);
+                asm volatile ("jmp 0");
+            }
+        } else {
+            Serial.println("ERRO ao ler buffer CAN!");
+        }
+    }
+        
 	
 	//═══════════════════════════════════════════════════════════════════════
 	// MENSAGEM 0x402 - CONTROLE DE SAÍDAS DIGITAIS E PWM
@@ -1075,7 +1101,6 @@ void loop()
 	// TODO: Conectar ao protocolo CAN ou implementar lógica de controle
 	//───────────────────────────────────────────────────────────────────────
 	setMotor(dir, pwmVal);  // dir=0,
-	setMotor(dir, pwmVal);  // dir=0, pwmVal=0 → Motor sempre parado
 	
 	//═══════════════════════════════════════════════════════════════════════
 	// BLOCO 6: RESET DA VARIÁVEL rxId

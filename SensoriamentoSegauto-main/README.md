@@ -67,3 +67,20 @@ Configurado igual agora é capaz de fazer intervalos de 10ms à 10s com exatidã
                     │ VOLTA AO INÍCIO │
                     │ DO LOOP         │
                     └─────────────────┘
+
+
+
+Reles ordem de posicao da direita pra esquerda
+
+Pino D1, ascende led 04 e aciona rele 10
+Pino D2, ascende led 03 e aciona rele 09
+Pino D3, ascende led 02 e aciona rele 02, mas o led dp pwr do primeiro modulo rele ascende
+Pino D4, ascende led 01 e aciona rele 01, mesma coisa do d4
+Pino D5 , ascende led08 e aciona rele 03,04,05,06
+Pnio D6 ascende led 07 e aciona 03,04,05,06, 08
+Pion D7 ascende led 06, aciona rele 05 duvida (aciona todos?)
+Pino d8 ascende led 05, aciona rele 08, duvida...
+
+
+
+

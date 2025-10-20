@@ -1,0 +1,4 @@
+Versão: v1.0.5
+Data: 20251020_204749
+Board: megaatmega2560
+Tamanho: 38.35 KB
