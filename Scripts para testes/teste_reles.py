@@ -364,49 +364,47 @@ class PlacaARCGUI:
         self.set_rele(rele_idx, new_state)
     
     def set_rele(self, rele_idx, state):
-        """Define estado de um relé (0=OFF, 1=ON)"""
-        if not self.connected:
-            return
+    """Define estado de um relé (0=OFF, 1=ON)"""
+    if not self.connected:
+        return
+
+    try:
+        # Lê o estado atual em um byte
+        # Cada bit representa um relé
+        mask = 1 << rele_idx
+        data = [0x00] * 8
         
-        try:
-            # Prepara mensagem CAN
-            data = [0x00] * 8
-            
-            # Calcula byte e bit
-            byte_idx = 0 if rele_idx < 4 else 1
-            bit_pos = (rele_idx % 4) * 2
-            
-            # Define estado (01=ON, 00=OFF)
-            if state:
-                data[byte_idx] |= (0x01 << bit_pos)
-            else:
-                data[byte_idx] |= (0x00 << bit_pos)
-            
-            # Envia mensagem 0x402
-            msg = can.Message(
-                arbitration_id=0x402,
-                data=data,
-                is_extended_id=False
-            )
-            self.bus.send(msg)
-            
-            # Atualiza estado local
-            self.rele_states[rele_idx] = state
-            
-            # Atualiza UI
-            self.update_rele_ui(rele_idx, state)
-            
-            # Log
-            action = "LIGADO" if state else "DESLIGADO"
-            self.log(f"D{rele_idx+1} {action}", "SUCCESS")
-            
-            # Aguarda confirmação (0x422)
-            response = self.bus.recv(timeout=0.5)
-            if response and response.arbitration_id == 0x422:
-                self.log(f"  ✓ Confirmação recebida (0x422)", "CAN")
-            
-        except Exception as e:
-            self.log(f"✗ Erro ao controlar D{rele_idx+1}: {e}", "ERROR")
+        # Monta o byte 0 com os estados
+        current_state = 0
+        for i in range(8):
+            if self.rele_states[i]:
+                current_state |= (1 << i)
+        
+        if state:
+            current_state |= mask   # Liga bit
+        else:
+            current_state &= ~mask  # Desliga bit
+        
+        data[0] = current_state
+        
+        # Envia mensagem CAN
+        msg = can.Message(
+            arbitration_id=0x402,
+            data=data,
+            is_extended_id=False
+        )
+        self.bus.send(msg)
+
+        # Atualiza estado local
+        self.rele_states[rele_idx] = state
+        self.update_rele_ui(rele_idx, state)
+
+        # Log
+        action = "LIGADO" if state else "DESLIGADO"
+        self.log(f"D{rele_idx+1} {action}", "SUCCESS")
+
+    except Exception as e:
+        self.log(f"✗ Erro ao controlar D{rele_idx+1}: {e}", "ERROR")
     
     def update_rele_ui(self, rele_idx, state):
         """Atualiza interface visual do relé"""
