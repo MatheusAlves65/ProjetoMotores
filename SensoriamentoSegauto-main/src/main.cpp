@@ -90,7 +90,7 @@ int ledpins[8] = {D1, D2, D3, D4, D5, D6, D7, D8};
 //            Remote Frame = solicita dados sem enviar payload
 //───────────────────────────────────────────────────────────────────────────
 unsigned long DataIDs[8] = {
-    0x510, 0x520, 0x530,  // Temperaturas? (não documentado completamente)
+    0x510, 0x520, 0x520,  // Temperaturas? (não documentado completamente)
     0x610, 0x611,          // Sensores diversos? (não documentado)
     0x620, 0x621, 0x622    // Sensores diversos? (não documentado)
 };
