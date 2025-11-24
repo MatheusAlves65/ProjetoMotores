@@ -637,25 +637,25 @@ void loop()
             Serial.print(len);
             Serial.println("]");
             
-            // Responde ao heartbeat
-            if(rxId == 0x401) {
-                Serial.println("  -> HEARTBEAT! Respondendo...");
-                
-                byte result = CAN0.sendMsgBuf(0x401, 0, 0);
-                
-                if(result == CAN_OK) {
-                    Serial.println("  -> Resposta enviada OK!");
-                } else {
-                    Serial.print("  -> ERRO ao enviar! Código: ");
-                    Serial.println(result);
-                }
-                
-                // Pisca 3x rápido quando responde
-                for(int i=0; i<6; i++) {
-                    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-                    delay(100);
-                }
-            }
+			// Responde ao heartbeat
+			if(rxId == 0x401) {
+				Serial.println("  -> HEARTBEAT! Respondendo...");
+				// Envia o buffer de 8 bytes definido em txBufDebug
+				byte result = CAN0.sendMsgBuf(0x401, 8, txBufDebug);
+				
+				if(result == CAN_OK) {
+					Serial.println("  -> Resposta enviada OK!");
+				} else {
+					Serial.print("  -> ERRO ao enviar! Código: ");
+					Serial.println(result);
+				}
+				
+				// Pisca 3x rápido quando responde
+				for(int i=0; i<6; i++) {
+					digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+					delay(100);
+				}
+			}
             
             // Reset
             if(rxId == 0x243) {
