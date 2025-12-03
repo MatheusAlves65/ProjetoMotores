@@ -113,7 +113,8 @@ MCP_CAN CAN0(33);          // Pino CS (Chip Select) do MCP2515 = 33
 long unsigned int rxId;           // ID da mensagem recebida
 long unsigned int rxIdData[8];    // Buffer de IDs (não usado atualmente)
 unsigned char len;                // Tamanho da mensagem (DLC)
-unsigned char rxBuf[8] = " ";     // Buffer de dados recebidos (max 8 bytes)
+unsigned char rxBuf[8] = " ";  
+unsigned long fullId = rxId & 0x1FFFFFFF;   // Buffer de dados recebidos (max 8 bytes)
 
 // Buffers para transmissão
 byte txBufDebug[8] = {0x55, 0x55, 0x55, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -618,153 +619,154 @@ void loop()
     
     if(millis() - lastBlink > 1000) {
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-        // Serial.println(loopCounter); // Comentado para limpar o terminal
         loopCounter = 0;
         lastBlink = millis();
     }
     
     //═══════════════════════════════════════════════════════════════════════
-    // DEBUG: Status do pino INT (Apenas se mudar de estado)
-    //═══════════════════════════════════════════════════════════════════════
-    static bool lastIntState = HIGH;
-    bool currentIntState = digitalRead(CAN0_INT);
-    
-    if(currentIntState != lastIntState) {
-        // Serial.print("CAN_INT: "); Serial.println(currentIntState); // Reduzido ruído
-        lastIntState = currentIntState;
-    }
-    
-    //═══════════════════════════════════════════════════════════════════════
     // PROCESSAMENTO CAN (Prioridade Alta)
     //═══════════════════════════════════════════════════════════════════════
+    
+    // Variável local para armazenar o ID limpo desta iteração
+    unsigned long currentFullId = 0; 
+
     if(!digitalRead(CAN0_INT)) {
         // Lê mensagem
         if(CAN0.readMsgBuf(&rxId, &len, rxBuf) == CAN_OK) {
             
-            // Só imprime log detalhado se NÃO for a mensagem de temperatura (para não poluir)
-            // ou se você quiser debug total, descomente as linhas abaixo
-            if(rxId != 0x510 && rxId != 0x426) { 
+            // [CORREÇÃO CRÍTICA] Calcula o ID limpo AQUI, toda vez que chega mensagem
+            currentFullId = rxId & 0x1FFFFFFF; 
+            
+            // Debug se não for mensagem repetitiva (Temp ou Aquisicao)
+            if(currentFullId != 0x510 && currentFullId != 0x426) { 
                 Serial.print("RX ID: 0x"); Serial.print(rxId, HEX);
-                Serial.print(" | DATA: ");
-                for(int i = 0; i < len; i++) {
-                    Serial.print("0x"); Serial.print(rxBuf[i], HEX); Serial.print(" ");
+                Serial.print(" -> ID Limpo: 0x"); Serial.print(currentFullId, HEX);
+                Serial.print(" | DLC: "); Serial.println(len);
+            }
+
+            // --- TRATAMENTO DE MENSAGENS ESPECÍFICAS (Usando currentFullId) ---
+
+            // 0x401 - Debug
+            if(currentFullId == 0x401){
+                Serial.println("cmd: 0x401 (Debug)");
+                CAN0.sendMsgBuf(0x401, sizeof(txBufDebug), txBufDebug);
+            }
+
+            // 0x402 - SAÍDAS DIGITAIS
+            if(currentFullId == 0x402){
+                Serial.println("cmd: 0x402 (Saidas)");
+                static int result[8];
+                readDigital(rxBuf, result);
+                
+                for (size_t i = 0; i < 8; i++){
+                    if(result[i] == 0) digitalWrite(ledpins[i], 0);
+                    else if(result[i] == 1) digitalWrite(ledpins[i], 1);
+                }
+                
+                // PWM e Encoder
+                int tPWM1 = readPWMEnc(rxBuf, 2);
+                int tPWM2 = readPWMEnc(rxBuf, 3);
+                int tEnc = readPWMEnc(rxBuf, 4);
+
+                if(tPWM1 >= 0) { PWM1_val = tPWM1; analogWrite(PWM1, PWM1_val); }
+                if(tPWM2 >= 0) { PWM2_val = tPWM2; analogWrite(PWM2, PWM2_val); }
+                if(tEnc >= 0) Enc = tEnc;
+
+                sendDigital(result, PWM1_val, PWM2_val, Enc, txBuf);
+                CAN0.sendMsgBuf(0x422, sizeof(txBuf), txBuf);
+            }
+
+            // 0x403 - CONFIG SEGURANÇA (PARSE MANUAL + SALVAMENTO FORÇADO)
+            // 0x403 - CONFIG SEGURANÇA (CORRIGIDO PARA T2)
+            // 0x403 - CONFIG SEGURANÇA (CORRIGIDO E FORÇADO)
+            if(currentFullId == 0x403){
+                
+                // Se tiver dados na mensagem (Len > 0), atualiza as variáveis
+                if(len > 0) {
+                    Serial.println("\n--- COMANDO 0x403 RECEBIDO ---");
+
+                    // 1. Atualiza Temp 1 na memória
+                    temp1c.Monit_Enable = (rxBuf[1] & 0x03); 
+                    temp1c.maxtemp = (float)rxBuf[2]; 
+                    temp1c.timer = (uint16_t)((float)rxBuf[3]);
+                    temp1c.saveeeprom = 1;
+
+                    // 2. Atualiza Temp 2 na memória
+                    temp2c.Monit_Enable = (rxBuf[5] & 0x03);
+                    temp2c.maxtemp = (float)rxBuf[6]; 
+                    temp2c.timer = (uint16_t)((float)rxBuf[7]);
+                    temp2c.saveeeprom = 1;
+
+                    // 3. Salva na EEPROM se estiver habilitado
+                    if(temp1c.Monit_Enable != 2) updateSafetyConfig1(temp1c);
+                    if(temp2c.Monit_Enable != 2) updateSafetyConfig2(temp2c);
+                    
+                    Serial.println(" -> Configuracoes salvas na RAM e EEPROM");
+                } 
+
+                // 4. PREENCHIMENTO MANUAL DO BUFFER DE RESPOSTA (0x423)
+                // Aqui garantimos que os dados serao escritos no txBuf
+                
+                // --- SENSOR 1 (Bytes 0-3) ---
+                txBuf[0] = 0x12; // Cabeçalho Fixo
+                txBuf[1] = 0x30 | (temp1c.Monit_Enable & 0x03);
+                txBuf[2] = (byte)((float)temp1c.maxtemp); // Converte para escala CAN
+                txBuf[3] = (byte)(temp1c.timer);
+
+                // --- SENSOR 2 (Bytes 4-7) ---
+                txBuf[4] = 0x12; // Cabeçalho Fixo (FORÇADO)
+                txBuf[5] = 0x30 | (temp2c.Monit_Enable & 0x03);
+                txBuf[6] = (byte)((float)temp2c.maxtemp); // Converte para escala CAN
+                txBuf[7] = (byte)(temp2c.timer);
+
+                // DEBUG: Mostra no terminal o que vai ser enviado
+                Serial.print(" > TX (0x423) HEX: ");
+                for(int i=0; i<8; i++) { 
+                    Serial.print(txBuf[i], HEX); 
+                    Serial.print(" "); 
                 }
                 Serial.println();
+
+                // Envia a resposta (Força tamanho 8 bytes)
+                CAN0.sendMsgBuf(0x423, 8, txBuf); 
+            }
+
+            // 0x404 - CONFIG AQUISIÇÃO
+            if(currentFullId == 0x404){
+                Serial.println("cmd: 0x404 (Config Aquisicao)");
+                aconfigbuf = aquisitionConfig(rxBuf);
+                if(aconfigbuf.Aquics_Enable != 2) aquisc = aconfigbuf;
+                
+                sendaquisitionConfig(aquisc, txBuf);
+                CAN0.sendMsgBuf(0x424, sizeof(txBuf), txBuf);
+            }
+
+            // 0x405 - START/STOP
+            if(currentFullId == 0x405){
+                uint8_t EnableBuf = (rxBuf[0] >> 6);
+                if(EnableBuf < 2) {
+                    aquisc.Aquics_Enable = EnableBuf;
+                    Serial.print("cmd: 0x405 -> "); 
+                    Serial.println(EnableBuf ? "START" : "STOP");
+                }
+                byte EnableBufc[1];
+                EnableBufc[0] = ((aquisc.Aquics_Enable << 6) & 0xC0);
+                CAN0.sendMsgBuf(0x425, 8, EnableBufc);
+            }
+
+            // 0x510 - LEITURA DE TEMPERATURA
+            if (currentFullId == 0x510){
+                temp1s = tempRead(rxBuf);
+                temp2s = tempRead(rxBuf); // Atenção: Confirme se Sensor 2 vem nos bytes 4-7
+                temp1f = filterSensorValue1(temp1s.TLtemp);
+                temp2f = filterSensorValue2(temp2s.TRtemp);
+                timetempmess = millis();
             }
         } 
     }
 
-    // --- TRATAMENTO DE MENSAGENS ESPECÍFICAS ---
-
-    if(rxId == 0x40000401){
-        Serial.println("cmd: 0x401 (Debug)");
-        CAN0.sendMsgBuf(0x401, sizeof(txBufDebug), txBufDebug);
-    }
-
-    // 0x402 - SAÍDAS DIGITAIS
-    if(rxId == 0x402){
-        Serial.println("cmd: 0x402 (Saidas)");
-        static int result[8];
-        readDigital(rxBuf, result);
-        
-        for (size_t i = 0; i < 8; i++){
-            if(result[i] == 0) digitalWrite(ledpins[i], 0);
-            else if(result[i] == 1) digitalWrite(ledpins[i], 1);
-        }
-        
-        // PWM e Encoder
-        int tPWM1 = readPWMEnc(rxBuf, 2);
-        int tPWM2 = readPWMEnc(rxBuf, 3);
-        int tEnc = readPWMEnc(rxBuf, 4);
-
-        if(tPWM1 >= 0) { PWM1_val = tPWM1; analogWrite(PWM1, PWM1_val); }
-        if(tPWM2 >= 0) { PWM2_val = tPWM2; analogWrite(PWM2, PWM2_val); }
-        if(tEnc >= 0) Enc = tEnc;
-
-        sendDigital(result, PWM1_val, PWM2_val, Enc, txBuf);
-        CAN0.sendMsgBuf(0x422, sizeof(txBuf), txBuf);
-    }
-
-    // 0x403 - CONFIG SEGURANÇA
-    // 0x403 - CONFIG SEGURANÇA (LEITURA E ESCRITA)
-            if(rxId == 0x40000403){
-                Serial.println("cmd: 0x403 (Config Temp)");
-
-                // CASO 1: MENSAGEM COM DADOS -> É UMA GRAVAÇÃO (SET)
-                if(len > 0) {
-                    Serial.println(" > Acao: GRAVAR nova config");
-                    
-                    // Processa Sensor 1
-                    tconfigbuf = safetyConfig(rxBuf);
-                    // Só atualiza se o enable for válido (diferente de 2)
-                    if(tconfigbuf.Monit_Enable != 2) {
-                        temp1c = tconfigbuf;
-                    }
-                    if(temp1c.saveeeprom == 1) {
-                        Serial.println("   > Salvando T1 na EEPROM...");
-                        updateSafetyConfig1(temp1c); // Chama função de salvar real
-                    }
-
-                    // Processa Sensor 2 (bytes 4-7)
-                    tconfigbuf = safetyConfig(rxBuf+4);
-                    if(tconfigbuf.Monit_Enable != 2) {
-                        temp2c = tconfigbuf;
-                    }
-                    if(temp2c.saveeeprom == 1) {
-                        Serial.println("   > Salvando T2 na EEPROM...");
-                        updateSafetyConfig2(temp2c); // Chama função de salvar real
-                    }
-                } 
-                // CASO 2: MENSAGEM VAZIA -> É UM PEDIDO DE LEITURA (GET/RTR)
-                else {
-                    Serial.println(" > Acao: LER config atual");
-                }
-
-                // INDEPENDENTE SE FOI LEITURA OU ESCRITA, SEMPRE ENVIA A RESPOSTA
-                // Prepara o buffer de envio com os valores atuais de temp1c e temp2c
-                sendsafetyConfig(temp1c, txBuf);
-                sendsafetyConfig(temp2c, txBuf+4);
-                
-                // Envia a resposta no ID 0x423
-                CAN0.sendMsgBuf(0x423, sizeof(txBuf), txBuf);
-                Serial.println(" > Resposta 0x423 enviada");
-            }
-
-    // 0x404 - CONFIG AQUISIÇÃO
-    if(rxId == 0x404){
-        Serial.println("cmd: 0x404 (Config Aquisicao)");
-        aconfigbuf = aquisitionConfig(rxBuf);
-        if(aconfigbuf.Aquics_Enable != 2) aquisc = aconfigbuf;
-        
-        sendaquisitionConfig(aquisc, txBuf);
-        CAN0.sendMsgBuf(0x424, sizeof(txBuf), txBuf);
-    }
-
-    // 0x405 - START/STOP
-    if(rxId == 0x405){
-        uint8_t EnableBuf = (rxBuf[0] >> 6);
-        if(EnableBuf < 2) {
-            aquisc.Aquics_Enable = EnableBuf;
-            Serial.print("cmd: 0x405 -> "); 
-            Serial.println(EnableBuf ? "START" : "STOP");
-        }
-        byte EnableBufc[1];
-        EnableBufc[0] = ((aquisc.Aquics_Enable << 6) & 0xC0);
-        CAN0.sendMsgBuf(0x425, 8, EnableBufc);
-    }
-
-    // 0x510 - LEITURA DE TEMPERATURA (ATUALIZAÇÃO DE VARIÁVEIS)
-    if (rxId == 0x510){
-        // Apenas atualiza as variáveis, o print será feito no Dashboard abaixo
-        temp1s = tempRead(rxBuf);
-        temp2s = tempRead(rxBuf);
-        temp1f = filterSensorValue1(temp1s.TLtemp);
-        temp2f = filterSensorValue2(temp2s.TRtemp);
-        timetempmess = millis();
-    }
-
     //═══════════════════════════════════════════════════════════════════════
-    // SISTEMA DE AQUISIÇÃO PERIÓDICA (Otimizado)
+    // SISTEMA DE AQUISIÇÃO PERIÓDICA
     //═══════════════════════════════════════════════════════════════════════
     if(((millis() - timeaquisition) >= aquisc.timer) && 
        (aquisc.Aquics_Enable || aquisc.Aquics_Enable_Continuous)){
@@ -772,13 +774,11 @@ void loop()
         timeaquisition = millis();
         if (aquisc.Aquics_Enable == 1) aquisc.Aquics_Enable = 0;
         
-        // Envia Remote Frame pedindo temperatura
         for (size_t i = 0; i < 3; i++){ 
             CAN0.sendMsgBuf(remoteIDs[i], 0, NULL);
             delayMicroseconds(100); 
         }
         
-        // Envia status valvulas
         static byte aquisData[2];
         aquisData[0] = (downpipePress * 255) / 20;
         aquisData[1] = (valvPos * 255) / 100;
@@ -793,14 +793,16 @@ void loop()
     if(temp1c.Monit_Enable == 1){
         if(temp1f >= temp1c.maxtemp){
             if(starttimer1 == 0){
-                Serial.println("!!! ALERTA: T1 LIMITE ATINGIDO !!!");
+                Serial.println("!!! ALERTA: T1 LIMITE ATINGIDO Acionando D1 !!!");
+                digitalWrite(D1, HIGH); // LED ON em alerta
                 ITimer5.attachInterruptInterval(temp1c.timer, TimerHandler1);
                 previousMillistimer = millis();
                 starttimer1 = 1;
             }
         } else {
             if(starttimer1 == 1) {
-                Serial.println("INFO: T1 Normalizado");
+                Serial.println("INFO: T1 Normalizado D1 Desligado");
+                digitalWrite(D1, LOW); // LED ON em alerta
                 ITimer5.detachInterrupt();
                 starttimer1 = 0;
             }
@@ -812,16 +814,17 @@ void loop()
 
     // --- MONITOR TEMP 2 ---
     if(temp2c.Monit_Enable == 1){
-        // Lógica idêntica ao Temp 1
         if(temp2f >= temp2c.maxtemp){
             if(starttimer2 == 0){
-                Serial.println("!!! ALERTA: T2 LIMITE ATINGIDO !!!");
+                Serial.println("!!! ALERTA: T2 LIMITE ATINGIDO Acionando D2 !!!");
+                digitalWrite(D2, HIGH); // LED ON em alerta
                 ITimer3.attachInterruptInterval(temp2c.timer, TimerHandler2);
                 starttimer2 = 1;
             }
         } else {
             if(starttimer2 == 1) {
-                Serial.println("INFO: T2 Normalizado");
+                Serial.println("INFO: T2 Normalizado D2 desligado");
+                digitalWrite(D2, LOW); // LED OFF
                 ITimer3.detachInterrupt();
                 starttimer2 = 0;
             }
@@ -837,9 +840,8 @@ void loop()
     setMotor(dir, pwmVal);
     
     //═══════════════════════════════════════════════════════════════════════
-    // DASHBOARD SERIAL (NOVO: DEBUG DE TEMPERATURA AQUI)
+    // DASHBOARD SERIAL
     //═══════════════════════════════════════════════════════════════════════
-    // Imprime status a cada 500ms para facilitar leitura
     static unsigned long lastDebugPrint = 0;
     if(millis() - lastDebugPrint >= 500) {
         lastDebugPrint = millis();
@@ -858,6 +860,6 @@ void loop()
         Serial.println(pwmVal);
     }
 
-    // Limpa ID para próximo ciclo
+    // Limpa IDs para próximo ciclo
     rxId = 0;
 }
