@@ -64,6 +64,11 @@ void sendsafetyConfig (safetyConfigStructure tempc, byte *txBuf){
 
 aquisitionConfigStructure aquisitionConfig (byte *buf){
     aquisitionConfigStructure aquisc;
+    Serial.println("Parsing aquisitionConfigStructure from buffer:");
+    for(int i=0; i<8; i++) {
+        Serial.print(buf[i], HEX);
+        Serial.print(" ");
+    }
     aquisc.timer = (buf[0] << 8) | buf[1];
     aquisc.analog = (buf[2] & 0x01);
     aquisc.Aquics_Enable_Continuous = (buf[3] & 0x03);

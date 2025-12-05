@@ -36,7 +36,7 @@
 //───────────────────────────────────────────────────────────────────────────
 #define USE_TIMER_0     false  // ✗ Usado pelo sistema
 #define USE_TIMER_1     false  // ✗ Usado pelo sistema
-#define USE_TIMER_2     false  // ✗ Usado pelo sistema
+#define USE_TIMER_2     true  //  ✓ Disponível (usado para temp3)
 #define USE_TIMER_3     true   // ✓ Disponível (usado para temp2)
 #define USE_TIMER_4     false  // ✗ Usado pelo sistema
 #define USE_TIMER_5     true   // ✓ Disponível (usado para temp1)
@@ -139,6 +139,7 @@ char serialString[128];           // Buffer para strings serial (não usado)
 //───────────────────────────────────────────────────────────────────────────
 safetyConfigStructure temp1c;     // Configuração do sensor de temp 1
 safetyConfigStructure temp2c;     // Configuração do sensor de temp 2
+safetyConfigStructure temp3c;     // Configuração do sensor de temp 3   
 safetyConfigStructure tconfigbuf; // Buffer temporário para receber config
 
 //───────────────────────────────────────────────────────────────────────────
@@ -224,6 +225,7 @@ uint32_t timeaquisition = 0;                 // Último ciclo de aquisição
 // Flags de controle dos timers de segurança
 bool starttimer1 = 0;  // Timer1 está ativo?
 bool starttimer2 = 0;  // Timer2 está ativo?
+bool starttimer3 = 0;  // Timer3 está ativo?
 
 //───────────────────────────────────────────────────────────────────────────
 // VARIÁVEIS DE TEMPERATURA
@@ -232,11 +234,13 @@ bool starttimer2 = 0;  // Timer2 está ativo?
 //───────────────────────────────────────────────────────────────────────────
 volatile int16_t temp1 = 120;   // Temp bruta sensor 1 (não usado)
 volatile int16_t temp2 = 120;   // Temp bruta sensor 2 (não usado)
+volatile int16_t temp3 = 120;   // Temp bruta sensor 3 (não usado)
 volatile float temp1f = 0;      // Temp filtrada sensor 1 (°C)
 volatile float temp2f = 0;      // Temp filtrada sensor 2 (°C)
 volatile float temp3f = 0;      // Temp filtrada sensor 3 (°C)
 volatile float prevtempf1 = 0;  // Temp anterior para filtro 1
 volatile float prevtempf2 = 0;  // Temp anterior para filtro 2
+volatile float prevtempf3 = 0;  // Temp anterior para filtro 3
 
 //═══════════════════════════════════════════════════════════════════════════
 // SISTEMA DE PERSISTÊNCIA - EEPROM
@@ -250,6 +254,9 @@ int addrtimer1 = sizeof(float) + sizeof(float);            // uint16_t (2 bytes)
 int addrtimer2 = sizeof(float) + sizeof(float) + sizeof(uint16_t);  // uint16_t
 int monitenable1 = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t);  // uint8_t
 int monitenable2 = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint8_t);  // uint8_t
+int addrtemp3max = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t); // float (4 bytes)
+int addrtimer3 = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(float); // uint16_t (2 bytes)
+int monitenable3 = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(float) + sizeof(uint16_t); // uint8_t
 
 // Layout da EEPROM:
 // ┌─────────────┬──────────┬────────┐
@@ -261,6 +268,9 @@ int monitenable2 = sizeof(float) + sizeof(float) + sizeof(uint16_t) + sizeof(uin
 // │ 10-11       │ timer2   │ 2      │
 // │ 12          │ enable1  │ 1      │
 // │ 13          │ enable2  │ 1      │
+// │ 14-17       │ temp3max │ 4      │
+// │ 18-19       │ timer3   │ 2      │
+// │ 20          │ enable3  │ 1      │
 // └─────────────┴──────────┴────────┘
 
 //═══════════════════════════════════════════════════════════════════════════
@@ -351,12 +361,22 @@ void updateSafetyConfig2(const safetyConfigStructure &temp2c) {
 }
 
 //───────────────────────────────────────────────────────────────────────────
+// SALVAR CONFIGURAÇÃO DE SEGURANÇA 3
+void updateSafetyConfig3(const safetyConfigStructure &temp3c) {
+    updateEEPROMFloat(addrtemp3max, temp3c.maxtemp);
+    updateEEPROMUInt16(addrtimer3, temp3c.timer);
+    updateEEPROMUInt8(monitenable3, temp3c.Monit_Enable);
+}
+
+//───────────────────────────────────────────────────────────────────────────
 // CARREGAR AMBAS CONFIGURAÇÕES DA EEPROM
 //───────────────────────────────────────────────────────────────────────────
+//___________________________________________________________________________
+//
 // Chamado no setup() para restaurar configurações após reboot
 //───────────────────────────────────────────────────────────────────────────
 void loadSafetyConfigs(safetyConfigStructure &temp1c, 
-                       safetyConfigStructure &temp2c) {
+                       safetyConfigStructure &temp2c,safetyConfigStructure &temp3c) {
     // Carrega config 1
     temp1c.maxtemp = readEEPROMFloat(addrtemp1max);
     temp1c.timer = readEEPROMUInt16(addrtimer1);
@@ -366,6 +386,12 @@ void loadSafetyConfigs(safetyConfigStructure &temp1c,
     temp2c.maxtemp = readEEPROMFloat(addrtemp2max);
     temp2c.timer = readEEPROMUInt16(addrtimer2);
     temp2c.Monit_Enable = readEEPROMUInt8(monitenable2);
+
+    // Carrega config 3
+    temp3c.maxtemp = readEEPROMFloat(addrtemp3max);
+    temp3c.timer = readEEPROMUInt16(addrtimer3);
+    temp3c.Monit_Enable = readEEPROMUInt8(monitenable3);
+                        
 }
 
 //═══════════════════════════════════════════════════════════════════════════
@@ -385,8 +411,6 @@ void loadSafetyConfigs(safetyConfigStructure &temp1c,
 //   - Enviar mensagem CAN de emergência
 //───────────────────────────────────────────────────────────────────────────
 void TimerHandler1() {
-	Serial.print("ITimer1 called, millis() = ");
-	Serial.println(millis() - previousMillistimer);
 	previousMillistimer = millis();
 	
 	// TODO: IMPLEMENTAR AÇÕES DE SEGURANÇA AQUI!
@@ -409,6 +433,14 @@ void TimerHandler2() {
 	
 	// TODO: IMPLEMENTAR AÇÕES DE SEGURANÇA AQUI!
 }
+
+//TIMER 3 - Segurança Temperatura 3 - Intercooler
+
+void TimerHandler3() {
+    previousMillistimer = millis();
+
+}
+// TIMER
 
 //═══════════════════════════════════════════════════════════════════════════
 // CONTROLE DE MOTOR DC - PONTE H
@@ -491,6 +523,18 @@ float filterSensorValue2(int16_t newValue) {
     return filteredValue2;
 }
 
+//───────────────────────────────────────────────────────────────────────────
+// FILTRO EXPONENCIAL - Sensor 3 (idêntico ao sensor 1)
+//───────────────────────────────────────────────────────────────────────────
+
+float filterSensorValue3(int16_t newValue) {
+    static float filteredValue3 = 25;
+    const float alpha3 = 0.1f;
+    filteredValue3 = alpha3 * newValue + (1 - alpha3) * prevtempf3;
+    prevtempf3 = filteredValue3;
+    return filteredValue3;
+}
+
 //═══════════════════════════════════════════════════════════════════════════
 // SETUP() - INICIALIZAÇÃO DO SISTEMA
 //═══════════════════════════════════════════════════════════════════════════
@@ -546,6 +590,7 @@ void setup()
 	// ITimer3 e ITimer5 são usados para monitoramento de temperatura
 	// São inicializados aqui, mas attachInterrupt() só é chamado quando
 	// a temperatura ultrapassa o limite
+    ITimer2.init();  // Timer 2 para sensor de temperatura 3
 	ITimer3.init();  // Timer 3 para sensor de temperatura 2
 	ITimer5.init();  // Timer 5 para sensor de temperatura 1
 
@@ -591,7 +636,7 @@ void setup()
 	// Restaura as configurações de temperatura que foram salvas anteriormente
 	// Se for a primeira vez que o código roda, valores serão aleatórios!
 	// Melhor seria inicializar EEPROM com valores padrão na primeira execução
-	loadSafetyConfigs(temp1c, temp2c);
+	loadSafetyConfigs(temp1c, temp2c,temp3c);
 
 	// Configura padrão para aquisição contínua automática
     aquisc.Aquics_Enable_Continuous = 1; // 1 = Habilitado, 0 = Desabilitado
@@ -638,11 +683,11 @@ void loop()
             currentFullId = rxId & 0x1FFFFFFF; 
             
             // Debug se não for mensagem repetitiva (Temp ou Aquisicao)
-            if(currentFullId != 0x510 && currentFullId != 0x426) { 
+            /*if(currentFullId != 0x510 && currentFullId != 0x426) { 
                 Serial.print("RX ID: 0x"); Serial.print(rxId, HEX);
                 Serial.print(" -> ID Limpo: 0x"); Serial.print(currentFullId, HEX);
                 Serial.print(" | DLC: "); Serial.println(len);
-            }
+            }*/
 
             // --- TRATAMENTO DE MENSAGENS ESPECÍFICAS (Usando currentFullId) ---
 
@@ -732,26 +777,100 @@ void loop()
             }
 
             // 0x404 - CONFIG AQUISIÇÃO
+            // 0x404 - CONFIGURAÇÃO DE AQUISIÇÃO (Dual Mode: Set & Get)
             if(currentFullId == 0x404){
-                Serial.println("cmd: 0x404 (Config Aquisicao)");
-                aconfigbuf = aquisitionConfig(rxBuf);
-                if(aconfigbuf.Aquics_Enable != 2) aquisc = aconfigbuf;
                 
-                sendaquisitionConfig(aquisc, txBuf);
-                CAN0.sendMsgBuf(0x424, sizeof(txBuf), txBuf);
-            }
-
-            // 0x405 - START/STOP
-            if(currentFullId == 0x405){
-                uint8_t EnableBuf = (rxBuf[0] >> 6);
-                if(EnableBuf < 2) {
-                    aquisc.Aquics_Enable = EnableBuf;
-                    Serial.print("cmd: 0x405 -> "); 
-                    Serial.println(EnableBuf ? "START" : "STOP");
+                // CASO 1: Data Frame (Tem dados) -> GRAVA NOVA CONFIG
+                if(len > 0) {
+                    Serial.println("\n--- COMANDO 0x404 (GRAVAR CONFIG) ---");
+                    
+                    // Lê a nova configuração que chegou no buffer
+                    aconfigbuf = aquisitionConfig(rxBuf);
+                    
+                    // --- DEBUG: VALOR ANTERIOR ---
+                    Serial.print(" > Timer ANTERIOR: "); 
+                    Serial.print(aquisc.timer); 
+                    Serial.println(" ms");
+                    
+                    // Atualiza variáveis globais
+                    aquisc.timer = aconfigbuf.timer;
+                    aquisc.analog = aconfigbuf.analog;
+                    aquisc.Aquics_Enable_Continuous = aconfigbuf.Aquics_Enable_Continuous;
+                    
+                    // --- DEBUG: VALOR NOVO ---
+                    Serial.print(" > Timer NOVO:     "); 
+                    Serial.print(aquisc.timer); 
+                    Serial.println(" ms");
+                    
+                    Serial.println(" -> Config Atualizada com sucesso!");
+                } 
+                // CASO 2: Remote Frame (Sem dados) -> APENAS LEITURA
+                else {
+                    Serial.println("cmd: 0x404 (Ler Status - RTR)");
+                    // Não altera nada, apenas avisa que foi uma leitura
                 }
+
+                // SEMPRE RESPONDE COM O ESTADO ATUAL (seja leitura ou gravação)
+                txBuf[0] = (aquisc.timer >> 8) & 0xFF;
+                txBuf[1] = aquisc.timer & 0xFF;
+                txBuf[2] = aquisc.analog;
+                txBuf[3] = aquisc.Aquics_Enable_Continuous;
+                txBuf[4] = 0; txBuf[5] = 0; txBuf[6] = 0; txBuf[7] = 0;
+                
+                CAN0.sendMsgBuf(0x424, 8, txBuf);
+                Serial.println(" > Resposta 0x424 enviada");
+                for(int i=0; i<4; i++) { 
+                    Serial.print("   Byte "); Serial.print(i); 
+                    Serial.print(": 0x"); Serial.println(txBuf[i], HEX); 
+                }
+            }
+            // 0x405 - START/STOP (Dual Mode: Set & Get)
+            if(currentFullId == 0x405){
+                
+                // CASO 1: Data Frame -> ALTERA O ESTADO
+                if(len > 0) {
+                    Serial.println("\n--- COMANDO 0x405 (START/STOP) ---");
+                    
+                    // --- DEBUG: ESTADO ANTERIOR ---
+                    Serial.print(" > Estado ANTERIOR: ");
+                    if(aquisc.Aquics_Enable == 1) Serial.println("LIGADO (Run)");
+                    else Serial.println("DESLIGADO (Stop)");
+
+                    // Lógica de leitura (Mantendo o deslocamento de bits original)
+                    // Lembra: 0x40 (bin 01000000) >> 6 vira 1.
+                    uint8_t rawByte = rxBuf[0];
+                    uint8_t EnableBuf = (rawByte >> 6); 
+                    
+                    // --- DEBUG: O QUE CHEGOU ---
+                    Serial.print(" > Byte Recebido:   0x");
+                    Serial.print(rawByte, HEX);
+                    Serial.print(" (Interpretado como: ");
+                    Serial.print(EnableBuf);
+                    Serial.println(")");
+
+                    // Aplica a mudança se for válida (0 ou 1)
+                    if(EnableBuf < 2) {
+                        aquisc.Aquics_Enable = EnableBuf;
+                        
+                        // --- DEBUG: ESTADO NOVO ---
+                        Serial.print(" > Estado NOVO:     "); 
+                        if(aquisc.Aquics_Enable == 1) Serial.println("LIGADO (START)");
+                        else Serial.println("DESLIGADO (STOP)");
+                    } else {
+                        Serial.println(" > ERRO: Valor invalido recebido (Ignorado)");
+                    }
+                }
+                // CASO 2: Remote Frame -> APENAS LEITURA
+                else {
+                    Serial.print("cmd: 0x405 (Ler Status - RTR) -> Atualmente: ");
+                    Serial.println(aquisc.Aquics_Enable ? "ON" : "OFF");
+                }
+
+                // SEMPRE RESPONDE 0x425
                 byte EnableBufc[1];
-                EnableBufc[0] = ((aquisc.Aquics_Enable << 6) & 0xC0);
+                EnableBufc[0] = ((aquisc.Aquics_Enable << 6) & 0xC0); // Empacota de volta para o bit 6
                 CAN0.sendMsgBuf(0x425, 8, EnableBufc);
+                Serial.println(" > Resposta 0x425 enviada");
             }
 
             // 0x510 - LEITURA DE TEMPERATURA
@@ -761,6 +880,36 @@ void loop()
                 temp1f = filterSensorValue1(temp1s.TLtemp);
                 temp2f = filterSensorValue2(temp2s.TRtemp);
                 timetempmess = millis();
+            }
+            if(currentFullId == 0x520){
+                temp3s = tempRead(rxBuf);
+                temp3f = filterSensorValue3(temp3s.TLtemp);
+                timetempmess = millis();
+            }
+
+            if (currentFullId == 0x406){
+                if(len>0){
+                    Serial.println("cmd: 0x406 (Intercooler)");
+                    temp3c.Monit_Enable = (rxBuf[1] & 0x03);
+                    temp3c.maxtemp = (float)rxBuf[2]; 
+                    temp3c.timer = (uint16_t)((float)rxBuf[3]);
+                    if(temp3c.Monit_Enable != 2) updateSafetyConfig3(temp3c);
+                }
+                txBuf[0] = 0x12; // Cabeçalho Fixo
+                txBuf[1] = 0x30 | (temp3c.Monit_Enable & 0x03);
+                txBuf[2] = (byte)((float)temp3c.maxtemp); // Converte para escala CAN   
+                txBuf[3] = (byte)(temp3c.timer);
+                Serial.print(" > TX (0x426) HEX: ");
+                for(int i=0; i<4; i++) { 
+                    Serial.print(txBuf[i], HEX); 
+                    Serial.print(" ");
+                }
+                Serial.println();
+                CAN0.sendMsgBuf(0x426, 8, txBuf);
+                
+
+
+
             }
         } 
     }
@@ -834,6 +983,27 @@ void loop()
         starttimer2 = 0;
     }
 
+    if(temp3c.Monit_Enable == 1){
+        if(temp3f >= temp3c.maxtemp){
+            if(starttimer3 == 0){
+                Serial.println("!!! ALERTA: T3 LIMITE ATINGIDO Acionando D3 !!!");
+                digitalWrite(D2, HIGH); // LED ON em alerta
+                ITimer2.attachInterruptInterval(temp3c.timer, TimerHandler3);
+                starttimer3 = 1;
+            }
+        } else {
+            if(starttimer3 == 1) {
+                Serial.println("INFO: T3 Normalizado D3 Desligado");
+                digitalWrite(D2, LOW); // LED ON em alerta
+                ITimer2.detachInterrupt();
+                starttimer3 = 0;
+            }
+        }
+    } else {
+        if(starttimer3) ITimer2.detachInterrupt();
+        starttimer3 = 0;
+    }
+
     //═══════════════════════════════════════════════════════════════════════
     // CONTROLE DE MOTOR
     //═══════════════════════════════════════════════════════════════════════
@@ -850,14 +1020,18 @@ void loop()
         Serial.print(temp1f, 1);
         Serial.print("C (Max:");
         Serial.print(temp1c.maxtemp, 0);
+
         
         Serial.print(") | T2: ");
         Serial.print(temp2f, 1);
         Serial.print("C (Max:");
         Serial.print(temp2c.maxtemp, 0);
-        
-        Serial.print(") | PWM: ");
-        Serial.println(pwmVal);
+
+        Serial.print(") | T3: ");
+        Serial.print(temp3f, 1); 
+        Serial.print("C (Max:");
+        Serial.print(temp3c.maxtemp, 0);   
+        Serial.print(")\n");
     }
 
     // Limpa IDs para próximo ciclo
