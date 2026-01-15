@@ -555,6 +555,15 @@ void setup()
 	pinMode(D6, OUTPUT);
 	pinMode(D7, OUTPUT);
 	pinMode(D8, OUTPUT);
+
+    digitalWrite(D1, HIGH);
+    digitalWrite(D2, HIGH);
+    digitalWrite(D3, HIGH);
+    digitalWrite(D4, HIGH);
+    digitalWrite(D5, HIGH);
+    digitalWrite(D6, HIGH);
+    digitalWrite(D7, HIGH);
+    digitalWrite(D8, HIGH);
 	
 	// Configura pino de interrupção do CAN como entrada
 	pinMode(CAN0_INT, INPUT);
@@ -644,6 +653,8 @@ void setup()
     timeaquisition = millis();           // Inicializa o contador de tempo
     
     Serial.println("MODO CONTINUO INICIADO AUTOMATICAMENTE");
+    digitalWrite(D8, HIGH); 
+
 }
 
 //═══════════════════════════════════════════════════════════════════════════
@@ -702,11 +713,34 @@ void loop()
                 Serial.println("cmd: 0x402 (Saidas)");
                 static int result[8];
                 readDigital(rxBuf, result);
+
+                Serial.println("Estados do result antes:");
+                Serial.print("[ ");
+                for (size_t i = 0; i < 8; i++) {    
+                    Serial.print(result[i]);
+                    if (i < 7) Serial.print(", ");
+                }
                 
                 for (size_t i = 0; i < 8; i++){
-                    if(result[i] == 0) digitalWrite(ledpins[i], 0);
-                    else if(result[i] == 1) digitalWrite(ledpins[i], 1);
+                    if(result[i] == 0) {
+                    digitalWrite(ledpins[i], LOW);
+                    Serial.print("Led ");
+                    Serial.print(ledpins[i]);
+                    Serial.println(" Ativado");
                 }
+                    else if(result[i] == 1) {
+                        digitalWrite(ledpins[i], HIGH);
+                        Serial.print("Led ");
+                        Serial.print(ledpins[i]);
+                        Serial.println(" Desativado");
+                }}
+
+                /*if(result[7] == 0){
+                    digitalWrite(D8, HIGH);
+                }
+                else if(result[7] == 1){
+                    digitalWrite(D8, LOW);
+                }*/
                 
                 // PWM e Encoder
                 int tPWM1 = readPWMEnc(rxBuf, 2);
@@ -778,51 +812,50 @@ void loop()
 
             // 0x404 - CONFIG AQUISIÇÃO
             // 0x404 - CONFIGURAÇÃO DE AQUISIÇÃO (Dual Mode: Set & Get)
+// 0x404 - CONFIGURAÇÃO DE TAXA DE AQUISIÇÃO (Manual & Seguro)
             if(currentFullId == 0x404){
                 
-                // CASO 1: Data Frame (Tem dados) -> GRAVA NOVA CONFIG
+                // CASO 1: Tem dados? Então é para GRAVAR (SET)
                 if(len > 0) {
-                    Serial.println("\n--- COMANDO 0x404 (GRAVAR CONFIG) ---");
+                   Serial.println("\n--- COMANDO 0x404 RECEBIDO ---");
                     
-                    // Lê a nova configuração que chegou no buffer
-                    aconfigbuf = aquisitionConfig(rxBuf);
+                    // Lê o Timer (Bytes 0 e 1)
+                    uint16_t newTimer = ((uint16_t)rxBuf[0] << 8) | rxBuf[1];
+                    if(newTimer < 10) newTimer = 100; // Proteção
+
+                    // Lê o Analógico (Byte 2)
+                    uint8_t newAnalog = rxBuf[2]; 
+
+                    // Lê o BIT DE CONTÍNUO (Byte 3, bit 2)
+                    // Se você mandar 0x00 aqui, o bit 2 será 0 -> DESLIGA O MODO CONTÍNUO
+                    uint8_t newContinuous = (rxBuf[3] >> 2) & 0x01;
+
+                    // Atualiza as variáveis
+                    aquisc.timer = newTimer;
+                    aquisc.analog = newAnalog;
+                    aquisc.Aquics_Enable_Continuous = newContinuous; // <--- AQUI A MÁGICA ACONTECE
                     
-                    // --- DEBUG: VALOR ANTERIOR ---
-                    Serial.print(" > Timer ANTERIOR: "); 
-                    Serial.print(aquisc.timer); 
-                    Serial.println(" ms");
-                    
-                    // Atualiza variáveis globais
-                    aquisc.timer = aconfigbuf.timer;
-                    aquisc.analog = aconfigbuf.analog;
-                    aquisc.Aquics_Enable_Continuous = aconfigbuf.Aquics_Enable_Continuous;
-                    
-                    // --- DEBUG: VALOR NOVO ---
-                    Serial.print(" > Timer NOVO:     "); 
-                    Serial.print(aquisc.timer); 
-                    Serial.println(" ms");
-                    
-                    Serial.println(" -> Config Atualizada com sucesso!");
-                } 
-                // CASO 2: Remote Frame (Sem dados) -> APENAS LEITURA
+                    Serial.print(" > Modo Continuo alterado para: ");
+                    Serial.println(aquisc.Aquics_Enable_Continuous ? "LIGADO" : "DESLIGADO");
+                }
+                // CASO 2: Sem dados (RTR)? Então é apenas LEITURA (GET)
                 else {
                     Serial.println("cmd: 0x404 (Ler Status - RTR)");
-                    // Não altera nada, apenas avisa que foi uma leitura
                 }
 
-                // SEMPRE RESPONDE COM O ESTADO ATUAL (seja leitura ou gravação)
-                txBuf[0] = (aquisc.timer >> 8) & 0xFF;
-                txBuf[1] = aquisc.timer & 0xFF;
-                txBuf[2] = aquisc.analog;
-                txBuf[3] = aquisc.Aquics_Enable_Continuous;
+                // --- RESPOSTA (0x424) ---
+                // Sempre responde com o estado atual das variáveis
+                txBuf[0] = (aquisc.timer >> 8) & 0xFF; // Timer High
+                txBuf[1] = aquisc.timer & 0xFF;        // Timer Low
+                txBuf[2] = aquisc.analog;              // Analog Enable
+                
+                // Empacota o bit continuo de volta na posição 2 do byte 3
+                txBuf[3] = (aquisc.Aquics_Enable_Continuous & 0x01) << 2;
+                
                 txBuf[4] = 0; txBuf[5] = 0; txBuf[6] = 0; txBuf[7] = 0;
                 
                 CAN0.sendMsgBuf(0x424, 8, txBuf);
                 Serial.println(" > Resposta 0x424 enviada");
-                for(int i=0; i<4; i++) { 
-                    Serial.print("   Byte "); Serial.print(i); 
-                    Serial.print(": 0x"); Serial.println(txBuf[i], HEX); 
-                }
             }
             // 0x405 - START/STOP (Dual Mode: Set & Get)
             if(currentFullId == 0x405){

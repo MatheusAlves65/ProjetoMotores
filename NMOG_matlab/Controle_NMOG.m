@@ -176,7 +176,7 @@ while opcao ~= 0
             configurarTaxaAquisicao(masterCh);
             
         case 0 % --- SAIR ---
-            disp('Encerrando...'); stop(masterCh);
+            disp('Encerrando...');try stop(masterCh);catch disp('Canal fechado...');end
             
         otherwise
             disp('Opção Inválida.');
@@ -662,43 +662,76 @@ function Descarte_func(ch, lineM, lineA)
     if isvalid(figKey), close(figKey); end
 end
 
+%% --- FUNÇÃO 8: TESTE DE RELÉS (LÓGICA INVERSA: 0=LIGA, 1=DESLIGA) ---
 function executarTesteReles(ch)
-    reles = zeros(1, 8); sairTeste = false;
+    % Estado visual: 0 = OFF na tela, 1 = ON na tela
+    reles = zeros(1, 8); 
+    sairTeste = false;
+    
     while ~sairTeste
-        clc; disp('=== TESTE DE RELÉS (ID 0x402) ===');
+        clc; disp('=== TESTE DE RELÉS (ID 0x402) - LÓGICA INVERSA ===');
+        disp(' Nota: Enviando 0 para LIGAR e 1 para DESLIGAR o hardware');
+        
+        % --- MONTAGEM DOS BYTES (Lógica Invertida) ---
+        % Se o relé deve estar DESLIGADO (0), enviamos bit 1.
+        % Se o relé deve estar LIGADO (1), enviamos bit 0.
+        
         b1 = 0;
-        if reles(1), b1 = bitor(b1, 64); end 
-        if reles(2), b1 = bitor(b1, 16); end 
-        if reles(3), b1 = bitor(b1, 4);  end 
-        if reles(4), b1 = bitor(b1, 1);  end 
+        % Byte 1 (Relés 1 a 4)
+        if reles(1) == 0, b1 = bitor(b1, 64); end % Se OFF na tela, manda 1
+        if reles(2) == 0, b1 = bitor(b1, 16); end
+        if reles(3) == 0, b1 = bitor(b1, 4);  end
+        if reles(4) == 0, b1 = bitor(b1, 1);  end 
+        
         b2 = 0;
-        if reles(5), b2 = bitor(b2, 64); end 
-        if reles(6), b2 = bitor(b2, 16); end 
-        if reles(7), b2 = bitor(b2, 4);  end 
-        if reles(8), b2 = bitor(b2, 1);  end 
-        msg = canMessage(1026, false, 8); msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+        % Byte 2 (Relés 5 a 8)
+        if reles(5) == 0, b2 = bitor(b2, 64); end 
+        if reles(6) == 0, b2 = bitor(b2, 16); end 
+        if reles(7) == 0, b2 = bitor(b2, 4);  end 
+        if reles(8) == 0, b2 = bitor(b2, 1);  end 
+        
+        % Envio da mensagem
+        msg = canMessage(1026, false, 8); 
+        msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
         try, transmit(ch, msg); catch, end
-        fprintf('ENVIANDO: %02X %02X\n', b1, b2);
+        
+        fprintf('ENVIANDO (Hex): %02X %02X (Bits 1 = Desligado)\n', b1, b2);
         disp('----------------------------------------');
+        
+        % --- EXIBIÇÃO VISUAL (Mantém lógica normal para o usuário) ---
         for i = 1:8
-            st = '[ OFF ]'; if reles(i), st = '[ ON  ] LIGADO'; end
+            st = '[ OFF ]'; 
+            if reles(i), st = '[ ON  ] ATIVADO'; end
+            
             nome = sprintf('Saída D%d', i);
-            if i==5, nome='NA1/NF1'; end
-            if i==6, nome='NA2/NF2'; end
+            if i==5, nome='NA2/NF2'; end
+            if i==6, nome='NA1/NF1'; end
             if i==8, nome='Bomba'; end
+            
             fprintf(' %d. %s -> %s\n', i, st, nome);
         end
+        
         disp('----------------------------------------');
         disp(' 9. LIGAR TUDO'); disp('10. DESLIGAR TUDO'); disp(' x. VOLTAR');
+        
         inp = input('Opção: ', 's');
+        
         if strcmpi(inp, 'x')
-            msg.Data = [0 0 0 0 0 0 0 0]; transmit(ch, msg); sairTeste = true;
+            % AO SAIR: Mandar TUDO 1 para garantir que desligue
+            % 64 + 16 + 4 + 1 = 85 (0x55)
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; 
+            transmit(ch, msg); 
+            sairTeste = true;
         else
             val = str2double(inp);
             if ~isnan(val)
-                if val >= 1 && val <= 8, reles(val) = ~reles(val);
-                elseif val == 9, reles(:) = 1;
-                elseif val == 10, reles(:) = 0; end
+                if val >= 1 && val <= 8
+                    reles(val) = ~reles(val); % Inverte estado visual
+                elseif val == 9
+                    reles(:) = 1; % Visualmente tudo 1 (Envia 0)
+                elseif val == 10
+                    reles(:) = 0; % Visualmente tudo 0 (Envia 1)
+                end
             end
         end
     end
