@@ -1086,7 +1086,7 @@ function monitorarModulosTermicos(ch)
                 end
                 disp('------------------------------------------------------------------------------------------');
                 fprintf('(Legenda: [OK ]=Normal, [ErX]=Erro Sensor)\n');
-                fprintf('Starter = TL1, Engine = TR1, Intercooler = BL1, Water = BR1\n ')
+                fprintf('Starter = TL1, Engine = TR1, I ')
             end
             pause(delayVal);
         end
