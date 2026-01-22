@@ -301,32 +301,31 @@ function configurarTaxaAquisicao(ch)
 end
 
 %% --- FUNÇÃO 9: CONFIGURAR LIMIARES E TEMPOS (0x403 e 0x406) ---
+%% --- FUNÇÃO 9: CONFIGURAR LIMIARES E HABILITAÇÃO (STARTER, ENGINE, INTERC, WATER) ---
 function configurarLimiaresPlaca(ch)
     disp('--------------------------------------------------');
-    disp('    CONFIGURAÇÃO DE SEGURANÇA (TEMP E TEMPO)');
-    disp('    (Starter, Engine, Intercooler)');
+    disp('    CONFIGURAÇÃO DE SEGURANÇA (STATUS, TEMP, TEMPO)');
+    disp('    (1=Habilitado/ON, 3=Desabilitado/OFF)');
     disp('--------------------------------------------------');
     
     % --- 1. LEITURA DO 0x403 (STARTER / ENGINE) ---
     disp('>>> Lendo 0x403 (Starter/Engine)...');
-    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end % Limpa buffer
+    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end
     
     try
-        msgRTR = canMessage(1027, false, 0); % 1027 = 0x403
+        msgRTR = canMessage(1027, false, 0); % 0x403
         msgRTR.Remote = true; transmit(ch, msgRTR);
     catch, disp('Erro ao enviar RTR 0x403.'); end
     pause(0.5);
     
-    % Dados Padrão 403 (Caso falhe a leitura)
-    % Índices: 1=ID, 2=En, 3=TempS, 4=TimeS, 5=ID, 6=En, 7=TempE, 8=TimeE
-    data403 = [12, 49, 80, 5, 0, 49, 105, 5]; 
+    % Padrão 0x403 (Bytes 2 e 6 são Enable)
+    data403 = [12, 3, 80, 5, 0, 3, 105, 5]; 
     leu403 = false;
     
     if ch.MessagesAvailable > 0
         msgs = receive(ch, ch.MessagesAvailable);
         for k=1:length(msgs)
-            % A placa responde no ID 0x423 (1059)
-            if ~msgs(k).Remote && msgs(k).ID == 1059 
+            if ~msgs(k).Remote && msgs(k).ID == 1059 % Resp 0x423
                 data403 = msgs(k).Data;
                 leu403 = true;
                 break;
@@ -334,24 +333,22 @@ function configurarLimiaresPlaca(ch)
         end
     end
     
-    % --- 2. LEITURA DO 0x406 (INTERCOOLER) ---
-    disp('>>> Lendo 0x406 (Intercooler)...');
+    % --- 2. LEITURA DO 0x406 (INTERCOOLER / WATER) ---
+    disp('>>> Lendo 0x406 (Intercooler/Water)...');
     try
-        msgRTR2 = canMessage(1030, false, 0); % 1030 = 0x406
+        msgRTR2 = canMessage(1030, false, 0); % 0x406
         msgRTR2.Remote = true; transmit(ch, msgRTR2);
     catch, disp('Erro ao enviar RTR 0x406.'); end
     pause(0.5);
     
-    % Dados Padrão 406
-    % Índices: 1=ID, 2=En, 3=TempI, 4=TimeI, ...
-    data406 = [12, 49, 50, 5, 0, 0, 0, 0]; 
+    % Padrão 0x406 (Bytes 2 e 6 são Enable)
+    data406 = [12, 3, 50, 5, 0, 3, 95, 5]; 
     leu406 = false;
     
     if ch.MessagesAvailable > 0
         msgs = receive(ch, ch.MessagesAvailable);
         for k=1:length(msgs)
-            % A placa responde no ID 0x426 (1062)
-            if ~msgs(k).Remote && msgs(k).ID == 1062 
+            if ~msgs(k).Remote && msgs(k).ID == 1062 % Resp 0x426
                 data406 = msgs(k).Data;
                 leu406 = true;
                 break;
@@ -359,53 +356,63 @@ function configurarLimiaresPlaca(ch)
         end
     end
     
-    if ~leu403, disp('AVISO: Sem resposta do 0x403 (Usando padrão).'); end
-    if ~leu406, disp('AVISO: Sem resposta do 0x406 (Usando padrão).'); end
+    % --- DECODIFICAÇÃO E STATUS ---
+    % Função auxiliar simples para texto (1=ON, 3=OFF)
+    getTxt = @(x) char("ON " * (x==1) + "OFF" * (x~=1));
     
-    % --- EXIBIÇÃO DOS VALORES ATUAIS ---
-    % Lê os bytes diretos (Sem conversão matemática)
+    % 0x403: STARTER
+    enS = data403(2); tempS = data403(3); timeS = data403(4);
+    stS = 'OFF'; if enS == 1, stS = 'ON '; end
     
-    % STARTER (0x403)
-    tempS = data403(3); 
-    timeS = data403(4);
+    % 0x403: ENGINE
+    enE = data403(6); tempE = data403(7); timeE = data403(8);
+    stE = 'OFF'; if enE == 1, stE = 'ON '; end
     
-    % ENGINE (0x403)
-    tempE = data403(7); 
-    timeE = data403(8);
+    % 0x406: INTERCOOLER
+    enI = data406(2); tempI = data406(3); timeI = data406(4);
+    stI = 'OFF'; if enI == 1, stI = 'ON '; end
     
-    % INTERCOOLER (0x406)
-    tempI = data406(3); 
-    timeI = data406(4);
+    % 0x406: WATER
+    enW = data406(6); tempW = data406(7); timeW = data406(8);
+    stW = 'OFF'; if enW == 1, stW = 'ON '; end
     
-    fprintf('\n   1. STARTER: %3d °C  | Tempo: %d s\n', tempS, timeS);
-    fprintf('   2. ENGINE : %3d °C  | Tempo: %d s\n', tempE, timeE);
-    fprintf('   3. INTERC.: %3d °C  | Tempo: %d s\n', tempI, timeI);
+    % --- EXIBIÇÃO ---
+    fprintf('\n   1. STARTER: [%s] (Val:%d) | %3d °C | %d s\n', stS, enS, tempS, timeS);
+    fprintf('   2. ENGINE : [%s] (Val:%d) | %3d °C | %d s\n', stE, enE, tempE, timeE);
+    fprintf('   3. INTERC.: [%s] (Val:%d) | %3d °C | %d s\n', stI, enI, tempI, timeI);
+    fprintf('   4. WATER  : [%s] (Val:%d) | %3d °C | %d s\n', stW, enW, tempW, timeW);
     disp('--------------------------------------------------');
     
     if lower(input('Alterar configurações? (s/n): ', 's')) == 's'
-        disp('--- Insira os novos valores (0-255) ---');
+        disp('--- Digite os novos valores ---');
+        disp(' (Para Enable: 1 = Ligar, 3 = Desligar)');
         
-        % Inputs STARTER
-        nT_S = input('   Limite STARTER [C]: ');
-        nt_S = input('   Tempo STARTER  [s]: ');
+        % --- INPUTS STARTER ---
+        nEn_S = input('   STARTER Habilitado? (1/3): ');
+        nT_S  = input('   STARTER Limite [C]: ');
+        nt_S  = input('   STARTER Tempo  [s]: ');
         
-        % Inputs ENGINE
-        nT_E = input('   Limite ENGINE  [C]: ');
-        nt_E = input('   Tempo ENGINE   [s]: ');
+        % --- INPUTS ENGINE ---
+        nEn_E = input('   ENGINE  Habilitado? (1/3): ');
+        nT_E  = input('   ENGINE  Limite [C]: ');
+        nt_E  = input('   ENGINE  Tempo  [s]: ');
         
-        % Inputs INTERCOOLER
-        nT_I = input('   Limite INTERC. [C]: ');
-        nt_I = input('   Tempo INTERC.  [s]: ');
+        % --- INPUTS INTERCOOLER ---
+        nEn_I = input('   INTERC. Habilitado? (1/3): ');
+        nT_I  = input('   INTERC. Limite [C]: ');
+        nt_I  = input('   INTERC. Tempo  [s]: ');
         
-        % --- ENVIO (SEM CONVERSÃO, DIRETO) ---
+        % --- INPUTS WATER ---
+        nEn_W = input('   WATER   Habilitado? (1/3): ');
+        nT_W  = input('   WATER   Limite [C]: ');
+        nt_W  = input('   WATER   Tempo  [s]: ');
         
-        % Atualiza Buffer 0x403 (Starter/Engine)
-        % Mantém Byte 1, 2, 5, 6 originais (ID/Enable)
+        % --- ATUALIZAÇÃO E ENVIO ---
+        
+        % Config 0x403
         newData403 = data403;
-        newData403(3) = nT_S; % Temp Starter
-        newData403(4) = nt_S; % Time Starter
-        newData403(7) = nT_E; % Temp Engine
-        newData403(8) = nt_E; % Time Engine
+        newData403(2) = nEn_S; newData403(3) = nT_S; newData403(4) = nt_S;
+        newData403(6) = nEn_E; newData403(7) = nT_E; newData403(8) = nt_E;
         
         msg1 = canMessage(1027, false, 8); 
         msg1.Data = newData403;
@@ -414,10 +421,10 @@ function configurarLimiaresPlaca(ch)
         
         pause(0.1);
         
-        % Atualiza Buffer 0x406 (Intercooler)
+        % Config 0x406
         newData406 = data406;
-        newData406(3) = nT_I; % Temp Intercooler
-        newData406(4) = nt_I; % Time Intercooler
+        newData406(2) = nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
+        newData406(6) = nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
         
         msg2 = canMessage(1030, false, 8); 
         msg2.Data = newData406;
@@ -429,7 +436,6 @@ function configurarLimiaresPlaca(ch)
         disp('Nenhuma alteração realizada.');
     end
 end
-
 %% --- FUNÇÃO 1: MÁQUINA DE ESTADOS AUTOMÁTICA ---
 function executarControle(ch, ax, lineM, lineA, limM, limA)
     disp('>>> CONTROLE AUTOMÁTICO INICIADO');

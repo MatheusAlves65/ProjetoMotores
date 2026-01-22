@@ -16,7 +16,7 @@
 struct safetyConfigStructure {
 	uint8_t saveeeprom = 0;
 	uint8_t Monit_Enable = 0;
-	float	maxtemp = 40;
+	float	maxtemp = 0;
 	uint16_t timer = 1000; // Milliseconds
 };
 
@@ -29,7 +29,7 @@ struct aquisitionConfigStructure {
 struct tempReadStructure {
 	int8_t CJtemp = 25;
 	int8_t TLstatus, TRstatus, BLstatus, BRstatus = 0;
-	int16_t TLtemp, TRtemp, BLtemp, BRtemp = 50;
+	int16_t TLtemp, TRtemp, BLtemp, BRtemp = 0;
 };
 
 #define TempFrameId 0x123
