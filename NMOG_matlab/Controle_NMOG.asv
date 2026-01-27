@@ -280,7 +280,6 @@ function configurarTaxaAquisicao(ch)
     end
 end
 
-%% --- FUNÇÃO 9: CONFIGURAR LIMIARES E TEMPOS (0x403 e 0x406) ---
 %% --- FUNÇÃO 9: CONFIGURAR LIMIARES E HABILITAÇÃO (STARTER, ENGINE, INTERC, WATER) ---
 function configurarLimiaresPlaca(ch)
     disp('--------------------------------------------------');
@@ -307,6 +306,7 @@ function configurarLimiaresPlaca(ch)
         for k=1:length(msgs)
             if ~msgs(k).Remote && msgs(k).ID == 1059 % Resp 0x423
                 data403 = msgs(k).Data;
+                fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
                 leu403 = true;
                 break;
             end
@@ -330,6 +330,7 @@ function configurarLimiaresPlaca(ch)
         for k=1:length(msgs)
             if ~msgs(k).Remote && msgs(k).ID == 1062 % Resp 0x426
                 data406 = msgs(k).Data;
+                fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
                 leu406 = true;
                 break;
             end
@@ -341,23 +342,32 @@ function configurarLimiaresPlaca(ch)
     getTxt = @(x) char("ON " * (x==1) + "OFF" * (x~=1));
     
     % 0x403: STARTER
-    enS = data403(2); tempS = data403(3); timeS = data403(4);
-    stS = 'OFF'; if enS == 1, stS = 'ON '; end
+    enS = bitand(data403(2),15); tempS = data403(3); timeS = data403(4);
+    stS = 'OFF';
+    if enS == 1, stS = 'ON '; end
     
     % 0x403: ENGINE
-    enE = data403(6); tempE = data403(7); timeE = data403(8);
-    stE = 'OFF'; if enE == 1, stE = 'ON '; end
+    enE = bitand(data403(6),15); tempE = data403(7); timeE = data403(8);
+        fprintf('enE: %3d', enE);
+     if enE == 1, stE = 'ON '; end
+     if enE == 3, stE = 'OFF'; end
     
     % 0x406: INTERCOOLER
-    enI = data406(2); tempI = data406(3); timeI = data406(4);
-    stI = 'OFF'; if enI == 1, stI = 'ON '; end
+    enI = bitand(data406(2),15); tempI = data406(3); timeI = data406(4);
+    fprintf('enI: %3d', enI);
+    if enI == 1 
+        stI = 'ON';
+    elseif  enI == 3
+        stI = 'OFF';
+    end
     
     % 0x406: WATER
-    enW = data406(6); tempW = data406(7); timeW = data406(8);
+    enW = bitand(data); tempW = data406(7); timeW = data406(8);
+    fprintf('enW: %3d', enW)
     stW = 'OFF'; if enW == 1, stW = 'ON '; end
     
     % --- EXIBIÇÃO ---
-    fprintf('\n   1. STARTER: [%s] (Val:%d) | %3d °C | %d s\n', stS, enS, tempS, timeS);
+    fprintf('\n   1. STARTER: [%s] (Val:%02X) | %2d °C | %d s\n', stS, enS, tempS, timeS);
     fprintf('   2. ENGINE : [%s] (Val:%d) | %3d °C | %d s\n', stE, enE, tempE, timeE);
     fprintf('   3. INTERC.: [%s] (Val:%d) | %3d °C | %d s\n', stI, enI, tempI, timeI);
     fprintf('   4. WATER  : [%s] (Val:%d) | %3d °C | %d s\n', stW, enW, tempW, timeW);
@@ -474,9 +484,9 @@ function executarControle(ch, limM, limA)
                 for i=1:length(msgs)
                     if ~msgs(i).Remote && msgs(i).ID == 1296
                         d = uint16(msgs(i).Data);
-                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                         rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
                         rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
                     end
                 end
             end
@@ -524,8 +534,8 @@ function executarControle(ch, limM, limA)
                 end
                 
                 stB='OFF'; if bomba, stB='ON '; end
-                fprintf('T:%6.1fs | S%d | M:%5.1f | B:%s | V1:%d | V2:%d\n', ...
-                    tNow, estado, tempM, stB, v1, v2);
+                fprintf('T:%6.1fs | S%d | Motor:%5.1f|Agua: %5.1f | B:%s | V1:%d | V2:%d\n', ...
+                    tNow, estado, tempM,tempA, stB, v1, v2);
                 
                 lastLog = clock;
             end
@@ -609,9 +619,9 @@ function filtragem_agua(ch)
                 for i=1:length(msgs)
                     if ~msgs(i).Remote && msgs(i).ID == 1296
                         d = uint16(msgs(i).Data);
-                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
                         rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
                     end
                 end
             end
@@ -721,9 +731,9 @@ function arrefecimento_func(ch)
                 for i=1:length(msgs)
                     if ~msgs(i).Remote && msgs(i).ID == 1296
                         d = uint16(msgs(i).Data);
-                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
                         rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
                     end
                 end
             end
@@ -837,9 +847,9 @@ function Descarte_func(ch)
                 for i=1:length(msgs)
                     if ~msgs(i).Remote && msgs(i).ID == 1296
                         d = uint16(msgs(i).Data);
-                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
                         rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
                     end
                 end
             end
@@ -899,11 +909,6 @@ function desligarSeguro_desc(ch)
         catch, end
     end
 end
-
-
-
-
-
 
 %% --- FUNÇÃO 8: TESTE DE RELÉS (LÓGICA INVERSA: 0=LIGA, 1=DESLIGA) ---
 function executarTesteReles(ch)
@@ -1086,7 +1091,7 @@ function monitorarModulosTermicos(ch)
                 end
                 disp('------------------------------------------------------------------------------------------');
                 fprintf('(Legenda: [OK ]=Normal, [ErX]=Erro Sensor)\n');
-                fprintf('Starter = TL1, Engine = TR1, I ')
+                fprintf('Starter = TL1, Engine = TR1, Intercooler = BL1, Water = BR1\n ')
             end
             pause(delayVal);
         end

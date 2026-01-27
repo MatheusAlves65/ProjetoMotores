@@ -449,32 +449,30 @@ void TimerHandler1() { // starter Relay
 // Mesmo conceito do Timer1, mas para o segundo sensor de temperatura
 //───────────────────────────────────────────────────────────────────────────
 void TimerHandler2() { // engine Relay
-	// Código comentado - provavelmente para reduzir output no serial
-	//Serial.print("ITimer2 called, millis() = ");
-	//Serial.println(millis() - previousMillistimer2);
-    // setMotor(0, 0);  // Para motor
-	//digitalWrite(D2, LOW);  // Desliga emergency
 	previousMillistimer2 = millis();
-	
-	// TODO: IMPLEMENTAR AÇÕES DE SEGURANÇA AQUI!
 }
 
+
+//───────────────────────────────────────────────────────────────────────────
 //TIMER 3 - Segurança Temperatura 3 - Intercooler
+//───────────────────────────────────────────────────────────────────────────
 
 void TimerHandler3() {
-
-    //digitalWrite(D2, LOW);  // Desliga emergency
     previousMillistimer = millis();
 
 }
+
+
+//───────────────────────────────────────────────────────────────────────────
+//TIMER 4 - Segurança Temperatura 4 - Agua
+//───────────────────────────────────────────────────────────────────────────
+
 
 void TimerHandler4() {
-
-    //digitalWrite(D2, LOW);  // Desliga emergency
     previousMillistimer = millis();
 
 }
-// TIMER
+
 
 //═══════════════════════════════════════════════════════════════════════════
 // CONTROLE DE MOTOR DC - PONTE H
@@ -663,8 +661,6 @@ void setup()
 		Serial.println("TEste se esta funcionando");
 	} else {
 		Serial.println("Error Initializing MCP2515...");
-		// ⚠️ Nota: O código continua mesmo com erro. Melhor seria:
-		// while(1);  // Trava aqui se CAN não inicializar
 	}
 
 		// Muda para modo normal (permite transmitir e receber)
@@ -682,11 +678,6 @@ void setup()
         }
     }
     Serial.println("Buffer CAN limpo!");
-    
-
-
-
-
 	
 	//───────────────────────────────────────────────────────────────────────
 	// CARREGA CONFIGURAÇÕES SALVAS DA EEPROM
@@ -695,15 +686,12 @@ void setup()
 	// Se for a primeira vez que o código roda, valores serão aleatórios!
 	// Melhor seria inicializar EEPROM com valores padrão na primeira execução
 	loadSafetyConfigs(temp1c, temp2c,temp3c);
-
 	// Configura padrão para aquisição contínua automática
     aquisc.Aquics_Enable_Continuous = 1; // 1 = Habilitado, 0 = Desabilitado
     aquisc.timer = 100;                  // Solicita temperatura a cada 100ms
     timeaquisition = millis();           // Inicializa o contador de tempo
-    
     Serial.println("MODO CONTINUO INICIADO AUTOMATICAMENTE");
     digitalWrite(D8, HIGH); 
-
 }
 
 //═══════════════════════════════════════════════════════════════════════════
@@ -742,13 +730,6 @@ void loop()
             // [CORREÇÃO CRÍTICA] Calcula o ID limpo AQUI, toda vez que chega mensagem
             currentFullId = rxId & 0x1FFFFFFF; 
             
-            // Debug se não for mensagem repetitiva (Temp ou Aquisicao)
-            /*if(currentFullId != 0x510 && currentFullId != 0x426) { 
-                Serial.print("RX ID: 0x"); Serial.print(rxId, HEX);
-                Serial.print(" -> ID Limpo: 0x"); Serial.print(currentFullId, HEX);
-                Serial.print(" | DLC: "); Serial.println(len);
-            }*/
-
             if(currentFullId == 0x0042){
                 Serial.println("!!! COMANDO DE UPDATE RECEBIDO - RESETANDO !!!");
                 
@@ -821,8 +802,7 @@ void loop()
                 CAN0.sendMsgBuf(0x422, sizeof(txBuf), txBuf);
             }
 
-            // 0x403 - CONFIG SEGURANÇA (PARSE MANUAL + SALVAMENTO FORÇADO)
-            // 0x403 - CONFIG SEGURANÇA (CORRIGIDO PARA T2)
+
             // 0x403 - CONFIG SEGURANÇA (CORRIGIDO E FORÇADO)
             if(currentFullId == 0x403){
                 
@@ -832,12 +812,14 @@ void loop()
 
                     // 1. Atualiza Temp 1 na memória
                     temp1c.Monit_Enable = (rxBuf[1] & 0x03); 
+                    printf("enable1: %d\n", temp1c.Monit_Enable);
                     temp1c.maxtemp = (float)rxBuf[2]; 
                     temp1c.timer = (uint16_t)((float)rxBuf[3]);
                     temp1c.saveeeprom = 1;
 
                     // 2. Atualiza Temp 2 na memória
                     temp2c.Monit_Enable = (rxBuf[5] & 0x03);
+                    Serial.println("enable2: %d\n", temp2c.Monit_Enable);
                     temp2c.maxtemp = (float)rxBuf[6]; 
                     temp2c.timer = (uint16_t)((float)rxBuf[7]);
                     temp2c.saveeeprom = 1;
@@ -859,6 +841,7 @@ void loop()
                 // --- SENSOR 1 (Bytes 0-3) ---
                 txBuf[0] = 0x12; // Cabeçalho Fixo
                 txBuf[1] = 0x30 | (temp1c.Monit_Enable & 0x03);
+                //printf("enable1: %d\n", temp1c.Monit_Enable);
                 txBuf[2] = (byte)((float)temp1c.maxtemp); // Converte para escala CAN
                 txBuf[3] = (byte)(temp1c.timer);
 
@@ -1098,7 +1081,7 @@ void loop()
         if(starttimer2) ITimer3.detachInterrupt();
         starttimer2 = 0;
     }
-
+        // --- MONITOR TEMP 3 ---
     if(temp3c.Monit_Enable == 1){
         if(temp3f >= temp3c.maxtemp){
             if(starttimer3 == 0){
@@ -1119,14 +1102,14 @@ void loop()
         if(starttimer3) ITimer3.detachInterrupt();
         starttimer3 = 0;
     }
-
+    // --- MONITOR TEMP 4 ---
     if(temp4c.Monit_Enable == 1){
         if(temp4f >= temp4c.maxtemp){
             if(starttimer4 == 0){
                 Serial.println("!!! ALERTA: T4 LIMITE ATINGIDO Acionando D4 !!!");
                 digitalWrite(D8, LOW); // Bomba ON 
                 digitalWrite(D5, LOW); // NA2/NF2 On
-                digitalWrite(D6, LOW); // NA1/NF1 O
+                digitalWrite(D6, LOW); // NA1/NF1 On
                 //digitalWrite(D4, LOW); // LED ON em alerta
                 ITimer4.attachInterruptInterval(temp4c.timer, TimerHandler4);
                 starttimer4 = 1;

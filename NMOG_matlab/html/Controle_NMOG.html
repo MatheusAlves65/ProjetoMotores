@@ -1,0 +1,2379 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>Controle_NMOG</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-01-23">
+<meta name="DC.source" content="Controle_NMOG.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">SISTEMA DE CONTROLE ARC - PAINEL DE GERENCIAMENTO (FINAL V4)</a>
+</li>
+<li>
+<a href="#2">--- FUN&Ccedil;&Atilde;O AUXILIAR DISPLAY ---</a>
+</li>
+<li>
+<a href="#3">--- FUN&Ccedil;&Atilde;O 10: CONFIGURAR AQUISI&Ccedil;&Atilde;O COMPLETA (0x404 + 0x405) ---</a>
+</li>
+<li>
+<a href="#4">--- FUN&Ccedil;&Atilde;O 9: CONFIGURAR LIMIARES E TEMPOS (0x403 e 0x406) ---</a>
+</li>
+<li>
+<a href="#5">--- FUN&Ccedil;&Atilde;O 9: CONFIGURAR LIMIARES E HABILITA&Ccedil;&Atilde;O (STARTER, ENGINE, INTERC, WATER) ---</a>
+</li>
+<li>
+<a href="#6">--- FUN&Ccedil;&Atilde;O 1: M&Aacute;QUINA DE ESTADOS (CORRIGIDA E SEGURA) ---</a>
+</li>
+<li>
+<a href="#7">--- FUN&Ccedil;&Atilde;O 4: MODO FILTRAGEM (SOMENTE BOMBA LIGADA) ---</a>
+</li>
+<li>
+<a href="#8">--- FUN&Ccedil;&Atilde;O 5: MODO ARREFECIMENTO (BOMBA + V1 LIGADOS) ---</a>
+</li>
+<li>
+<a href="#9">DESCARTE</a>
+</li>
+<li>
+<a href="#10">--- FUN&Ccedil;&Atilde;O 6: MODO DESCARTE (TUDO LIGADO) ---</a>
+</li>
+<li>
+<a href="#11">--- FUN&Ccedil;&Atilde;O 8: TESTE DE REL&Eacute;S (L&Oacute;GICA INVERSA: 0=LIGA, 1=DESLIGA) ---</a>
+</li>
+<li>
+<a href="#12">--- FUN&Ccedil;&Atilde;O 11: MONITORAR T&Eacute;RMICOS COM STATUS (OK/ERRO) ---</a>
+</li>
+</ul>
+</div>
+<h2 id="1">SISTEMA DE CONTROLE ARC - PAINEL DE GERENCIAMENTO (FINAL V4)</h2>
+<p>Funcionalidades: - Controle de Temperatura (Limiares 0x403) - Configura&ccedil;&atilde;o Geral de Aquisi&ccedil;&atilde;o (Taxa + Start/Stop) - UNIFICADO - M&aacute;quina de Estados e Rel&eacute;s - Handshake Completo (9 M&oacute;dulos)</p>
+<pre class="codeinput">clear; clc;
+<span class="keyword">try</span> stop(canChannelList); <span class="keyword">catch</span>; <span class="keyword">end</span>
+
+<span class="comment">% --- CONFIGURA&Ccedil;&Otilde;ES GLOBAIS ---</span>
+HARDWARE_DEVICE = <span class="string">'VN1630A 1'</span>;
+HARDWARE_CHANNEL = 3;
+BAUD_RATE = 500000;
+
+<span class="comment">% Vari&aacute;veis de Estado</span>
+masterCh = [];
+sistemaValidado = false;
+hLineMot = []; hLineAgu = [];
+
+<span class="comment">% Loop do Menu Principal</span>
+opcao = -1;
+<span class="keyword">while</span> opcao ~= 0
+    disp(<span class="string">' '</span>);
+    disp(<span class="string">'=================================================='</span>);
+    disp(<span class="string">'       ARC - SISTEMA DE CONTROLE DE ARREFECIMENTO '</span>);
+    disp(<span class="string">'=================================================='</span>);
+
+    <span class="keyword">if</span> ~isempty(masterCh) &amp;&amp; isa(masterCh, <span class="string">'can.Channel'</span>)
+        fprintf(<span class="string">'STATUS: [CONECTADO] em %s (Ch %d)\n'</span>, masterCh.Device, masterCh.DeviceChannelIndex);
+    <span class="keyword">else</span>
+        fprintf(<span class="string">'STATUS: [DESCONECTADO]\n'</span>);
+    <span class="keyword">end</span>
+
+    disp(<span class="string">'--------------------------------------------------'</span>);
+    disp(<span class="string">'1. CONECTAR Hardware (Vector)'</span>);
+    disp(<span class="string">'2. VERIFICAR M&Oacute;DULOS CAN (Handshake)'</span>);
+    disp(<span class="string">'3. INICIAR CONTROLE AUTOM&Aacute;TICO'</span>);
+    disp(<span class="string">'4. MODO FILTRAGEM (Bomba ligada)'</span>);
+    disp(<span class="string">'5. MODO ARREFECIMENTO (Bomba + NA1)'</span>);
+    disp(<span class="string">'6. MODO DESCARTE (Tudo Aberto)'</span>);
+    disp(<span class="string">'7. MODO SNIFFER'</span>);
+    disp(<span class="string">'8. TESTE MANUAL DE REL&Eacute;S'</span>);
+    disp(<span class="string">'9. CONFIGURAR LIMIARES DE SEGURAN&Ccedil;A (0x403)'</span>);
+    disp(<span class="string">'10. CONFIGURAR AQUISI&Ccedil;&Atilde;O GERAL (0x404)'</span>);
+    disp(<span class="string">'11. MONITORAR M&Oacute;DULOS T&Eacute;RMICOS (510, 520, 530)'</span>); <span class="comment">% NOVA OP&Ccedil;&Atilde;O</span>
+    disp(<span class="string">'0. SAIR'</span>);
+    disp(<span class="string">'=================================================='</span>);
+
+    strOpcao = input(<span class="string">'Digite a op&ccedil;&atilde;o desejada: '</span>, <span class="string">'s'</span>);
+    opcao = str2double(strOpcao);
+    clc;
+
+    <span class="keyword">switch</span> opcao
+        <span class="keyword">case</span> 1 <span class="comment">% --- CONEX&Atilde;O ---</span>
+            disp(<span class="string">'&gt;&gt;&gt; Conectando ao hardware...'</span>);
+            <span class="keyword">try</span>
+                <span class="keyword">if</span> ~isempty(masterCh), stop(masterCh); <span class="keyword">end</span>
+                masterCh = canChannel(<span class="string">'Vector'</span>, HARDWARE_DEVICE, HARDWARE_CHANNEL);
+                configBusSpeed(masterCh, BAUD_RATE);
+                start(masterCh);
+                disp(<span class="string">'-&gt; Sucesso! Canal aberto.'</span>);
+            <span class="keyword">catch</span> ME
+                disp(<span class="string">'-&gt; ERRO AO CONECTAR:'</span>); disp(ME.message); masterCh = [];
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span> 2 <span class="comment">% --- HANDSHAKE ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Conecte primeiro.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            disp(<span class="string">'&gt;&gt;&gt; Verificando rede (Solicitando RTRs)...'</span>);
+            <span class="keyword">if</span> masterCh.MessagesAvailable &gt; 0, receive(masterCh, masterCh.MessagesAvailable); <span class="keyword">end</span>
+
+            idsCheck = hex2dec({<span class="string">'401'</span>,<span class="string">'510'</span>,<span class="string">'520'</span>,<span class="string">'530'</span>,<span class="string">'610'</span>,<span class="string">'611'</span>,<span class="string">'620'</span>,<span class="string">'621'</span>,<span class="string">'622'</span>});
+            <span class="keyword">try</span>
+                <span class="keyword">for</span> k=1:length(idsCheck)
+                    msg = canMessage(idsCheck(k), false, 0); msg.Remote = true;
+                    transmit(masterCh, msg); pause(0.02);
+                <span class="keyword">end</span>
+            <span class="keyword">catch</span>, disp(<span class="string">'AVISO: Falha no envio.'</span>); <span class="keyword">end</span>
+            pause(1.0);
+
+            <span class="keyword">if</span> masterCh.MessagesAvailable &gt; 0
+                msgs = receive(masterCh, masterCh.MessagesAvailable);
+                idsFound = unique([msgs(~[msgs.Remote] &amp; ismember([msgs.ID], idsCheck)).ID]);
+                fprintf(<span class="string">'\nRESUMO DA REDE (%d/%d):\n'</span>, length(idsFound), length(idsCheck));
+                checkID(idsFound, 1025, <span class="string">'ARDUINO (0x401)'</span>);
+                checkID(idsFound, 1296, <span class="string">'CANTemp1TC (0x510)'</span>);
+                checkID(idsFound, 1312, <span class="string">'CANTemp2TC (0x520)'</span>);
+                checkID(idsFound, 1328, <span class="string">'CANTemp3TC (0x530)'</span>);
+                checkID(idsFound, 1552, <span class="string">'CANIn1AI1To4 (0x610)'</span>);
+                checkID(idsFound, 1553, <span class="string">'CANIn1AI5To8 (0x611)'</span>);
+                checkID(idsFound, 1568, <span class="string">'CANIn2AI1To2 (0x620)'</span>);
+                checkID(idsFound, 1569, <span class="string">'CANIn2DI1To4 (0x621)'</span>);
+                checkID(idsFound, 1570, <span class="string">'CANIn2PI1To2 (0x622)'</span>);
+            <span class="keyword">else</span>
+                disp(<span class="string">'-&gt; NENHUMA RESPOSTA RECEBIDA.'</span>);
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span> 3 <span class="comment">% --- AUTOM&Aacute;TICO ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            <span class="keyword">if</span> ~sistemaValidado
+                resp = input(<span class="string">'AVISO: Handshake pendente. Continuar? (s/n): '</span>, <span class="string">'s'</span>);
+                <span class="keyword">if</span> lower(resp) ~= <span class="string">'s'</span>, <span class="keyword">continue</span>; <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            disp(<span class="string">' '</span>);
+            useDefault = input(<span class="string">'Usar padr&otilde;es (90C/45C)? (s/n): '</span>, <span class="string">'s'</span>);
+            <span class="keyword">if</span> lower(useDefault) == <span class="string">'n'</span>
+                limMotor = input(<span class="string">'Limite MOTOR (ex: 85): '</span>);
+                limAgua  = input(<span class="string">'Limite &Aacute;GUA  (ex: 50): '</span>);
+            <span class="keyword">else</span>, limMotor = 90; limAgua = 45; <span class="keyword">end</span>
+            executarControle(masterCh,limMotor, limAgua);
+
+        <span class="keyword">case</span> 4 <span class="comment">% --- FILTRAGEM ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            filtragem_agua(masterCh);
+
+        <span class="keyword">case</span> 5 <span class="comment">% --- ARREFECIMENTO ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            arrefecimento_func(masterCh);
+
+        <span class="keyword">case</span> 6 <span class="comment">% --- DESCARTE ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            Descarte_func(masterCh);
+
+        <span class="keyword">case</span> 7 <span class="comment">% --- SNIFFER ---</span>
+            <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            disp(<span class="string">'&gt;&gt;&gt; SNIFFER ATIVO (Pressione "x" na janela para sair)...'</span>);
+            <span class="comment">% (C&oacute;digo do sniffer mantido simples aqui ou chame fun&ccedil;&atilde;o se tiver)</span>
+            figKey = figure(<span class="string">'Name'</span>,<span class="string">'Pressione X para Sair'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'Position'</span>,[100 100 300 50]);
+            set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+            <span class="keyword">while</span> true
+                <span class="keyword">if</span> ~isvalid(figKey) || lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>, <span class="keyword">break</span>; <span class="keyword">end</span>
+                <span class="keyword">if</span> masterCh.MessagesAvailable &gt; 0
+                    msgs = receive(masterCh, masterCh.MessagesAvailable);
+                    <span class="keyword">for</span> k=1:length(msgs)
+                        fprintf(<span class="string">'0x%03X   | %s\n'</span>, msgs(k).ID, sprintf(<span class="string">'%02X '</span>, msgs(k).Data));
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+                pause(0.05);
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+
+        <span class="keyword">case</span> 8 <span class="comment">% --- TESTE DE REL&Eacute;S ---</span>
+             <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            executarTesteReles(masterCh);
+
+        <span class="keyword">case</span> 9 <span class="comment">% --- CONFIGURAR LIMIARES ---</span>
+             <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            configurarLimiaresPlaca(masterCh);
+
+        <span class="keyword">case</span> 10 <span class="comment">% --- CONFIGURA&Ccedil;&Atilde;O GERAL ---</span>
+             <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            configurarTaxaAquisicao(masterCh);
+
+        <span class="keyword">case</span> 11 <span class="comment">% --- NOVO: MONITORAR T&Eacute;RMICOS ---</span>
+             <span class="keyword">if</span> isempty(masterCh), disp(<span class="string">'ERRO: Sem Conex&atilde;o.'</span>); <span class="keyword">continue</span>; <span class="keyword">end</span>
+            monitorarModulosTermicos(masterCh);
+
+        <span class="keyword">case</span> 0 <span class="comment">% --- SAIR ---</span>
+            disp(<span class="string">'Encerrando...'</span>);<span class="keyword">try</span> stop(masterCh);<span class="keyword">catch</span>, <span class="keyword">end</span>
+
+        <span class="keyword">otherwise</span>
+            disp(<span class="string">'Op&ccedil;&atilde;o Inv&aacute;lida.'</span>);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> ~ismember(opcao, [4, 5, 6, 7, 8, 11])
+        input(<span class="string">'\nPressione Enter para continuar...'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<pre class="codeoutput">Warning: The following error was caught while executing 'can.vector.Channel'
+class destructor:
+Error using can.vector.XLDriverLibrary.checkStatus (line 229)
+Vector XL Driver Library function xlCanSetChannelOutput returned error code 155
+indicating:
+
+XL_ERR_INVALID_HANDLE
+
+Error in can.vector.XLDriverLibrary.xlCanSetChannelOutput (line 169)
+        can.vector.XLDriverLibrary.checkStatus(status, 'xlCanSetChannelOutput');
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in can.vector.Channel/delete (line 787)
+                    XLDriverLibrary.xlCanSetChannelOutput(obj.Handle,
+                    obj.AccessMask, true);
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in Controle_NMOG (line 8)
+clear; clc;
+^^^^^
+Error in evalmxdom&gt;instrumentAndRun (line 116)
+text = evalc(evalstr);
+       ^^^^^^^^^^^^^^
+Error in evalmxdom (line 21)
+[data,text,laste] =
+instrumentAndRun(file,cellBoundaries,imageDir,imagePrefix,options);
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in publish 
+ 
+==================================================
+       ARC - SISTEMA DE CONTROLE DE ARREFECIMENTO 
+==================================================
+STATUS: [DESCONECTADO]
+--------------------------------------------------
+1. CONECTAR Hardware (Vector)
+2. VERIFICAR M&Oacute;DULOS CAN (Handshake)
+3. INICIAR CONTROLE AUTOM&Aacute;TICO
+4. MODO FILTRAGEM (Bomba ligada)
+5. MODO ARREFECIMENTO (Bomba + NA1)
+6. MODO DESCARTE (Tudo Aberto)
+7. MODO SNIFFER
+8. TESTE MANUAL DE REL&Eacute;S
+9. CONFIGURAR LIMIARES DE SEGURAN&Ccedil;A (0x403)
+10. CONFIGURAR AQUISI&Ccedil;&Atilde;O GERAL (0x404)
+11. MONITORAR M&Oacute;DULOS T&Eacute;RMICOS (510, 520, 530)
+0. SAIR
+==================================================
+</pre>
+<pre class="codeoutput error">Error using input
+Cannot call INPUT from EVALC.
+
+Error in Controle_NMOG (line 50)
+    strOpcao = input('Digite a op&ccedil;&atilde;o desejada: ', 's');
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</pre>
+<h2 id="2">--- FUN&Ccedil;&Atilde;O AUXILIAR DISPLAY ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> checkID(foundList, id, name)
+    <span class="keyword">if</span> ismember(id, foundList), fprintf(<span class="string">'[OK] %s\n'</span>, name);
+    <span class="keyword">else</span>, fprintf(<span class="string">'[..] %s (Sem resposta)\n'</span>, name); <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="3">--- FUN&Ccedil;&Atilde;O 10: CONFIGURAR AQUISI&Ccedil;&Atilde;O COMPLETA (0x404 + 0x405) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> configurarTaxaAquisicao(ch)
+    disp(<span class="string">'--------------------------------------------------'</span>);
+    disp(<span class="string">'    CONFIGURA&Ccedil;&Atilde;O DE AQUISI&Ccedil;&Atilde;O E CONTROLE (0x404/0x405)'</span>);
+    disp(<span class="string">'--------------------------------------------------'</span>);
+
+    <span class="comment">% --- PASSO 1: LEITURA ATUAL ---</span>
+    disp(<span class="string">'&gt;&gt;&gt; Lendo par&acirc;metros atuais da placa...'</span>);
+    <span class="keyword">if</span> ch.MessagesAvailable &gt; 0, receive(ch, ch.MessagesAvailable); <span class="keyword">end</span> <span class="comment">% Limpa buffer</span>
+
+    <span class="keyword">try</span>
+        <span class="comment">% 1. Envia RTR para 0x404 (Config)</span>
+        msgRTR1 = canMessage(1028, false, 0); <span class="comment">% 1028 = 0x404</span>
+        msgRTR1.Remote = true;
+        transmit(ch, msgRTR1);
+
+        pause(0.1); <span class="comment">% Pequeno intervalo</span>
+
+        <span class="comment">% 2. Envia RTR para 0x405 (Status)</span>
+        msgRTR2 = canMessage(1029, false, 0); <span class="comment">% 1029 = 0x405</span>
+        msgRTR2.Remote = true;
+        transmit(ch, msgRTR2);
+
+    <span class="keyword">catch</span>
+        disp(<span class="string">'Erro ao enviar RTR. Verifique a conex&atilde;o.'</span>);
+    <span class="keyword">end</span>
+
+    pause(0.5); <span class="comment">% Aguarda resposta</span>
+
+    <span class="comment">% Valores Padr&atilde;o</span>
+    data404 = [0, 100, 1, 1, 0, 0, 0, 0]; <span class="comment">% Timer=100ms (Big Endian)</span>
+    data405 = [0, 0, 0, 0, 0, 0, 0, 0];   <span class="comment">% Parado</span>
+
+    <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        <span class="keyword">for</span> k=1:length(msgs)
+            <span class="keyword">if</span> ~msgs(k).Remote
+                <span class="keyword">if</span> msgs(k).ID == 1060, data404 = msgs(k).Data; <span class="keyword">end</span> <span class="comment">% Resp 0x424</span>
+                <span class="keyword">if</span> msgs(k).ID == 1061, data405 = msgs(k).Data; <span class="keyword">end</span> <span class="comment">% Resp 0x425</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% --- DECODIFICA&Ccedil;&Atilde;O (BIG ENDIAN) ---</span>
+    <span class="comment">% O Arduino manda MSB no Byte 0 e LSB no Byte 1</span>
+    currTimer = double(data404(1))*256 + double(data404(2));
+
+    currAnalog = data404(3); <span class="comment">% Byte 2</span>
+    currCont   = data404(4); <span class="comment">% Byte 3</span>
+
+    <span class="comment">% Status 0x405 (Bits 6-7 do Byte 0)</span>
+    currStatus = bitshift(data405(1), -6);
+
+    <span class="comment">% Status Texto</span>
+    stAnalog = <span class="string">'OFF'</span>; <span class="keyword">if</span> currAnalog == 1, stAnalog = <span class="string">'ON '</span>; <span class="keyword">end</span>
+    stCont   = <span class="string">'OFF'</span>; <span class="keyword">if</span> currCont == 1,   stCont   = <span class="string">'ON '</span>; <span class="keyword">end</span>
+    stGeral  = <span class="string">'PARADO '</span>; <span class="keyword">if</span> currStatus == 1, stGeral  = <span class="string">'RODANDO'</span>; <span class="keyword">end</span>
+
+    fprintf(<span class="string">'\n   1. Taxa (Timer)..........: %d ms\n'</span>, currTimer);
+    fprintf(<span class="string">'   2. Leitura Anal&oacute;gica.....: [%s] (Val: %d)\n'</span>, stAnalog, currAnalog);
+    fprintf(<span class="string">'   3. Aquisi&ccedil;&atilde;o Cont&iacute;nua....: [%s] (Val: %d)\n'</span>, stCont, currCont);
+    fprintf(<span class="string">'   4. STATUS GERAL..........: [%s] (Val: %d)\n'</span>, stGeral, currStatus);
+    disp(<span class="string">'--------------------------------------------------'</span>);
+
+    <span class="keyword">if</span> lower(input(<span class="string">'Deseja reconfigurar tudo? (s/n): '</span>, <span class="string">'s'</span>)) == <span class="string">'s'</span>
+        disp(<span class="string">'--- Digite os novos valores ---'</span>);
+
+        <span class="comment">% Inputs 0x404</span>
+        newTimer  = input(<span class="string">'   Novo Tempo (ms) [10-3000]: '</span>);
+        newAnalog = input(<span class="string">'   Habilitar Anal&oacute;gico? (1/0): '</span>);
+        newCont   = input(<span class="string">'   Habilitar Cont&iacute;nuo?  (1/0): '</span>);
+
+        <span class="comment">% Input 0x405</span>
+        newStart  = input(<span class="string">'   STATUS DO SISTEMA (1=START, 0=STOP): '</span>);
+
+        <span class="comment">% --- ENVIO 0x404 (CONFIGURA&Ccedil;&Atilde;O) ---</span>
+        newData404 = data404;
+        <span class="comment">% Envia Timer em Big Endian para bater com a leitura</span>
+        newData404(1) = bitshift(newTimer, -8); <span class="comment">% Byte 0: MSB</span>
+        newData404(2) = bitand(newTimer, 255);  <span class="comment">% Byte 1: LSB</span>
+        newData404(3) = newAnalog;
+        newData404(4) = newCont;
+
+        msgConf = canMessage(1028, false, 8);
+        msgConf.Data = newData404;
+        transmit(ch, msgConf);
+        fprintf(<span class="string">'&gt;&gt;&gt; Config 0x404 enviada: %s\n'</span>, sprintf(<span class="string">'%02X '</span>, newData404));
+
+        pause(0.1);
+
+        <span class="comment">% --- ENVIO 0x405 (COMANDO) ---</span>
+        valToSend = bitshift(newStart, 6);
+
+        msgCmd = canMessage(1029, false, 8);
+        msgCmd.Data = [valToSend 0 0 0 0 0 0 0];
+        transmit(ch, msgCmd);
+
+        <span class="keyword">if</span> newStart == 1
+            disp(<span class="string">'&gt;&gt;&gt; COMANDO START (0x405) ENVIADO! Aquisi&ccedil;&atilde;o iniciada.'</span>);
+        <span class="keyword">else</span>
+            disp(<span class="string">'&gt;&gt;&gt; COMANDO STOP (0x405) ENVIADO. Aquisi&ccedil;&atilde;o parada.'</span>);
+        <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        disp(<span class="string">'Nenhuma altera&ccedil;&atilde;o realizada.'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="4">--- FUN&Ccedil;&Atilde;O 9: CONFIGURAR LIMIARES E TEMPOS (0x403 e 0x406) ---</h2>
+<h2 id="5">--- FUN&Ccedil;&Atilde;O 9: CONFIGURAR LIMIARES E HABILITA&Ccedil;&Atilde;O (STARTER, ENGINE, INTERC, WATER) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> configurarLimiaresPlaca(ch)
+    disp(<span class="string">'--------------------------------------------------'</span>);
+    disp(<span class="string">'    CONFIGURA&Ccedil;&Atilde;O DE SEGURAN&Ccedil;A (STATUS, TEMP, TEMPO)'</span>);
+    disp(<span class="string">'    (1=Habilitado/ON, 3=Desabilitado/OFF)'</span>);
+    disp(<span class="string">'--------------------------------------------------'</span>);
+
+    <span class="comment">% --- 1. LEITURA DO 0x403 (STARTER / ENGINE) ---</span>
+    disp(<span class="string">'&gt;&gt;&gt; Lendo 0x403 (Starter/Engine)...'</span>);
+    <span class="keyword">if</span> ch.MessagesAvailable &gt; 0, receive(ch, ch.MessagesAvailable); <span class="keyword">end</span>
+
+    <span class="keyword">try</span>
+        msgRTR = canMessage(1027, false, 0); <span class="comment">% 0x403</span>
+        msgRTR.Remote = true; transmit(ch, msgRTR);
+    <span class="keyword">catch</span>, disp(<span class="string">'Erro ao enviar RTR 0x403.'</span>); <span class="keyword">end</span>
+    pause(0.5);
+
+    <span class="comment">% Padr&atilde;o 0x403 (Bytes 2 e 6 s&atilde;o Enable)</span>
+    data403 = [12, 3, 80, 5, 0, 3, 105, 5];
+    leu403 = false;
+
+    <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        <span class="keyword">for</span> k=1:length(msgs)
+            <span class="keyword">if</span> ~msgs(k).Remote &amp;&amp; msgs(k).ID == 1059 <span class="comment">% Resp 0x423</span>
+                data403 = msgs(k).Data;
+                leu403 = true;
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% --- 2. LEITURA DO 0x406 (INTERCOOLER / WATER) ---</span>
+    disp(<span class="string">'&gt;&gt;&gt; Lendo 0x406 (Intercooler/Water)...'</span>);
+    <span class="keyword">try</span>
+        msgRTR2 = canMessage(1030, false, 0); <span class="comment">% 0x406</span>
+        msgRTR2.Remote = true; transmit(ch, msgRTR2);
+    <span class="keyword">catch</span>, disp(<span class="string">'Erro ao enviar RTR 0x406.'</span>); <span class="keyword">end</span>
+    pause(0.5);
+
+    <span class="comment">% Padr&atilde;o 0x406 (Bytes 2 e 6 s&atilde;o Enable)</span>
+    data406 = [12, 3, 50, 5, 0, 3, 95, 5];
+    leu406 = false;
+
+    <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        <span class="keyword">for</span> k=1:length(msgs)
+            <span class="keyword">if</span> ~msgs(k).Remote &amp;&amp; msgs(k).ID == 1062 <span class="comment">% Resp 0x426</span>
+                data406 = msgs(k).Data;
+                leu406 = true;
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% --- DECODIFICA&Ccedil;&Atilde;O E STATUS ---</span>
+    <span class="comment">% Fun&ccedil;&atilde;o auxiliar simples para texto (1=ON, 3=OFF)</span>
+    getTxt = @(x) char(<span class="string">"ON "</span> * (x==1) + <span class="string">"OFF"</span> * (x~=1));
+
+    <span class="comment">% 0x403: STARTER</span>
+    enS = data403(2); tempS = data403(3); timeS = data403(4);
+    stS = <span class="string">'OFF'</span>; <span class="keyword">if</span> enS == 1, stS = <span class="string">'ON '</span>; <span class="keyword">end</span>
+
+    <span class="comment">% 0x403: ENGINE</span>
+    enE = data403(6); tempE = data403(7); timeE = data403(8);
+    stE = <span class="string">'OFF'</span>; <span class="keyword">if</span> enE == 1, stE = <span class="string">'ON '</span>; <span class="keyword">end</span>
+
+    <span class="comment">% 0x406: INTERCOOLER</span>
+    enI = data406(2); tempI = data406(3); timeI = data406(4);
+    stI = <span class="string">'OFF'</span>; <span class="keyword">if</span> enI == 1, stI = <span class="string">'ON '</span>; <span class="keyword">end</span>
+
+    <span class="comment">% 0x406: WATER</span>
+    enW = data406(6); tempW = data406(7); timeW = data406(8);
+    stW = <span class="string">'OFF'</span>; <span class="keyword">if</span> enW == 1, stW = <span class="string">'ON '</span>; <span class="keyword">end</span>
+
+    <span class="comment">% --- EXIBI&Ccedil;&Atilde;O ---</span>
+    fprintf(<span class="string">'\n   1. STARTER: [%s] (Val:%d) | %3d &deg;C | %d s\n'</span>, stS, enS, tempS, timeS);
+    fprintf(<span class="string">'   2. ENGINE : [%s] (Val:%d) | %3d &deg;C | %d s\n'</span>, stE, enE, tempE, timeE);
+    fprintf(<span class="string">'   3. INTERC.: [%s] (Val:%d) | %3d &deg;C | %d s\n'</span>, stI, enI, tempI, timeI);
+    fprintf(<span class="string">'   4. WATER  : [%s] (Val:%d) | %3d &deg;C | %d s\n'</span>, stW, enW, tempW, timeW);
+    disp(<span class="string">'--------------------------------------------------'</span>);
+
+    <span class="keyword">if</span> lower(input(<span class="string">'Alterar configura&ccedil;&otilde;es? (s/n): '</span>, <span class="string">'s'</span>)) == <span class="string">'s'</span>
+        disp(<span class="string">'--- Digite os novos valores ---'</span>);
+        disp(<span class="string">' (Para Enable: 1 = Ligar, 3 = Desligar)'</span>);
+
+        <span class="comment">% --- INPUTS STARTER ---</span>
+        nEn_S = input(<span class="string">'   STARTER Habilitado? (1/3): '</span>);
+        nT_S  = input(<span class="string">'   STARTER Limite [C]: '</span>);
+        nt_S  = input(<span class="string">'   STARTER Tempo  [s]: '</span>);
+
+        <span class="comment">% --- INPUTS ENGINE ---</span>
+        nEn_E = input(<span class="string">'   ENGINE  Habilitado? (1/3): '</span>);
+        nT_E  = input(<span class="string">'   ENGINE  Limite [C]: '</span>);
+        nt_E  = input(<span class="string">'   ENGINE  Tempo  [s]: '</span>);
+
+        <span class="comment">% --- INPUTS INTERCOOLER ---</span>
+        nEn_I = input(<span class="string">'   INTERC. Habilitado? (1/3): '</span>);
+        nT_I  = input(<span class="string">'   INTERC. Limite [C]: '</span>);
+        nt_I  = input(<span class="string">'   INTERC. Tempo  [s]: '</span>);
+
+        <span class="comment">% --- INPUTS WATER ---</span>
+        nEn_W = input(<span class="string">'   WATER   Habilitado? (1/3): '</span>);
+        nT_W  = input(<span class="string">'   WATER   Limite [C]: '</span>);
+        nt_W  = input(<span class="string">'   WATER   Tempo  [s]: '</span>);
+
+        <span class="comment">% --- ATUALIZA&Ccedil;&Atilde;O E ENVIO ---</span>
+
+        <span class="comment">% Config 0x403</span>
+        newData403 = data403;
+        newData403(2) = nEn_S; newData403(3) = nT_S; newData403(4) = nt_S;
+        newData403(6) = nEn_E; newData403(7) = nT_E; newData403(8) = nt_E;
+
+        msg1 = canMessage(1027, false, 8);
+        msg1.Data = newData403;
+        transmit(ch, msg1);
+        fprintf(<span class="string">'&gt;&gt;&gt; Enviado 0x403: %s\n'</span>, sprintf(<span class="string">'%02X '</span>, newData403));
+
+        pause(0.1);
+
+        <span class="comment">% Config 0x406</span>
+        newData406 = data406;
+        newData406(2) = nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
+        newData406(6) = nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
+
+        msg2 = canMessage(1030, false, 8);
+        msg2.Data = newData406;
+        transmit(ch, msg2);
+        fprintf(<span class="string">'&gt;&gt;&gt; Enviado 0x406: %s\n'</span>, sprintf(<span class="string">'%02X '</span>, newData406));
+
+        disp(<span class="string">'&gt;&gt;&gt; Configura&ccedil;&atilde;o Conclu&iacute;da.'</span>);
+    <span class="keyword">else</span>
+        disp(<span class="string">'Nenhuma altera&ccedil;&atilde;o realizada.'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="6">--- FUN&Ccedil;&Atilde;O 1: M&Aacute;QUINA DE ESTADOS (CORRIGIDA E SEGURA) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> executarControle(ch, limM, limA)
+    disp(<span class="string">'&gt;&gt;&gt; CONTROLE AUTOM&Aacute;TICO INICIADO'</span>);
+    disp(<span class="string">'    L&oacute;gica id&ecirc;ntica ao Teste Manual.'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+    disp(<span class="string">'    PARA VOLTAR AO MENU: Feche a janela "CONTROLE ATIVO"'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+
+    <span class="comment">% --- JANELA DE CONTROLE ---</span>
+    figKey = figure(<span class="string">'Name'</span>,<span class="string">'CONTROLE ATIVO - Feche para Voltar'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'ToolBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[100 100 400 100], <span class="string">'Color'</span>, [0.9 0.4 0.4]);
+
+    uicontrol(<span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="string">'String'</span>, <span class="string">'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU'</span>,<span class="keyword">...</span>
+              <span class="string">'Position'</span>,[20 20 360 60], <span class="string">'BackgroundColor'</span>,[0.9 0.4 0.4],<span class="keyword">...</span>
+              <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>, <span class="string">'bold'</span>, <span class="string">'ForegroundColor'</span>, <span class="string">'white'</span>);
+
+    set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+
+    <span class="comment">% --- GATILHO DE SEGURAN&Ccedil;A ---</span>
+    cleanupObj = onCleanup(@() desligarSeguro(ch));
+
+    <span class="comment">% Estados</span>
+    S1=1; S2=2; S3=3; S4=4;
+
+    <span class="comment">% Inicia no Estado 2 (Bomba Ligada)</span>
+    estado = S2;
+
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+    histM = limM - 3; histA = limA - 5;
+
+    <span class="keyword">try</span>
+        <span class="keyword">while</span> true
+            <span class="comment">% --- SA&Iacute;DA ---</span>
+            <span class="keyword">if</span> ~isvalid(figKey)
+                disp(<span class="string">'&gt;&gt;&gt; Janela fechada. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>
+                disp(<span class="string">'&gt;&gt;&gt; Comando de sa&iacute;da recebido. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            tNow = (now - startTime) * 86400;
+
+            <span class="comment">% --- LEITURA ---</span>
+            <span class="keyword">if</span> etime(clock, lastReq) &gt; 0.2
+                <span class="keyword">try</span>, transmit(ch, canMessage(1296, false, 0, <span class="string">'Remote'</span>, true)); <span class="keyword">catch</span>, <span class="keyword">end</span>
+                lastReq = clock;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                <span class="keyword">for</span> i=1:length(msgs)
+                    <span class="keyword">if</span> ~msgs(i).Remote &amp;&amp; msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% --- L&Oacute;GICA DE ESTADOS ---</span>
+            bomba=0; v1=0; v2=0; d1=0; d2=0;
+
+            <span class="keyword">switch</span> estado
+                <span class="keyword">case</span> S1 <span class="comment">% Repouso</span>
+                    <span class="keyword">if</span> tempM &gt; 0, estado = S2; <span class="keyword">end</span>
+                <span class="keyword">case</span> S2 <span class="comment">% Filtragem</span>
+                    bomba=1;
+                    <span class="keyword">if</span> tempM &gt;= limM, estado = S3; <span class="keyword">end</span>
+                <span class="keyword">case</span> S3 <span class="comment">% Circula&ccedil;&atilde;o</span>
+                    bomba=1; v1=1;
+                    <span class="keyword">if</span> tempA &gt;= limA, estado = S4; <span class="keyword">end</span>
+                    <span class="keyword">if</span> tempM &lt; histM, estado = S2; <span class="keyword">end</span>
+                <span class="keyword">case</span> S4 <span class="comment">% Descarte</span>
+                    bomba=1; v1=1; v2=1;
+                    <span class="keyword">if</span> tempM &lt; histM &amp;&amp; tempA &lt; histA, estado = S3; <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> tempM &gt; (limM + 15), d1=1; d2=1; <span class="keyword">end</span>
+
+            <span class="comment">% --- ENVIO (L&Oacute;GICA MANUAL) ---</span>
+            <span class="keyword">if</span> etime(clock, lastLog) &gt; 0.5
+                b1 = 0; b2 = 0;
+
+                <span class="comment">% Byte 1</span>
+                <span class="keyword">if</span> d1 == 0, b1 = bitor(b1, 64); <span class="keyword">end</span>
+                <span class="keyword">if</span> d2 == 0, b1 = bitor(b1, 16); <span class="keyword">end</span>
+                b1 = bitor(b1, 4); b1 = bitor(b1, 1);
+
+                <span class="comment">% Byte 2</span>
+                <span class="keyword">if</span> v2 == 0, b2 = bitor(b2, 64); <span class="keyword">end</span>
+                <span class="keyword">if</span> v1 == 0, b2 = bitor(b2, 16); <span class="keyword">end</span>
+                b2 = bitor(b2, 4);
+                <span class="keyword">if</span> bomba == 0, b2 = bitor(b2, 1); <span class="keyword">end</span>
+
+                <span class="keyword">try</span>
+                    cmd = canMessage(1026, false, 8);
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                <span class="keyword">catch</span>
+                <span class="keyword">end</span>
+
+                stB=<span class="string">'OFF'</span>; <span class="keyword">if</span> bomba, stB=<span class="string">'ON '</span>; <span class="keyword">end</span>
+                fprintf(<span class="string">'T:%6.1fs | S%d | M:%5.1f | B:%s | V1:%d | V2:%d\n'</span>, <span class="keyword">...</span>
+                    tNow, estado, tempM, stB, v1, v2);
+
+                lastLog = clock;
+            <span class="keyword">end</span>
+            pause(0.02);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> ME
+        disp([<span class="string">'Erro no loop: '</span> ME.message]);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% --- FUN&Ccedil;&Atilde;O DE SEGURAN&Ccedil;A (CORRIGIDA) ---</span>
+<span class="keyword">function</span> desligarSeguro(ch)
+    <span class="comment">% Verifica canal</span>
+    <span class="keyword">if</span> ~isempty(ch) &amp;&amp; isvalid(ch) &amp;&amp; ch.Running
+        <span class="keyword">try</span>
+            <span class="comment">% CORRE&Ccedil;&Atilde;O: Cria mensagem primeiro, atribui dados depois</span>
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; <span class="comment">% 85 = 01010101 (Desliga tudo)</span>
+
+            transmit(ch, msg);
+            pause(0.05);
+
+            fprintf(<span class="string">'\n&gt;&gt;&gt; HARDWARE DESLIGADO (Retornando ao Menu).\n'</span>);
+        <span class="keyword">catch</span> ME
+            fprintf(<span class="string">'\nAVISO: Erro ao enviar desligamento: %s\n'</span>, ME.message);
+        <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        fprintf(<span class="string">'\nAVISO: Canal fechado. N&atilde;o foi poss&iacute;vel desligar hardware.\n'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="7">--- FUN&Ccedil;&Atilde;O 4: MODO FILTRAGEM (SOMENTE BOMBA LIGADA) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> filtragem_agua(ch)
+    disp(<span class="string">'&gt;&gt;&gt; MODO FILTRAGEM INICIADO'</span>);
+    disp(<span class="string">'    Estado: BOMBA ON | V&Aacute;LVULAS OFF'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+    disp(<span class="string">'    PARA VOLTAR AO MENU: Feche a janela "FILTRAGEM ATIVA"'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+
+    <span class="comment">% --- JANELA DE CONTROLE ---</span>
+    figKey = figure(<span class="string">'Name'</span>,<span class="string">'FILTRAGEM ATIVA - Feche para Voltar'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'ToolBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[100 100 400 100], <span class="string">'Color'</span>, [0.4 0.4 0.9]); <span class="comment">% Azulado para diferenciar</span>
+
+    uicontrol(<span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="string">'String'</span>, <span class="string">'FECHE ESTA JANELA (X) PARA PARAR A FILTRAGEM'</span>,<span class="keyword">...</span>
+              <span class="string">'Position'</span>,[20 20 360 60], <span class="string">'BackgroundColor'</span>,[0.4 0.4 0.9],<span class="keyword">...</span>
+              <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>, <span class="string">'bold'</span>, <span class="string">'ForegroundColor'</span>, <span class="string">'white'</span>);
+
+    set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+
+    <span class="comment">% --- GATILHO DE SEGURAN&Ccedil;A ---</span>
+    cleanupObj = onCleanup(@() desligarSeguro_filt(ch));
+
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+
+    <span class="keyword">try</span>
+        <span class="keyword">while</span> true
+            <span class="comment">% --- SA&Iacute;DA ---</span>
+            <span class="keyword">if</span> ~isvalid(figKey)
+                disp(<span class="string">'&gt;&gt;&gt; Janela fechada. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>
+                disp(<span class="string">'&gt;&gt;&gt; Comando de sa&iacute;da recebido. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            tNow = (now - startTime) * 86400;
+
+            <span class="comment">% --- LEITURA (Apenas para monitoramento) ---</span>
+            <span class="keyword">if</span> etime(clock, lastReq) &gt; 0.2
+                <span class="keyword">try</span>, transmit(ch, canMessage(1296, false, 0, <span class="string">'Remote'</span>, true)); <span class="keyword">catch</span>, <span class="keyword">end</span>
+                lastReq = clock;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                <span class="keyword">for</span> i=1:length(msgs)
+                    <span class="keyword">if</span> ~msgs(i).Remote &amp;&amp; msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% --- ENVIO (L&Oacute;GICA INVERSA MANUAL) ---</span>
+            <span class="keyword">if</span> etime(clock, lastLog) &gt; 0.5
+                b1 = 0; b2 = 0;
+
+                <span class="comment">% --- BYTE 1: TUDO DESLIGADO ---</span>
+                <span class="comment">% Bits: 0, 2, 4, 6 colocados em 1 (OFF)</span>
+                b1 = bitor(b1, 64); <span class="comment">% D1 OFF</span>
+                b1 = bitor(b1, 16); <span class="comment">% D2 OFF</span>
+                b1 = bitor(b1, 4);  <span class="comment">% D3 OFF</span>
+                b1 = bitor(b1, 1);  <span class="comment">% D4 OFF</span>
+
+                <span class="comment">% --- BYTE 2: S&Oacute; BOMBA LIGADA ---</span>
+                b2 = bitor(b2, 64); <span class="comment">% V2 (NA2) OFF</span>
+                b2 = bitor(b2, 16); <span class="comment">% V1 (NA1) OFF</span>
+                b2 = bitor(b2, 4);  <span class="comment">% D7 OFF</span>
+
+                <span class="comment">% BOMBA (Bit 0):</span>
+                <span class="comment">% Como queremos LIGADA, N&Atilde;O fazemos o bitor com 1.</span>
+                <span class="comment">% Deixamos o bit 0 como '0'.</span>
+
+                <span class="keyword">try</span>
+                    cmd = canMessage(1026, false, 8);
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                <span class="keyword">catch</span>
+                <span class="keyword">end</span>
+
+                fprintf(<span class="string">'FILTRAGEM | Tempo: %6.1fs | Mot:%5.1f C | Agu:%5.1f C | BOMBA LIGADA\n'</span>, <span class="keyword">...</span>
+                    tNow, tempM, tempA);
+
+                lastLog = clock;
+            <span class="keyword">end</span>
+            pause(0.02);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> ME
+        disp([<span class="string">'Erro no loop: '</span> ME.message]);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% --- REUTILIZA&Ccedil;&Atilde;O DA FUN&Ccedil;&Atilde;O DE SEGURAN&Ccedil;A ---</span>
+<span class="comment">% (Copie isso se n&atilde;o estiver no final do arquivo, ou deixe apenas uma vez no final do script principal)</span>
+<span class="keyword">function</span> desligarSeguro_filt(ch)
+    <span class="keyword">if</span> ~isempty(ch) &amp;&amp; isvalid(ch) &amp;&amp; ch.Running
+        <span class="keyword">try</span>
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf(<span class="string">'\n&gt;&gt;&gt; HARDWARE DESLIGADO (Retornando ao Menu).\n'</span>);
+        <span class="keyword">catch</span>, <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="8">--- FUN&Ccedil;&Atilde;O 5: MODO ARREFECIMENTO (BOMBA + V1 LIGADOS) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> arrefecimento_func(ch)
+    disp(<span class="string">'&gt;&gt;&gt; MODO ARREFECIMENTO INICIADO'</span>);
+    disp(<span class="string">'    Estado: BOMBA ON | NA1 (Circula&ccedil;&atilde;o) ON | NA2 OFF'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+    disp(<span class="string">'    PARA VOLTAR AO MENU: Feche a janela "ARREFECIMENTO ATIVO"'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+
+    <span class="comment">% --- JANELA DE CONTROLE ---</span>
+    figKey = figure(<span class="string">'Name'</span>,<span class="string">'ARREFECIMENTO ATIVO - Feche para Voltar'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'ToolBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[100 100 400 100], <span class="string">'Color'</span>, [0.4 0.8 0.4]); <span class="comment">% Esverdeado</span>
+
+    uicontrol(<span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="string">'String'</span>, <span class="string">'FECHE ESTA JANELA (X) PARA PARAR'</span>,<span class="keyword">...</span>
+              <span class="string">'Position'</span>,[20 20 360 60], <span class="string">'BackgroundColor'</span>,[0.4 0.8 0.4],<span class="keyword">...</span>
+              <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>, <span class="string">'bold'</span>, <span class="string">'ForegroundColor'</span>, <span class="string">'white'</span>);
+
+    set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+
+    <span class="comment">% --- GATILHO DE SEGURAN&Ccedil;A ---</span>
+    cleanupObj = onCleanup(@() desligarSeguro_arref(ch));
+
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+
+    <span class="keyword">try</span>
+        <span class="keyword">while</span> true
+            <span class="comment">% --- VERIFICA&Ccedil;&Atilde;O DE SA&Iacute;DA ---</span>
+            <span class="keyword">if</span> ~isvalid(figKey)
+                disp(<span class="string">'&gt;&gt;&gt; Janela fechada. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>
+                disp(<span class="string">'&gt;&gt;&gt; Comando de sa&iacute;da recebido. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            tNow = (now - startTime) * 86400;
+
+            <span class="comment">% --- LEITURA ---</span>
+            <span class="keyword">if</span> etime(clock, lastReq) &gt; 0.2
+                <span class="keyword">try</span>, transmit(ch, canMessage(1296, false, 0, <span class="string">'Remote'</span>, true)); <span class="keyword">catch</span>, <span class="keyword">end</span>
+                lastReq = clock;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                <span class="keyword">for</span> i=1:length(msgs)
+                    <span class="keyword">if</span> ~msgs(i).Remote &amp;&amp; msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% --- ENVIO (L&Oacute;GICA INVERSA MANUAL) ---</span>
+            <span class="keyword">if</span> etime(clock, lastLog) &gt; 0.5
+                b1 = 0; b2 = 0;
+
+                <span class="comment">% --- BYTE 1: TUDO DESLIGADO (Manda 1) ---</span>
+                b1 = bitor(b1, 64); <span class="comment">% D1 OFF</span>
+                b1 = bitor(b1, 16); <span class="comment">% D2 OFF</span>
+                b1 = bitor(b1, 4);  <span class="comment">% D3 OFF</span>
+                b1 = bitor(b1, 1);  <span class="comment">% D4 OFF</span>
+
+                <span class="comment">% --- BYTE 2: CONFIGURA&Ccedil;&Atilde;O ARREFECIMENTO ---</span>
+
+                <span class="comment">% V2 (NA2/Descarte - Bit 6): DESLIGADA -&gt; Manda 1</span>
+                b2 = bitor(b2, 64);
+
+                <span class="comment">% V1 (NA1/Circula&ccedil;&atilde;o - Bit 4): LIGADA -&gt; Manda 0 (N&atilde;o faz nada)</span>
+                <span class="comment">% (N&atilde;o adicionamos 16 aqui, deixando o bit em 0)</span>
+
+                <span class="comment">% D7 (Bit 2): DESLIGADO -&gt; Manda 1</span>
+                b2 = bitor(b2, 4);
+
+                <span class="comment">% BOMBA (Bit 0): LIGADA -&gt; Manda 0 (N&atilde;o faz nada)</span>
+                <span class="comment">% (N&atilde;o adicionamos 1 aqui, deixando o bit em 0)</span>
+
+                <span class="keyword">try</span>
+                    cmd = canMessage(1026, false, 8);
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                <span class="keyword">catch</span>
+                <span class="keyword">end</span>
+
+                fprintf(<span class="string">'ARREFECIM.| T:%6.1fs | M:%5.1f | A:%5.1f | BOMBA + V1 (NA1) ON\n'</span>, <span class="keyword">...</span>
+                    tNow, tempM, tempA);
+
+                lastLog = clock;
+            <span class="keyword">end</span>
+            pause(0.02);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> ME
+        disp([<span class="string">'Erro no loop: '</span> ME.message]);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+
+<span class="keyword">function</span> desligarSeguro_arref(ch)
+    <span class="keyword">if</span> ~isempty(ch) &amp;&amp; isvalid(ch) &amp;&amp; ch.Running
+        <span class="keyword">try</span>
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf(<span class="string">'\n&gt;&gt;&gt; HARDWARE DESLIGADO (Retornando ao Menu).\n'</span>);
+        <span class="keyword">catch</span>, <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="9">DESCARTE</h2>
+<h2 id="10">--- FUN&Ccedil;&Atilde;O 6: MODO DESCARTE (TUDO LIGADO) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> Descarte_func(ch)
+    disp(<span class="string">'&gt;&gt;&gt; MODO DESCARTE INICIADO'</span>);
+    disp(<span class="string">'    Estado: BOMBA ON | V1 ON | V2 ON (Esvaziando...)'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+    disp(<span class="string">'    PARA VOLTAR AO MENU: Feche a janela "DESCARTE ATIVO"'</span>);
+    disp(<span class="string">'    -------------------------------------------------'</span>);
+
+    <span class="comment">% --- JANELA DE CONTROLE ---</span>
+    <span class="comment">% Cor Laranja/Vermelha para indicar aten&ccedil;&atilde;o (Descarte)</span>
+    figKey = figure(<span class="string">'Name'</span>,<span class="string">'DESCARTE ATIVO - Feche para Voltar'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'ToolBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[100 100 400 100], <span class="string">'Color'</span>, [0.9 0.6 0.2]);
+
+    uicontrol(<span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="string">'String'</span>, <span class="string">'FECHE ESTA JANELA (X) PARA PARAR O DESCARTE'</span>,<span class="keyword">...</span>
+              <span class="string">'Position'</span>,[20 20 360 60], <span class="string">'BackgroundColor'</span>,[0.9 0.6 0.2],<span class="keyword">...</span>
+              <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>, <span class="string">'bold'</span>, <span class="string">'ForegroundColor'</span>, <span class="string">'white'</span>);
+
+    set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+
+    <span class="comment">% --- GATILHO DE SEGURAN&Ccedil;A ---</span>
+    cleanupObj = onCleanup(@() desligarSeguro_desc(ch));
+
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+
+    <span class="keyword">try</span>
+        <span class="keyword">while</span> true
+            <span class="comment">% --- VERIFICA&Ccedil;&Atilde;O DE SA&Iacute;DA ---</span>
+            <span class="keyword">if</span> ~isvalid(figKey)
+                disp(<span class="string">'&gt;&gt;&gt; Janela fechada. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>
+                disp(<span class="string">'&gt;&gt;&gt; Comando de sa&iacute;da recebido. Voltando ao Menu...'</span>);
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            tNow = (now - startTime) * 86400;
+
+            <span class="comment">% --- LEITURA ---</span>
+            <span class="keyword">if</span> etime(clock, lastReq) &gt; 0.2
+                <span class="keyword">try</span>, transmit(ch, canMessage(1296, false, 0, <span class="string">'Remote'</span>, true)); <span class="keyword">catch</span>, <span class="keyword">end</span>
+                lastReq = clock;
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                <span class="keyword">for</span> i=1:length(msgs)
+                    <span class="keyword">if</span> ~msgs(i).Remote &amp;&amp; msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% --- ENVIO (L&Oacute;GICA INVERSA MANUAL) ---</span>
+            <span class="keyword">if</span> etime(clock, lastLog) &gt; 0.5
+                b1 = 0; b2 = 0;
+
+                <span class="comment">% --- BYTE 1: TUDO DESLIGADO (Manda 1) ---</span>
+                b1 = bitor(b1, 64); <span class="comment">% D1 OFF</span>
+                b1 = bitor(b1, 16); <span class="comment">% D2 OFF</span>
+                b1 = bitor(b1, 4);  <span class="comment">% D3 OFF</span>
+                b1 = bitor(b1, 1);  <span class="comment">% D4 OFF</span>
+
+                <span class="comment">% --- BYTE 2: TUDO LIGADO (Bomba + V1 + V2) ---</span>
+
+                <span class="comment">% V2 (NA2/Descarte - Bit 6): Queremos ON (0).</span>
+                <span class="comment">% N&Atilde;O fazemos bitor. Deixa 0.</span>
+
+                <span class="comment">% V1 (NA1/Circula&ccedil;&atilde;o - Bit 4): Queremos ON (0).</span>
+                <span class="comment">% N&Atilde;O fazemos bitor. Deixa 0.</span>
+
+                <span class="comment">% D7 (Bit 2): Queremos OFF (1).</span>
+                b2 = bitor(b2, 4);
+
+                <span class="comment">% BOMBA (Bit 0): Queremos ON (0).</span>
+                <span class="comment">% N&Atilde;O fazemos bitor. Deixa 0.</span>
+
+                <span class="keyword">try</span>
+                    cmd = canMessage(1026, false, 8);
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                <span class="keyword">catch</span>
+                <span class="keyword">end</span>
+
+                fprintf(<span class="string">'DESCARTE  | T:%6.1fs | M:%5.1f | A:%5.1f | TUDO ABERTO (ON)\n'</span>, <span class="keyword">...</span>
+                    tNow, tempM, tempA);
+
+                lastLog = clock;
+            <span class="keyword">end</span>
+            pause(0.02);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> ME
+        disp([<span class="string">'Erro no loop: '</span> ME.message]);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> desligarSeguro_desc(ch)
+    <span class="keyword">if</span> ~isempty(ch) &amp;&amp; isvalid(ch) &amp;&amp; ch.Running
+        <span class="keyword">try</span>
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf(<span class="string">'\n&gt;&gt;&gt; HARDWARE DESLIGADO (Retornando ao Menu).\n'</span>);
+        <span class="keyword">catch</span>, <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="11">--- FUN&Ccedil;&Atilde;O 8: TESTE DE REL&Eacute;S (L&Oacute;GICA INVERSA: 0=LIGA, 1=DESLIGA) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> executarTesteReles(ch)
+    <span class="comment">% Estado visual: 0 = OFF na tela, 1 = ON na tela</span>
+    reles = zeros(1, 8);
+    sairTeste = false;
+
+    <span class="keyword">while</span> ~sairTeste
+        clc; disp(<span class="string">'=== TESTE DE REL&Eacute;S (ID 0x402) - L&Oacute;GICA INVERSA ==='</span>);
+        disp(<span class="string">' Nota: Enviando 0 para LIGAR e 1 para DESLIGAR o hardware'</span>);
+
+        <span class="comment">% --- MONTAGEM DOS BYTES (L&oacute;gica Invertida) ---</span>
+        <span class="comment">% Se o rel&eacute; deve estar DESLIGADO (0), enviamos bit 1.</span>
+        <span class="comment">% Se o rel&eacute; deve estar LIGADO (1), enviamos bit 0.</span>
+
+        b1 = 0;
+        <span class="comment">% Byte 1 (Rel&eacute;s 1 a 4)</span>
+        <span class="keyword">if</span> reles(1) == 0, b1 = bitor(b1, 64); <span class="keyword">end</span> <span class="comment">% Se OFF na tela, manda 1</span>
+        <span class="keyword">if</span> reles(2) == 0, b1 = bitor(b1, 16); <span class="keyword">end</span>
+        <span class="keyword">if</span> reles(3) == 0, b1 = bitor(b1, 4);  <span class="keyword">end</span>
+        <span class="keyword">if</span> reles(4) == 0, b1 = bitor(b1, 1);  <span class="keyword">end</span>
+
+        b2 = 0;
+        <span class="comment">% Byte 2 (Rel&eacute;s 5 a 8)</span>
+        <span class="keyword">if</span> reles(5) == 0, b2 = bitor(b2, 64); <span class="keyword">end</span>
+        <span class="keyword">if</span> reles(6) == 0, b2 = bitor(b2, 16); <span class="keyword">end</span>
+        <span class="keyword">if</span> reles(7) == 0, b2 = bitor(b2, 4);  <span class="keyword">end</span>
+        <span class="keyword">if</span> reles(8) == 0, b2 = bitor(b2, 1);  <span class="keyword">end</span>
+
+        <span class="comment">% Envio da mensagem</span>
+        msg = canMessage(1026, false, 8);
+        msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+        <span class="keyword">try</span>, transmit(ch, msg); <span class="keyword">catch</span>, <span class="keyword">end</span>
+
+        fprintf(<span class="string">'ENVIANDO (Hex): %02X %02X (Bits 1 = Desligado)\n'</span>, b1, b2);
+        disp(<span class="string">'----------------------------------------'</span>);
+
+        <span class="comment">% --- EXIBI&Ccedil;&Atilde;O VISUAL (Mant&eacute;m l&oacute;gica normal para o usu&aacute;rio) ---</span>
+        <span class="keyword">for</span> i = 1:8
+            st = <span class="string">'[ OFF ]'</span>;
+            <span class="keyword">if</span> reles(i), st = <span class="string">'[ ON  ] ATIVADO'</span>; <span class="keyword">end</span>
+
+            nome = sprintf(<span class="string">'Sa&iacute;da D%d'</span>, i);
+            <span class="keyword">if</span> i==5, nome=<span class="string">'NA2/NF2'</span>; <span class="keyword">end</span>
+            <span class="keyword">if</span> i==6, nome=<span class="string">'NA1/NF1'</span>; <span class="keyword">end</span>
+            <span class="keyword">if</span> i==8, nome=<span class="string">'Bomba'</span>; <span class="keyword">end</span>
+
+            fprintf(<span class="string">' %d. %s -&gt; %s\n'</span>, i, st, nome);
+        <span class="keyword">end</span>
+
+        disp(<span class="string">'----------------------------------------'</span>);
+        disp(<span class="string">' 9. LIGAR TUDO'</span>); disp(<span class="string">'10. DESLIGAR TUDO'</span>); disp(<span class="string">' x. VOLTAR'</span>);
+
+        inp = input(<span class="string">'Op&ccedil;&atilde;o: '</span>, <span class="string">'s'</span>);
+
+        <span class="keyword">if</span> strcmpi(inp, <span class="string">'x'</span>)
+            <span class="comment">% AO SAIR: Mandar TUDO 1 para garantir que desligue</span>
+            <span class="comment">% 64 + 16 + 4 + 1 = 85 (0x55)</span>
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg);
+            sairTeste = true;
+        <span class="keyword">else</span>
+            val = str2double(inp);
+            <span class="keyword">if</span> ~isnan(val)
+                <span class="keyword">if</span> val &gt;= 1 &amp;&amp; val &lt;= 8
+                    reles(val) = ~reles(val); <span class="comment">% Inverte estado visual</span>
+                <span class="keyword">elseif</span> val == 9
+                    reles(:) = 1; <span class="comment">% Visualmente tudo 1 (Envia 0)</span>
+                <span class="keyword">elseif</span> val == 10
+                    reles(:) = 0; <span class="comment">% Visualmente tudo 0 (Envia 1)</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<h2 id="12">--- FUN&Ccedil;&Atilde;O 11: MONITORAR T&Eacute;RMICOS COM STATUS (OK/ERRO) ---</h2>
+<pre class="codeinput">
+<span class="keyword">function</span> monitorarModulosTermicos(ch)
+    clc;
+    disp(<span class="string">'=================================================='</span>);
+    disp(<span class="string">'    MONITORAMENTO T&Eacute;RMICO + STATUS DOS SENSORES'</span>);
+    disp(<span class="string">'=================================================='</span>);
+
+    <span class="comment">% Configura&ccedil;&atilde;o de Tempo</span>
+    delayStr = input(<span class="string">'Tempo de atualiza&ccedil;&atilde;o (segundos) [Padr&atilde;o: 0.5]: '</span>, <span class="string">'s'</span>);
+    delayVal = str2double(delayStr);
+    <span class="keyword">if</span> isnan(delayVal) || delayVal &lt; 0.1, delayVal = 0.5; <span class="keyword">end</span>
+
+    fprintf(<span class="string">'&gt;&gt;&gt; Iniciando (%.2fs)... Para SAIR, feche a janela.\n'</span>, delayVal);
+
+    <span class="comment">% Janela de Sa&iacute;da</span>
+    figKey = figure(<span class="string">'Name'</span>,<span class="string">'MONITOR T&Eacute;RMICO - Feche para Voltar'</span>,<span class="string">'NumberTitle'</span>,<span class="string">'off'</span>,<span class="keyword">...</span>
+                    <span class="string">'MenuBar'</span>,<span class="string">'none'</span>,<span class="string">'ToolBar'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
+                    <span class="string">'Position'</span>,[100 100 550 100], <span class="string">'Color'</span>, [0.8 0.8 0.8]);
+
+    uicontrol(<span class="string">'Style'</span>,<span class="string">'text'</span>, <span class="string">'String'</span>, <span class="string">'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU'</span>,<span class="keyword">...</span>
+              <span class="string">'Position'</span>,[20 20 510 60], <span class="string">'BackgroundColor'</span>,[0.8 0.8 0.8],<span class="keyword">...</span>
+              <span class="string">'FontSize'</span>, 12, <span class="string">'FontWeight'</span>, <span class="string">'bold'</span>);
+
+    set(figKey, <span class="string">'CurrentCharacter'</span>, char(0));
+
+    <span class="comment">% IDs e Textos de Status</span>
+    idsTermicos = [1296, 1312, 1328];
+    nomesModulos = {<span class="string">'M1 (Main)'</span>, <span class="string">'M2 (Aux)'</span>, <span class="string">'M3 (Aux)'</span>};
+    statusTxt = {<span class="string">'OK '</span>, <span class="string">'Er1'</span>, <span class="string">'Er2'</span>, <span class="string">'Er3'</span>}; <span class="comment">% 0=OK, 1..3=Erros</span>
+
+    <span class="keyword">try</span>
+        <span class="keyword">while</span> true
+            <span class="keyword">if</span> ~isvalid(figKey) || lower(get(figKey, <span class="string">'CurrentCharacter'</span>)) == <span class="string">'x'</span>
+                disp(<span class="string">'&gt;&gt;&gt; Voltando ao Menu...'</span>); <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+
+            <span class="comment">% Envia RTRs</span>
+            <span class="keyword">for</span> k=1:length(idsTermicos)
+                <span class="keyword">try</span>, transmit(ch, canMessage(idsTermicos(k), false, 0, <span class="string">'Remote'</span>, true)); <span class="keyword">catch</span>, <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            pause(0.1);
+            <span class="keyword">if</span> ch.MessagesAvailable &gt; 0
+                msgs = receive(ch, ch.MessagesAvailable);
+
+                clc;
+                fprintf(<span class="string">'=== LEITURAS (Atualizacao: %.2fs) ===\n'</span>, delayVal);
+                <span class="comment">% Cabe&ccedil;alho mais largo para caber o Status</span>
+                fprintf(<span class="string">'%-10s | CJ(C) | %-13s | %-13s | %-13s | %-13s\n'</span>, <span class="keyword">...</span>
+                        <span class="string">'MODULO'</span>, <span class="string">'TL(C&deg;)'</span>, <span class="string">'TR(C&deg;)'</span>, <span class="string">'BL(C&deg;)'</span>, <span class="string">'BR(C&deg;)'</span>);
+                disp(<span class="string">'------------------------------------------------------------------------------------------'</span>);
+
+                <span class="keyword">for</span> k=1:3
+                    targetID = idsTermicos(k);
+                    idx = find([msgs.ID] == targetID &amp; ~[msgs.Remote], 1, <span class="string">'last'</span>);
+
+                    <span class="keyword">if</span> ~isempty(idx)
+                        d = uint16(msgs(idx).Data);
+
+                        <span class="comment">% --- DECODIFICA&Ccedil;&Atilde;O COMPLETA (VALOR + STATUS) ---</span>
+
+                        <span class="comment">% Cold Junction (Byte 0)</span>
+                        cj = double(int8(d(1)));
+
+                        <span class="comment">% 1. STARTER (TL)</span>
+                        <span class="comment">% Status: Byte 2 (Bits 0-1) | Temp: Byte 2(2-7) + Byte 3(0-5)</span>
+                        stTL  = bitand(d(2), 3);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+
+                        <span class="comment">% 2. ENGINE (TR)</span>
+                        <span class="comment">% Status: Byte 3 (Bits 6-7) | Temp: Byte 4 + Byte 5(0-3)</span>
+                        stTR  = bitshift(d(3), -6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+
+                        <span class="comment">% 3. INTERCOOLER (BL)</span>
+                        <span class="comment">% Status: Byte 5 (Bits 4-5) | Temp: Byte 5(6-7)+Byte 6+Byte 7(0-1)</span>
+                        stBL  = bitand(bitshift(d(5), -4), 3);
+                        rawBL = bitshift(bitand(d(5), 192), -6) + bitshift(d(6), 2) + bitshift(bitand(d(7), 3), 10);
+
+                        <span class="comment">% 4. WATER (BR)</span>
+                        <span class="comment">% Status: Byte 7 (Bits 2-3) | Temp: Byte 7(4-7)+Byte 8</span>
+                        stBR  = bitand(bitshift(d(7), -2), 3);
+                        rawBR = bitshift(bitand(d(7), 240), -4) + bitshift(d(8), 4);
+
+                        <span class="comment">% Convers&atilde;o (-2048 Offset)</span>
+                        valTL = double(rawTL) - 2048;
+                        valTR = double(rawTR) - 2048;
+                        valBL = double(rawBL) - 2048;
+                        valBR = double(rawBR) - 2048;
+
+                        <span class="comment">% Formata&ccedil;&atilde;o com Status [Val + St]</span>
+                        <span class="comment">% Ex: " 90.5 [OK ]"</span>
+                        txtTL = sprintf(<span class="string">'%5.1f [%s]'</span>, valTL, statusTxt{stTL+1});
+                        txtTR = sprintf(<span class="string">'%5.1f [%s]'</span>, valTR, statusTxt{stTR+1});
+                        txtBL = sprintf(<span class="string">'%5.1f [%s]'</span>, valBL, statusTxt{stBL+1});
+                        txtBR = sprintf(<span class="string">'%5.1f [%s]'</span>, valBR, statusTxt{stBR+1});
+
+                        fprintf(<span class="string">'%-10s | %5.1f | %-13s | %-13s | %-13s | %-13s\n'</span>, <span class="keyword">...</span>
+                            nomesModulos{k}, cj, txtTL, txtTR, txtBL, txtBR);
+                    <span class="keyword">else</span>
+                        fprintf(<span class="string">'%-10s |  --   |      --       |      --       |      --       |      --      \n'</span>, nomesModulos{k});
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+                disp(<span class="string">'------------------------------------------------------------------------------------------'</span>);
+                fprintf(<span class="string">'(Legenda: [OK ]=Normal, [ErX]=Erro Sensor)\n'</span>);
+                fprintf(<span class="string">'Starter = TL1, Engine = TR1, Intercooler = BL1, Water = BR1\n '</span>)
+            <span class="keyword">end</span>
+            pause(delayVal);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span> ME
+        disp([<span class="string">'Erro: '</span> ME.message]);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> isvalid(figKey), close(figKey); <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% SISTEMA DE CONTROLE ARC - PAINEL DE GERENCIAMENTO (FINAL V4)
+% Funcionalidades:
+% - Controle de Temperatura (Limiares 0x403)
+% - Configuração Geral de Aquisição (Taxa + Start/Stop) - UNIFICADO
+% - Máquina de Estados e Relés
+% - Handshake Completo (9 Módulos)
+
+clear; clc;
+try stop(canChannelList); catch; end 
+
+% REPLACE_WITH_DASH_DASH- CONFIGURAÇÕES GLOBAIS REPLACE_WITH_DASH_DASH-
+HARDWARE_DEVICE = 'VN1630A 1';
+HARDWARE_CHANNEL = 3; 
+BAUD_RATE = 500000;
+
+% Variáveis de Estado
+masterCh = [];
+sistemaValidado = false;
+hLineMot = []; hLineAgu = []; 
+
+% Loop do Menu Principal
+opcao = -1;
+while opcao ~= 0
+    disp(' ');
+    disp('==================================================');
+    disp('       ARC - SISTEMA DE CONTROLE DE ARREFECIMENTO ');
+    disp('==================================================');
+    
+    if ~isempty(masterCh) && isa(masterCh, 'can.Channel')
+        fprintf('STATUS: [CONECTADO] em %s (Ch %d)\n', masterCh.Device, masterCh.DeviceChannelIndex);
+    else
+        fprintf('STATUS: [DESCONECTADO]\n');
+    end
+    
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    disp('1. CONECTAR Hardware (Vector)');
+    disp('2. VERIFICAR MÓDULOS CAN (Handshake)');
+    disp('3. INICIAR CONTROLE AUTOMÁTICO');
+    disp('4. MODO FILTRAGEM (Bomba ligada)');
+    disp('5. MODO ARREFECIMENTO (Bomba + NA1)');
+    disp('6. MODO DESCARTE (Tudo Aberto)');
+    disp('7. MODO SNIFFER');
+    disp('8. TESTE MANUAL DE RELÉS');
+    disp('9. CONFIGURAR LIMIARES DE SEGURANÇA (0x403)');
+    disp('10. CONFIGURAR AQUISIÇÃO GERAL (0x404)');
+    disp('11. MONITORAR MÓDULOS TÉRMICOS (510, 520, 530)'); % NOVA OPÇÃO
+    disp('0. SAIR');
+    disp('==================================================');
+    
+    strOpcao = input('Digite a opção desejada: ', 's');
+    opcao = str2double(strOpcao);
+    clc;
+    
+    switch opcao
+        case 1 % REPLACE_WITH_DASH_DASH- CONEXÃO REPLACE_WITH_DASH_DASH-
+            disp('>>> Conectando ao hardware...');
+            try
+                if ~isempty(masterCh), stop(masterCh); end
+                masterCh = canChannel('Vector', HARDWARE_DEVICE, HARDWARE_CHANNEL);
+                configBusSpeed(masterCh, BAUD_RATE);
+                start(masterCh);
+                disp('-> Sucesso! Canal aberto.');
+            catch ME
+                disp('-> ERRO AO CONECTAR:'); disp(ME.message); masterCh = [];
+            end
+            
+        case 2 % REPLACE_WITH_DASH_DASH- HANDSHAKE REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Conecte primeiro.'); continue; end
+            disp('>>> Verificando rede (Solicitando RTRs)...');
+            if masterCh.MessagesAvailable > 0, receive(masterCh, masterCh.MessagesAvailable); end
+            
+            idsCheck = hex2dec({'401','510','520','530','610','611','620','621','622'});
+            try
+                for k=1:length(idsCheck)
+                    msg = canMessage(idsCheck(k), false, 0); msg.Remote = true;
+                    transmit(masterCh, msg); pause(0.02); 
+                end
+            catch, disp('AVISO: Falha no envio.'); end
+            pause(1.0);
+            
+            if masterCh.MessagesAvailable > 0
+                msgs = receive(masterCh, masterCh.MessagesAvailable);
+                idsFound = unique([msgs(~[msgs.Remote] & ismember([msgs.ID], idsCheck)).ID]);
+                fprintf('\nRESUMO DA REDE (%d/%d):\n', length(idsFound), length(idsCheck));
+                checkID(idsFound, 1025, 'ARDUINO (0x401)');
+                checkID(idsFound, 1296, 'CANTemp1TC (0x510)');
+                checkID(idsFound, 1312, 'CANTemp2TC (0x520)');
+                checkID(idsFound, 1328, 'CANTemp3TC (0x530)');
+                checkID(idsFound, 1552, 'CANIn1AI1To4 (0x610)');
+                checkID(idsFound, 1553, 'CANIn1AI5To8 (0x611)');
+                checkID(idsFound, 1568, 'CANIn2AI1To2 (0x620)');
+                checkID(idsFound, 1569, 'CANIn2DI1To4 (0x621)');
+                checkID(idsFound, 1570, 'CANIn2PI1To2 (0x622)');
+            else
+                disp('-> NENHUMA RESPOSTA RECEBIDA.');
+            end
+            
+        case 3 % REPLACE_WITH_DASH_DASH- AUTOMÁTICO REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            if ~sistemaValidado
+                resp = input('AVISO: Handshake pendente. Continuar? (s/n): ', 's');
+                if lower(resp) ~= 's', continue; end
+            end
+            disp(' ');
+            useDefault = input('Usar padrões (90C/45C)? (s/n): ', 's');
+            if lower(useDefault) == 'n'
+                limMotor = input('Limite MOTOR (ex: 85): ');
+                limAgua  = input('Limite ÁGUA  (ex: 50): ');
+            else, limMotor = 90; limAgua = 45; end
+            executarControle(masterCh,limMotor, limAgua); 
+            
+        case 4 % REPLACE_WITH_DASH_DASH- FILTRAGEM REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            filtragem_agua(masterCh);
+            
+        case 5 % REPLACE_WITH_DASH_DASH- ARREFECIMENTO REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            arrefecimento_func(masterCh);
+           
+        case 6 % REPLACE_WITH_DASH_DASH- DESCARTE REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            Descarte_func(masterCh);
+            
+        case 7 % REPLACE_WITH_DASH_DASH- SNIFFER REPLACE_WITH_DASH_DASH-
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            disp('>>> SNIFFER ATIVO (Pressione "x" na janela para sair)...');
+            % (Código do sniffer mantido simples aqui ou chame função se tiver)
+            figKey = figure('Name','Pressione X para Sair','NumberTitle','off','MenuBar','none','Position',[100 100 300 50]);
+            set(figKey, 'CurrentCharacter', char(0));
+            while true
+                if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x', break; end
+                if masterCh.MessagesAvailable > 0
+                    msgs = receive(masterCh, masterCh.MessagesAvailable);
+                    for k=1:length(msgs)
+                        fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
+                    end
+                end
+                pause(0.05);
+            end
+            if isvalid(figKey), close(figKey); end
+            
+        case 8 % REPLACE_WITH_DASH_DASH- TESTE DE RELÉS REPLACE_WITH_DASH_DASH-
+             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            executarTesteReles(masterCh);
+            
+        case 9 % REPLACE_WITH_DASH_DASH- CONFIGURAR LIMIARES REPLACE_WITH_DASH_DASH-
+             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            configurarLimiaresPlaca(masterCh);
+            
+        case 10 % REPLACE_WITH_DASH_DASH- CONFIGURAÇÃO GERAL REPLACE_WITH_DASH_DASH-
+             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            configurarTaxaAquisicao(masterCh);
+
+        case 11 % REPLACE_WITH_DASH_DASH- NOVO: MONITORAR TÉRMICOS REPLACE_WITH_DASH_DASH-
+             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            monitorarModulosTermicos(masterCh);
+            
+        case 0 % REPLACE_WITH_DASH_DASH- SAIR REPLACE_WITH_DASH_DASH-
+            disp('Encerrando...');try stop(masterCh);catch, end
+            
+        otherwise
+            disp('Opção Inválida.');
+    end
+    
+    if ~ismember(opcao, [4, 5, 6, 7, 8, 11])
+        input('\nPressione Enter para continuar...');
+    end
+end
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO AUXILIAR DISPLAY REPLACE_WITH_DASH_DASH-
+function checkID(foundList, id, name)
+    if ismember(id, foundList), fprintf('[OK] %s\n', name);
+    else, fprintf('[..] %s (Sem resposta)\n', name); end
+end
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 10: CONFIGURAR AQUISIÇÃO COMPLETA (0x404 + 0x405) REPLACE_WITH_DASH_DASH-
+function configurarTaxaAquisicao(ch)
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    disp('    CONFIGURAÇÃO DE AQUISIÇÃO E CONTROLE (0x404/0x405)');
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    
+    % REPLACE_WITH_DASH_DASH- PASSO 1: LEITURA ATUAL REPLACE_WITH_DASH_DASH-
+    disp('>>> Lendo parâmetros atuais da placa...');
+    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end % Limpa buffer
+    
+    try
+        % 1. Envia RTR para 0x404 (Config)
+        msgRTR1 = canMessage(1028, false, 0); % 1028 = 0x404
+        msgRTR1.Remote = true; 
+        transmit(ch, msgRTR1);
+        
+        pause(0.1); % Pequeno intervalo
+        
+        % 2. Envia RTR para 0x405 (Status)
+        msgRTR2 = canMessage(1029, false, 0); % 1029 = 0x405
+        msgRTR2.Remote = true; 
+        transmit(ch, msgRTR2);
+        
+    catch
+        disp('Erro ao enviar RTR. Verifique a conexão.');
+    end
+    
+    pause(0.5); % Aguarda resposta
+    
+    % Valores Padrão
+    data404 = [0, 100, 1, 1, 0, 0, 0, 0]; % Timer=100ms (Big Endian)
+    data405 = [0, 0, 0, 0, 0, 0, 0, 0];   % Parado
+    
+    if ch.MessagesAvailable > 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        for k=1:length(msgs)
+            if ~msgs(k).Remote
+                if msgs(k).ID == 1060, data404 = msgs(k).Data; end % Resp 0x424
+                if msgs(k).ID == 1061, data405 = msgs(k).Data; end % Resp 0x425
+            end
+        end
+    end
+    
+    % REPLACE_WITH_DASH_DASH- DECODIFICAÇÃO (BIG ENDIAN) REPLACE_WITH_DASH_DASH-
+    % O Arduino manda MSB no Byte 0 e LSB no Byte 1
+    currTimer = double(data404(1))*256 + double(data404(2));
+    
+    currAnalog = data404(3); % Byte 2
+    currCont   = data404(4); % Byte 3
+    
+    % Status 0x405 (Bits 6-7 do Byte 0)
+    currStatus = bitshift(data405(1), -6); 
+    
+    % Status Texto
+    stAnalog = 'OFF'; if currAnalog == 1, stAnalog = 'ON '; end
+    stCont   = 'OFF'; if currCont == 1,   stCont   = 'ON '; end
+    stGeral  = 'PARADO '; if currStatus == 1, stGeral  = 'RODANDO'; end
+    
+    fprintf('\n   1. Taxa (Timer)..........: %d ms\n', currTimer);
+    fprintf('   2. Leitura Analógica.....: [%s] (Val: %d)\n', stAnalog, currAnalog);
+    fprintf('   3. Aquisição Contínua....: [%s] (Val: %d)\n', stCont, currCont);
+    fprintf('   4. STATUS GERAL..........: [%s] (Val: %d)\n', stGeral, currStatus);
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    
+    if lower(input('Deseja reconfigurar tudo? (s/n): ', 's')) == 's'
+        disp('REPLACE_WITH_DASH_DASH- Digite os novos valores REPLACE_WITH_DASH_DASH-');
+        
+        % Inputs 0x404
+        newTimer  = input('   Novo Tempo (ms) [10-3000]: ');
+        newAnalog = input('   Habilitar Analógico? (1/0): ');
+        newCont   = input('   Habilitar Contínuo?  (1/0): ');
+        
+        % Input 0x405
+        newStart  = input('   STATUS DO SISTEMA (1=START, 0=STOP): ');
+        
+        % REPLACE_WITH_DASH_DASH- ENVIO 0x404 (CONFIGURAÇÃO) REPLACE_WITH_DASH_DASH-
+        newData404 = data404;
+        % Envia Timer em Big Endian para bater com a leitura
+        newData404(1) = bitshift(newTimer, -8); % Byte 0: MSB
+        newData404(2) = bitand(newTimer, 255);  % Byte 1: LSB
+        newData404(3) = newAnalog;
+        newData404(4) = newCont;
+        
+        msgConf = canMessage(1028, false, 8);
+        msgConf.Data = newData404;
+        transmit(ch, msgConf);
+        fprintf('>>> Config 0x404 enviada: %s\n', sprintf('%02X ', newData404));
+        
+        pause(0.1);
+        
+        % REPLACE_WITH_DASH_DASH- ENVIO 0x405 (COMANDO) REPLACE_WITH_DASH_DASH-
+        valToSend = bitshift(newStart, 6);
+        
+        msgCmd = canMessage(1029, false, 8);
+        msgCmd.Data = [valToSend 0 0 0 0 0 0 0];
+        transmit(ch, msgCmd);
+        
+        if newStart == 1
+            disp('>>> COMANDO START (0x405) ENVIADO! Aquisição iniciada.');
+        else
+            disp('>>> COMANDO STOP (0x405) ENVIADO. Aquisição parada.');
+        end
+    else
+        disp('Nenhuma alteração realizada.');
+    end
+end
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 9: CONFIGURAR LIMIARES E TEMPOS (0x403 e 0x406) REPLACE_WITH_DASH_DASH-
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 9: CONFIGURAR LIMIARES E HABILITAÇÃO (STARTER, ENGINE, INTERC, WATER) REPLACE_WITH_DASH_DASH-
+function configurarLimiaresPlaca(ch)
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    disp('    CONFIGURAÇÃO DE SEGURANÇA (STATUS, TEMP, TEMPO)');
+    disp('    (1=Habilitado/ON, 3=Desabilitado/OFF)');
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    
+    % REPLACE_WITH_DASH_DASH- 1. LEITURA DO 0x403 (STARTER / ENGINE) REPLACE_WITH_DASH_DASH-
+    disp('>>> Lendo 0x403 (Starter/Engine)...');
+    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end
+    
+    try
+        msgRTR = canMessage(1027, false, 0); % 0x403
+        msgRTR.Remote = true; transmit(ch, msgRTR);
+    catch, disp('Erro ao enviar RTR 0x403.'); end
+    pause(0.5);
+    
+    % Padrão 0x403 (Bytes 2 e 6 são Enable)
+    data403 = [12, 3, 80, 5, 0, 3, 105, 5]; 
+    leu403 = false;
+    
+    if ch.MessagesAvailable > 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        for k=1:length(msgs)
+            if ~msgs(k).Remote && msgs(k).ID == 1059 % Resp 0x423
+                data403 = msgs(k).Data;
+                leu403 = true;
+                break;
+            end
+        end
+    end
+    
+    % REPLACE_WITH_DASH_DASH- 2. LEITURA DO 0x406 (INTERCOOLER / WATER) REPLACE_WITH_DASH_DASH-
+    disp('>>> Lendo 0x406 (Intercooler/Water)...');
+    try
+        msgRTR2 = canMessage(1030, false, 0); % 0x406
+        msgRTR2.Remote = true; transmit(ch, msgRTR2);
+    catch, disp('Erro ao enviar RTR 0x406.'); end
+    pause(0.5);
+    
+    % Padrão 0x406 (Bytes 2 e 6 são Enable)
+    data406 = [12, 3, 50, 5, 0, 3, 95, 5]; 
+    leu406 = false;
+    
+    if ch.MessagesAvailable > 0
+        msgs = receive(ch, ch.MessagesAvailable);
+        for k=1:length(msgs)
+            if ~msgs(k).Remote && msgs(k).ID == 1062 % Resp 0x426
+                data406 = msgs(k).Data;
+                leu406 = true;
+                break;
+            end
+        end
+    end
+    
+    % REPLACE_WITH_DASH_DASH- DECODIFICAÇÃO E STATUS REPLACE_WITH_DASH_DASH-
+    % Função auxiliar simples para texto (1=ON, 3=OFF)
+    getTxt = @(x) char("ON " * (x==1) + "OFF" * (x~=1));
+    
+    % 0x403: STARTER
+    enS = data403(2); tempS = data403(3); timeS = data403(4);
+    stS = 'OFF'; if enS == 1, stS = 'ON '; end
+    
+    % 0x403: ENGINE
+    enE = data403(6); tempE = data403(7); timeE = data403(8);
+    stE = 'OFF'; if enE == 1, stE = 'ON '; end
+    
+    % 0x406: INTERCOOLER
+    enI = data406(2); tempI = data406(3); timeI = data406(4);
+    stI = 'OFF'; if enI == 1, stI = 'ON '; end
+    
+    % 0x406: WATER
+    enW = data406(6); tempW = data406(7); timeW = data406(8);
+    stW = 'OFF'; if enW == 1, stW = 'ON '; end
+    
+    % REPLACE_WITH_DASH_DASH- EXIBIÇÃO REPLACE_WITH_DASH_DASH-
+    fprintf('\n   1. STARTER: [%s] (Val:%d) | %3d °C | %d s\n', stS, enS, tempS, timeS);
+    fprintf('   2. ENGINE : [%s] (Val:%d) | %3d °C | %d s\n', stE, enE, tempE, timeE);
+    fprintf('   3. INTERC.: [%s] (Val:%d) | %3d °C | %d s\n', stI, enI, tempI, timeI);
+    fprintf('   4. WATER  : [%s] (Val:%d) | %3d °C | %d s\n', stW, enW, tempW, timeW);
+    disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+    
+    if lower(input('Alterar configurações? (s/n): ', 's')) == 's'
+        disp('REPLACE_WITH_DASH_DASH- Digite os novos valores REPLACE_WITH_DASH_DASH-');
+        disp(' (Para Enable: 1 = Ligar, 3 = Desligar)');
+        
+        % REPLACE_WITH_DASH_DASH- INPUTS STARTER REPLACE_WITH_DASH_DASH-
+        nEn_S = input('   STARTER Habilitado? (1/3): ');
+        nT_S  = input('   STARTER Limite [C]: ');
+        nt_S  = input('   STARTER Tempo  [s]: ');
+        
+        % REPLACE_WITH_DASH_DASH- INPUTS ENGINE REPLACE_WITH_DASH_DASH-
+        nEn_E = input('   ENGINE  Habilitado? (1/3): ');
+        nT_E  = input('   ENGINE  Limite [C]: ');
+        nt_E  = input('   ENGINE  Tempo  [s]: ');
+        
+        % REPLACE_WITH_DASH_DASH- INPUTS INTERCOOLER REPLACE_WITH_DASH_DASH-
+        nEn_I = input('   INTERC. Habilitado? (1/3): ');
+        nT_I  = input('   INTERC. Limite [C]: ');
+        nt_I  = input('   INTERC. Tempo  [s]: ');
+        
+        % REPLACE_WITH_DASH_DASH- INPUTS WATER REPLACE_WITH_DASH_DASH-
+        nEn_W = input('   WATER   Habilitado? (1/3): ');
+        nT_W  = input('   WATER   Limite [C]: ');
+        nt_W  = input('   WATER   Tempo  [s]: ');
+        
+        % REPLACE_WITH_DASH_DASH- ATUALIZAÇÃO E ENVIO REPLACE_WITH_DASH_DASH-
+        
+        % Config 0x403
+        newData403 = data403;
+        newData403(2) = nEn_S; newData403(3) = nT_S; newData403(4) = nt_S;
+        newData403(6) = nEn_E; newData403(7) = nT_E; newData403(8) = nt_E;
+        
+        msg1 = canMessage(1027, false, 8); 
+        msg1.Data = newData403;
+        transmit(ch, msg1);
+        fprintf('>>> Enviado 0x403: %s\n', sprintf('%02X ', newData403));
+        
+        pause(0.1);
+        
+        % Config 0x406
+        newData406 = data406;
+        newData406(2) = nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
+        newData406(6) = nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
+        
+        msg2 = canMessage(1030, false, 8); 
+        msg2.Data = newData406;
+        transmit(ch, msg2);
+        fprintf('>>> Enviado 0x406: %s\n', sprintf('%02X ', newData406));
+        
+        disp('>>> Configuração Concluída.');
+    else
+        disp('Nenhuma alteração realizada.');
+    end
+end
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 1: MÁQUINA DE ESTADOS (CORRIGIDA E SEGURA) REPLACE_WITH_DASH_DASH-
+function executarControle(ch, limM, limA)
+    disp('>>> CONTROLE AUTOMÁTICO INICIADO');
+    disp('    Lógica idêntica ao Teste Manual.');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    disp('    PARA VOLTAR AO MENU: Feche a janela "CONTROLE ATIVO"');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    
+    % REPLACE_WITH_DASH_DASH- JANELA DE CONTROLE REPLACE_WITH_DASH_DASH-
+    figKey = figure('Name','CONTROLE ATIVO - Feche para Voltar','NumberTitle','off',...
+                    'MenuBar','none','ToolBar','none',...
+                    'Position',[100 100 400 100], 'Color', [0.9 0.4 0.4]); 
+    
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU',...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.4 0.4],...
+              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
+              
+    set(figKey, 'CurrentCharacter', char(0));
+    
+    % REPLACE_WITH_DASH_DASH- GATILHO DE SEGURANÇA REPLACE_WITH_DASH_DASH-
+    cleanupObj = onCleanup(@() desligarSeguro(ch));
+    
+    % Estados
+    S1=1; S2=2; S3=3; S4=4;
+    
+    % Inicia no Estado 2 (Bomba Ligada)
+    estado = S2; 
+    
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+    histM = limM - 3; histA = limA - 5;
+    
+    try
+        while true
+            % REPLACE_WITH_DASH_DASH- SAÍDA REPLACE_WITH_DASH_DASH-
+            if ~isvalid(figKey)
+                disp('>>> Janela fechada. Voltando ao Menu...');
+                break; 
+            end
+            
+            if lower(get(figKey, 'CurrentCharacter')) == 'x'
+                disp('>>> Comando de saída recebido. Voltando ao Menu...');
+                break;
+            end
+            
+            tNow = (now - startTime) * 86400;
+            
+            % REPLACE_WITH_DASH_DASH- LEITURA REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastReq) > 0.2
+                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
+                lastReq = clock;
+            end
+            
+            if ch.MessagesAvailable > 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                for i=1:length(msgs)
+                    if ~msgs(i).Remote && msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    end
+                end
+            end
+            
+            % REPLACE_WITH_DASH_DASH- LÓGICA DE ESTADOS REPLACE_WITH_DASH_DASH-
+            bomba=0; v1=0; v2=0; d1=0; d2=0;
+            
+            switch estado
+                case S1 % Repouso
+                    if tempM > 0, estado = S2; end
+                case S2 % Filtragem
+                    bomba=1; 
+                    if tempM >= limM, estado = S3; end
+                case S3 % Circulação
+                    bomba=1; v1=1; 
+                    if tempA >= limA, estado = S4; end
+                    if tempM < histM, estado = S2; end
+                case S4 % Descarte
+                    bomba=1; v1=1; v2=1;
+                    if tempM < histM && tempA < histA, estado = S3; end
+            end
+            
+            if tempM > (limM + 15), d1=1; d2=1; end
+            
+            % REPLACE_WITH_DASH_DASH- ENVIO (LÓGICA MANUAL) REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastLog) > 0.5
+                b1 = 0; b2 = 0;
+                
+                % Byte 1 
+                if d1 == 0, b1 = bitor(b1, 64); end 
+                if d2 == 0, b1 = bitor(b1, 16); end 
+                b1 = bitor(b1, 4); b1 = bitor(b1, 1);
+                
+                % Byte 2
+                if v2 == 0, b2 = bitor(b2, 64); end 
+                if v1 == 0, b2 = bitor(b2, 16); end 
+                b2 = bitor(b2, 4); 
+                if bomba == 0, b2 = bitor(b2, 1); end 
+                
+                try
+                    cmd = canMessage(1026, false, 8); 
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                catch
+                end
+                
+                stB='OFF'; if bomba, stB='ON '; end
+                fprintf('T:%6.1fs | S%d | M:%5.1f | B:%s | V1:%d | V2:%d\n', ...
+                    tNow, estado, tempM, stB, v1, v2);
+                
+                lastLog = clock;
+            end
+            pause(0.02);
+        end
+    catch ME
+        disp(['Erro no loop: ' ME.message]);
+    end
+    
+    if isvalid(figKey), close(figKey); end
+end
+
+% REPLACE_WITH_DASH_DASH- FUNÇÃO DE SEGURANÇA (CORRIGIDA) REPLACE_WITH_DASH_DASH-
+function desligarSeguro(ch)
+    % Verifica canal
+    if ~isempty(ch) && isvalid(ch) && ch.Running
+        try
+            % CORREÇÃO: Cria mensagem primeiro, atribui dados depois
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; % 85 = 01010101 (Desliga tudo)
+            
+            transmit(ch, msg);
+            pause(0.05);
+            
+            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
+        catch ME
+            fprintf('\nAVISO: Erro ao enviar desligamento: %s\n', ME.message);
+        end
+    else
+        fprintf('\nAVISO: Canal fechado. Não foi possível desligar hardware.\n');
+    end
+end
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 4: MODO FILTRAGEM (SOMENTE BOMBA LIGADA) REPLACE_WITH_DASH_DASH-
+function filtragem_agua(ch)
+    disp('>>> MODO FILTRAGEM INICIADO');
+    disp('    Estado: BOMBA ON | VÁLVULAS OFF');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    disp('    PARA VOLTAR AO MENU: Feche a janela "FILTRAGEM ATIVA"');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    
+    % REPLACE_WITH_DASH_DASH- JANELA DE CONTROLE REPLACE_WITH_DASH_DASH-
+    figKey = figure('Name','FILTRAGEM ATIVA - Feche para Voltar','NumberTitle','off',...
+                    'MenuBar','none','ToolBar','none',...
+                    'Position',[100 100 400 100], 'Color', [0.4 0.4 0.9]); % Azulado para diferenciar
+    
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR A FILTRAGEM',...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.4 0.9],...
+              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
+              
+    set(figKey, 'CurrentCharacter', char(0));
+    
+    % REPLACE_WITH_DASH_DASH- GATILHO DE SEGURANÇA REPLACE_WITH_DASH_DASH-
+    cleanupObj = onCleanup(@() desligarSeguro_filt(ch));
+    
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+    
+    try
+        while true
+            % REPLACE_WITH_DASH_DASH- SAÍDA REPLACE_WITH_DASH_DASH-
+            if ~isvalid(figKey)
+                disp('>>> Janela fechada. Voltando ao Menu...');
+                break; 
+            end
+            
+            if lower(get(figKey, 'CurrentCharacter')) == 'x'
+                disp('>>> Comando de saída recebido. Voltando ao Menu...');
+                break;
+            end
+            
+            tNow = (now - startTime) * 86400;
+            
+            % REPLACE_WITH_DASH_DASH- LEITURA (Apenas para monitoramento) REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastReq) > 0.2
+                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
+                lastReq = clock;
+            end
+            
+            if ch.MessagesAvailable > 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                for i=1:length(msgs)
+                    if ~msgs(i).Remote && msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    end
+                end
+            end
+            
+            % REPLACE_WITH_DASH_DASH- ENVIO (LÓGICA INVERSA MANUAL) REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastLog) > 0.5
+                b1 = 0; b2 = 0;
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 1: TUDO DESLIGADO REPLACE_WITH_DASH_DASH-
+                % Bits: 0, 2, 4, 6 colocados em 1 (OFF)
+                b1 = bitor(b1, 64); % D1 OFF
+                b1 = bitor(b1, 16); % D2 OFF
+                b1 = bitor(b1, 4);  % D3 OFF
+                b1 = bitor(b1, 1);  % D4 OFF
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 2: SÓ BOMBA LIGADA REPLACE_WITH_DASH_DASH-
+                b2 = bitor(b2, 64); % V2 (NA2) OFF
+                b2 = bitor(b2, 16); % V1 (NA1) OFF
+                b2 = bitor(b2, 4);  % D7 OFF
+                
+                % BOMBA (Bit 0): 
+                % Como queremos LIGADA, NÃO fazemos o bitor com 1.
+                % Deixamos o bit 0 como '0'.
+                
+                try
+                    cmd = canMessage(1026, false, 8); 
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                catch
+                end
+                
+                fprintf('FILTRAGEM | Tempo: %6.1fs | Mot:%5.1f C | Agu:%5.1f C | BOMBA LIGADA\n', ...
+                    tNow, tempM, tempA);
+                
+                lastLog = clock;
+            end
+            pause(0.02);
+        end
+    catch ME
+        disp(['Erro no loop: ' ME.message]);
+    end
+    
+    if isvalid(figKey), close(figKey); end
+end
+
+% REPLACE_WITH_DASH_DASH- REUTILIZAÇÃO DA FUNÇÃO DE SEGURANÇA REPLACE_WITH_DASH_DASH-
+% (Copie isso se não estiver no final do arquivo, ou deixe apenas uma vez no final do script principal)
+function desligarSeguro_filt(ch)
+    if ~isempty(ch) && isvalid(ch) && ch.Running
+        try
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
+        catch, end
+    end
+end
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 5: MODO ARREFECIMENTO (BOMBA + V1 LIGADOS) REPLACE_WITH_DASH_DASH-
+function arrefecimento_func(ch)
+    disp('>>> MODO ARREFECIMENTO INICIADO');
+    disp('    Estado: BOMBA ON | NA1 (Circulação) ON | NA2 OFF');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    disp('    PARA VOLTAR AO MENU: Feche a janela "ARREFECIMENTO ATIVO"');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    
+    % REPLACE_WITH_DASH_DASH- JANELA DE CONTROLE REPLACE_WITH_DASH_DASH-
+    figKey = figure('Name','ARREFECIMENTO ATIVO - Feche para Voltar','NumberTitle','off',...
+                    'MenuBar','none','ToolBar','none',...
+                    'Position',[100 100 400 100], 'Color', [0.4 0.8 0.4]); % Esverdeado
+    
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR',...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.8 0.4],...
+              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
+              
+    set(figKey, 'CurrentCharacter', char(0));
+    
+    % REPLACE_WITH_DASH_DASH- GATILHO DE SEGURANÇA REPLACE_WITH_DASH_DASH-
+    cleanupObj = onCleanup(@() desligarSeguro_arref(ch));
+    
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+    
+    try
+        while true
+            % REPLACE_WITH_DASH_DASH- VERIFICAÇÃO DE SAÍDA REPLACE_WITH_DASH_DASH-
+            if ~isvalid(figKey)
+                disp('>>> Janela fechada. Voltando ao Menu...');
+                break; 
+            end
+            
+            if lower(get(figKey, 'CurrentCharacter')) == 'x'
+                disp('>>> Comando de saída recebido. Voltando ao Menu...');
+                break;
+            end
+            
+            tNow = (now - startTime) * 86400;
+            
+            % REPLACE_WITH_DASH_DASH- LEITURA REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastReq) > 0.2
+                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
+                lastReq = clock;
+            end
+            
+            if ch.MessagesAvailable > 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                for i=1:length(msgs)
+                    if ~msgs(i).Remote && msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    end
+                end
+            end
+            
+            % REPLACE_WITH_DASH_DASH- ENVIO (LÓGICA INVERSA MANUAL) REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastLog) > 0.5
+                b1 = 0; b2 = 0;
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 1: TUDO DESLIGADO (Manda 1) REPLACE_WITH_DASH_DASH-
+                b1 = bitor(b1, 64); % D1 OFF
+                b1 = bitor(b1, 16); % D2 OFF
+                b1 = bitor(b1, 4);  % D3 OFF
+                b1 = bitor(b1, 1);  % D4 OFF
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 2: CONFIGURAÇÃO ARREFECIMENTO REPLACE_WITH_DASH_DASH-
+                
+                % V2 (NA2/Descarte - Bit 6): DESLIGADA -> Manda 1
+                b2 = bitor(b2, 64); 
+                
+                % V1 (NA1/Circulação - Bit 4): LIGADA -> Manda 0 (Não faz nada)
+                % (Não adicionamos 16 aqui, deixando o bit em 0)
+                
+                % D7 (Bit 2): DESLIGADO -> Manda 1
+                b2 = bitor(b2, 4);
+                
+                % BOMBA (Bit 0): LIGADA -> Manda 0 (Não faz nada)
+                % (Não adicionamos 1 aqui, deixando o bit em 0)
+                
+                try
+                    cmd = canMessage(1026, false, 8); 
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                catch
+                end
+                
+                fprintf('ARREFECIM.| T:%6.1fs | M:%5.1f | A:%5.1f | BOMBA + V1 (NA1) ON\n', ...
+                    tNow, tempM, tempA);
+                
+                lastLog = clock;
+            end
+            pause(0.02);
+        end
+    catch ME
+        disp(['Erro no loop: ' ME.message]);
+    end
+    
+    if isvalid(figKey), close(figKey); end
+end
+
+
+function desligarSeguro_arref(ch)
+    if ~isempty(ch) && isvalid(ch) && ch.Running
+        try
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
+        catch, end
+    end
+end
+%% DESCARTE
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 6: MODO DESCARTE (TUDO LIGADO) REPLACE_WITH_DASH_DASH-
+function Descarte_func(ch)
+    disp('>>> MODO DESCARTE INICIADO');
+    disp('    Estado: BOMBA ON | V1 ON | V2 ON (Esvaziando...)');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    disp('    PARA VOLTAR AO MENU: Feche a janela "DESCARTE ATIVO"');
+    disp('    REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-');
+    
+    % REPLACE_WITH_DASH_DASH- JANELA DE CONTROLE REPLACE_WITH_DASH_DASH-
+    % Cor Laranja/Vermelha para indicar atenção (Descarte)
+    figKey = figure('Name','DESCARTE ATIVO - Feche para Voltar','NumberTitle','off',...
+                    'MenuBar','none','ToolBar','none',...
+                    'Position',[100 100 400 100], 'Color', [0.9 0.6 0.2]); 
+    
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR O DESCARTE',...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.6 0.2],...
+              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
+              
+    set(figKey, 'CurrentCharacter', char(0));
+    
+    % REPLACE_WITH_DASH_DASH- GATILHO DE SEGURANÇA REPLACE_WITH_DASH_DASH-
+    cleanupObj = onCleanup(@() desligarSeguro_desc(ch));
+    
+    tempM = 0; tempA = 0;
+    lastLog = clock; lastReq = clock; startTime = now;
+    
+    try
+        while true
+            % REPLACE_WITH_DASH_DASH- VERIFICAÇÃO DE SAÍDA REPLACE_WITH_DASH_DASH-
+            if ~isvalid(figKey)
+                disp('>>> Janela fechada. Voltando ao Menu...');
+                break; 
+            end
+            
+            if lower(get(figKey, 'CurrentCharacter')) == 'x'
+                disp('>>> Comando de saída recebido. Voltando ao Menu...');
+                break;
+            end
+            
+            tNow = (now - startTime) * 86400;
+            
+            % REPLACE_WITH_DASH_DASH- LEITURA REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastReq) > 0.2
+                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
+                lastReq = clock;
+            end
+            
+            if ch.MessagesAvailable > 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                for i=1:length(msgs)
+                    if ~msgs(i).Remote && msgs(i).ID == 1296
+                        d = uint16(msgs(i).Data);
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        tempM = double(rawTL) - 2048; tempA = double(rawTR) - 2048;
+                    end
+                end
+            end
+            
+            % REPLACE_WITH_DASH_DASH- ENVIO (LÓGICA INVERSA MANUAL) REPLACE_WITH_DASH_DASH-
+            if etime(clock, lastLog) > 0.5
+                b1 = 0; b2 = 0;
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 1: TUDO DESLIGADO (Manda 1) REPLACE_WITH_DASH_DASH-
+                b1 = bitor(b1, 64); % D1 OFF
+                b1 = bitor(b1, 16); % D2 OFF
+                b1 = bitor(b1, 4);  % D3 OFF
+                b1 = bitor(b1, 1);  % D4 OFF
+                
+                % REPLACE_WITH_DASH_DASH- BYTE 2: TUDO LIGADO (Bomba + V1 + V2) REPLACE_WITH_DASH_DASH-
+                
+                % V2 (NA2/Descarte - Bit 6): Queremos ON (0).
+                % NÃO fazemos bitor. Deixa 0.
+                
+                % V1 (NA1/Circulação - Bit 4): Queremos ON (0).
+                % NÃO fazemos bitor. Deixa 0.
+                
+                % D7 (Bit 2): Queremos OFF (1).
+                b2 = bitor(b2, 4);
+                
+                % BOMBA (Bit 0): Queremos ON (0).
+                % NÃO fazemos bitor. Deixa 0.
+                
+                try
+                    cmd = canMessage(1026, false, 8); 
+                    cmd.Data = [b1 b2 0 0 0 0 0 0];
+                    transmit(ch, cmd);
+                catch
+                end
+                
+                fprintf('DESCARTE  | T:%6.1fs | M:%5.1f | A:%5.1f | TUDO ABERTO (ON)\n', ...
+                    tNow, tempM, tempA);
+                
+                lastLog = clock;
+            end
+            pause(0.02);
+        end
+    catch ME
+        disp(['Erro no loop: ' ME.message]);
+    end
+    
+    if isvalid(figKey), close(figKey); end
+end
+
+function desligarSeguro_desc(ch)
+    if ~isempty(ch) && isvalid(ch) && ch.Running
+        try
+            msg = canMessage(1026, false, 8);
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); pause(0.05);
+            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
+        catch, end
+    end
+end
+
+
+
+
+
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 8: TESTE DE RELÉS (LÓGICA INVERSA: 0=LIGA, 1=DESLIGA) REPLACE_WITH_DASH_DASH-
+function executarTesteReles(ch)
+    % Estado visual: 0 = OFF na tela, 1 = ON na tela
+    reles = zeros(1, 8); 
+    sairTeste = false;
+    
+    while ~sairTeste
+        clc; disp('=== TESTE DE RELÉS (ID 0x402) - LÓGICA INVERSA ===');
+        disp(' Nota: Enviando 0 para LIGAR e 1 para DESLIGAR o hardware');
+        
+        % REPLACE_WITH_DASH_DASH- MONTAGEM DOS BYTES (Lógica Invertida) REPLACE_WITH_DASH_DASH-
+        % Se o relé deve estar DESLIGADO (0), enviamos bit 1.
+        % Se o relé deve estar LIGADO (1), enviamos bit 0.
+        
+        b1 = 0;
+        % Byte 1 (Relés 1 a 4)
+        if reles(1) == 0, b1 = bitor(b1, 64); end % Se OFF na tela, manda 1
+        if reles(2) == 0, b1 = bitor(b1, 16); end
+        if reles(3) == 0, b1 = bitor(b1, 4);  end
+        if reles(4) == 0, b1 = bitor(b1, 1);  end 
+        
+        b2 = 0;
+        % Byte 2 (Relés 5 a 8)
+        if reles(5) == 0, b2 = bitor(b2, 64); end 
+        if reles(6) == 0, b2 = bitor(b2, 16); end 
+        if reles(7) == 0, b2 = bitor(b2, 4);  end 
+        if reles(8) == 0, b2 = bitor(b2, 1);  end 
+        
+        % Envio da mensagem
+        msg = canMessage(1026, false, 8); 
+        msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+        try, transmit(ch, msg); catch, end
+        
+        fprintf('ENVIANDO (Hex): %02X %02X (Bits 1 = Desligado)\n', b1, b2);
+        disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+        
+        % REPLACE_WITH_DASH_DASH- EXIBIÇÃO VISUAL (Mantém lógica normal para o usuário) REPLACE_WITH_DASH_DASH-
+        for i = 1:8
+            st = '[ OFF ]'; 
+            if reles(i), st = '[ ON  ] ATIVADO'; end
+            
+            nome = sprintf('Saída D%d', i);
+            if i==5, nome='NA2/NF2'; end
+            if i==6, nome='NA1/NF1'; end
+            if i==8, nome='Bomba'; end
+            
+            fprintf(' %d. %s -> %s\n', i, st, nome);
+        end
+        
+        disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+        disp(' 9. LIGAR TUDO'); disp('10. DESLIGAR TUDO'); disp(' x. VOLTAR');
+        
+        inp = input('Opção: ', 's');
+        
+        if strcmpi(inp, 'x')
+            % AO SAIR: Mandar TUDO 1 para garantir que desligue
+            % 64 + 16 + 4 + 1 = 85 (0x55)
+            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; 
+            transmit(ch, msg); 
+            sairTeste = true;
+        else
+            val = str2double(inp);
+            if ~isnan(val)
+                if val >= 1 && val <= 8
+                    reles(val) = ~reles(val); % Inverte estado visual
+                elseif val == 9
+                    reles(:) = 1; % Visualmente tudo 1 (Envia 0)
+                elseif val == 10
+                    reles(:) = 0; % Visualmente tudo 0 (Envia 1)
+                end
+            end
+        end
+    end
+end
+
+
+%% REPLACE_WITH_DASH_DASH- FUNÇÃO 11: MONITORAR TÉRMICOS COM STATUS (OK/ERRO) REPLACE_WITH_DASH_DASH-
+function monitorarModulosTermicos(ch)
+    clc;
+    disp('==================================================');
+    disp('    MONITORAMENTO TÉRMICO + STATUS DOS SENSORES');
+    disp('==================================================');
+    
+    % Configuração de Tempo
+    delayStr = input('Tempo de atualização (segundos) [Padrão: 0.5]: ', 's');
+    delayVal = str2double(delayStr);
+    if isnan(delayVal) || delayVal < 0.1, delayVal = 0.5; end
+    
+    fprintf('>>> Iniciando (%.2fs)... Para SAIR, feche a janela.\n', delayVal);
+    
+    % Janela de Saída
+    figKey = figure('Name','MONITOR TÉRMICO - Feche para Voltar','NumberTitle','off',...
+                    'MenuBar','none','ToolBar','none',...
+                    'Position',[100 100 550 100], 'Color', [0.8 0.8 0.8]); 
+    
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU',...
+              'Position',[20 20 510 60], 'BackgroundColor',[0.8 0.8 0.8],...
+              'FontSize', 12, 'FontWeight', 'bold');
+              
+    set(figKey, 'CurrentCharacter', char(0));
+    
+    % IDs e Textos de Status
+    idsTermicos = [1296, 1312, 1328];
+    nomesModulos = {'M1 (Main)', 'M2 (Aux)', 'M3 (Aux)'};
+    statusTxt = {'OK ', 'Er1', 'Er2', 'Er3'}; % 0=OK, 1..3=Erros
+    
+    try
+        while true
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
+                disp('>>> Voltando ao Menu...'); break;
+            end
+            
+            % Envia RTRs
+            for k=1:length(idsTermicos)
+                try, transmit(ch, canMessage(idsTermicos(k), false, 0, 'Remote', true)); catch, end
+            end
+            
+            pause(0.1); 
+            if ch.MessagesAvailable > 0
+                msgs = receive(ch, ch.MessagesAvailable);
+                
+                clc;
+                fprintf('=== LEITURAS (Atualizacao: %.2fs) ===\n', delayVal);
+                % Cabeçalho mais largo para caber o Status
+                fprintf('%-10s | CJ(C) | %-13s | %-13s | %-13s | %-13s\n', ...
+                        'MODULO', 'TL(C°)', 'TR(C°)', 'BL(C°)', 'BR(C°)');
+                disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+                
+                for k=1:3
+                    targetID = idsTermicos(k);
+                    idx = find([msgs.ID] == targetID & ~[msgs.Remote], 1, 'last');
+                    
+                    if ~isempty(idx)
+                        d = uint16(msgs(idx).Data);
+                        
+                        % REPLACE_WITH_DASH_DASH- DECODIFICAÇÃO COMPLETA (VALOR + STATUS) REPLACE_WITH_DASH_DASH-
+                        
+                        % Cold Junction (Byte 0)
+                        cj = double(int8(d(1)));
+                        
+                        % 1. STARTER (TL)
+                        % Status: Byte 2 (Bits 0-1) | Temp: Byte 2(2-7) + Byte 3(0-5)
+                        stTL  = bitand(d(2), 3); 
+                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
+                        
+                        % 2. ENGINE (TR)
+                        % Status: Byte 3 (Bits 6-7) | Temp: Byte 4 + Byte 5(0-3)
+                        stTR  = bitshift(d(3), -6);
+                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
+                        
+                        % 3. INTERCOOLER (BL)
+                        % Status: Byte 5 (Bits 4-5) | Temp: Byte 5(6-7)+Byte 6+Byte 7(0-1)
+                        stBL  = bitand(bitshift(d(5), -4), 3);
+                        rawBL = bitshift(bitand(d(5), 192), -6) + bitshift(d(6), 2) + bitshift(bitand(d(7), 3), 10);
+                        
+                        % 4. WATER (BR)
+                        % Status: Byte 7 (Bits 2-3) | Temp: Byte 7(4-7)+Byte 8
+                        stBR  = bitand(bitshift(d(7), -2), 3);
+                        rawBR = bitshift(bitand(d(7), 240), -4) + bitshift(d(8), 4);
+                        
+                        % Conversão (-2048 Offset)
+                        valTL = double(rawTL) - 2048;
+                        valTR = double(rawTR) - 2048;
+                        valBL = double(rawBL) - 2048;
+                        valBR = double(rawBR) - 2048;
+                        
+                        % Formatação com Status [Val + St]
+                        % Ex: " 90.5 [OK ]"
+                        txtTL = sprintf('%5.1f [%s]', valTL, statusTxt{stTL+1});
+                        txtTR = sprintf('%5.1f [%s]', valTR, statusTxt{stTR+1});
+                        txtBL = sprintf('%5.1f [%s]', valBL, statusTxt{stBL+1});
+                        txtBR = sprintf('%5.1f [%s]', valBR, statusTxt{stBR+1});
+                        
+                        fprintf('%-10s | %5.1f | %-13s | %-13s | %-13s | %-13s\n', ...
+                            nomesModulos{k}, cj, txtTL, txtTR, txtBL, txtBR);
+                    else
+                        fprintf('%-10s |  REPLACE_WITH_DASH_DASH   |      REPLACE_WITH_DASH_DASH       |      REPLACE_WITH_DASH_DASH       |      REPLACE_WITH_DASH_DASH       |      REPLACE_WITH_DASH_DASH      \n', nomesModulos{k});
+                    end
+                end
+                disp('REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH');
+                fprintf('(Legenda: [OK ]=Normal, [ErX]=Erro Sensor)\n');
+                fprintf('Starter = TL1, Engine = TR1, Intercooler = BL1, Water = BR1\n ')
+            end
+            pause(delayVal);
+        end
+    catch ME
+        disp(['Erro: ' ME.message]);
+    end
+    if isvalid(figKey), close(figKey); end
+end
+##### SOURCE END #####
+-->
+</body>
+</html>

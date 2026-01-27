@@ -1,0 +1,6 @@
+Firmware Info
+-------------
+Versão:  v1.1.2
+Build:   2026-01-27 17:46:41
+Placa:   megaatmega2560
+Tamanho: 51.81 KB
