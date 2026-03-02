@@ -1,0 +1,200 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+
+BO_ 1296 CANTemp1TC: 8 Vector__XXX
+ SG_ CJTemp : 0|8@1+ (1,-128) [-20|85] "degC" Vector__XXX
+ SG_ TLStatus : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TLTemp : 10|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ TRStatus : 22|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TRTemp : 24|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BLStatus : 36|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BLTemp : 38|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BRStatus : 50|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BRTemp : 52|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+
+BO_ 1312 CANTemp2TC: 8 Vector__XXX
+ SG_ CJTemp : 0|8@1+ (1,-128) [-20|85] "degC" Vector__XXX
+ SG_ TLStatus : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TLTemp : 10|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ TRStatus : 22|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TRTemp : 24|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BLStatus : 36|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BLTemp : 38|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BRStatus : 50|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BRTemp : 52|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+
+BO_ 1328 CANTemp3TC: 8 Vector__XXX
+ SG_ CJTemp : 0|8@1+ (1,-128) [-20|85] "degC" Vector__XXX
+ SG_ TLStatus : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TLTemp : 10|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ TRStatus : 22|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TRTemp : 24|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BLStatus : 36|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BLTemp : 38|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+ SG_ BRStatus : 50|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ BRTemp : 52|12@1+ (1,-2048) [-210|1800] "degC" Vector__XXX
+
+BO_ 1552 CANIn1AI1To4: 8 Vector__XXX
+ SG_ Analog1 : 0|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog2 : 16|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog3 : 32|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog4 : 48|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+
+BO_ 1553 CANIn1AI5To8: 8 Vector__XXX
+ SG_ Analog5 : 0|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog6 : 16|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog7 : 32|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog8 : 48|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+
+BO_ 1568 CANIn2AI1To2: 8 Vector__XXX
+ SG_ Analog1 : 0|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+ SG_ Analog2 : 16|16@1+ (0.625,0) [0|10000] "mV" Vector__XXX
+
+BO_ 1569 CANIn2DI1To4: 8 Vector__XXX
+ SG_ Digital1Act : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Digital1Hgh : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Digital1Low : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Digital2Act : 4|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital2Hgh : 6|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital2Low : 7|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital3Act : 8|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital3Hgh : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital3Low : 11|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital4Act : 12|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital4Hgh : 14|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Digital4Low : 15|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1570 CANIn2PI1To2: 8 Vector__XXX
+ SG_ Pulse32Bit1 : 0|32@1+ (1,0) [-2147483648|2147483647] "" Vector__XXX
+ SG_ Pulse32Bit2 : 32|32@1+ (1,0) [-2147483648|2147483647] "" Vector__XXX
+
+BO_ 1026 CANOutput: 8 Vector__XXX
+ SG_ DigOut1 : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut2 : 2|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut3 : 4|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut4 : 6|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut5 : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut6 : 10|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut7 : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ DigOut8 : 14|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ PwmOut1 : 16|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ PwmOut2 : 24|8@1+ (1,0) [0|100] "%" Vector__XXX
+
+
+
+CM_ BO_ 1296 "Standard resolution, all";
+CM_ SG_ 1296 CJTemp "Cold junction temperature";
+CM_ SG_ 1296 TLStatus "Top-Left status";
+CM_ SG_ 1296 TLTemp "Top-Left temperature";
+CM_ SG_ 1296 TRStatus "Top-Right status";
+CM_ SG_ 1296 TRTemp "Top-Right temperature";
+CM_ SG_ 1296 BLStatus "Bottom-Left status";
+CM_ SG_ 1296 BLTemp "Bottom-Left temperature";
+CM_ SG_ 1296 BRStatus "Bottom-Right status";
+CM_ SG_ 1296 BRTemp "Bottom-Right temperature";
+CM_ BO_ 1312 "Standard resolution, all";
+CM_ SG_ 1312 CJTemp "Cold junction temperature";
+CM_ SG_ 1312 TLStatus "Top-Left status";
+CM_ SG_ 1312 TLTemp "Top-Left temperature";
+CM_ SG_ 1312 TRStatus "Top-Right status";
+CM_ SG_ 1312 TRTemp "Top-Right temperature";
+CM_ SG_ 1312 BLStatus "Bottom-Left status";
+CM_ SG_ 1312 BLTemp "Bottom-Left temperature";
+CM_ SG_ 1312 BRStatus "Bottom-Right status";
+CM_ SG_ 1312 BRTemp "Bottom-Right temperature";
+CM_ BO_ 1328 "Standard resolution, all";
+CM_ SG_ 1328 CJTemp "Cold junction temperature";
+CM_ SG_ 1328 TLStatus "Top-Left status";
+CM_ SG_ 1328 TLTemp "Top-Left temperature";
+CM_ SG_ 1328 TRStatus "Top-Right status";
+CM_ SG_ 1328 TRTemp "Top-Right temperature";
+CM_ SG_ 1328 BLStatus "Bottom-Left status";
+CM_ SG_ 1328 BLTemp "Bottom-Left temperature";
+CM_ SG_ 1328 BRStatus "Bottom-Right status";
+CM_ SG_ 1328 BRTemp "Bottom-Right temperature";
+CM_ BO_ 1552 "Analog data - 8 bits resoluiton";
+CM_ BO_ 1553 "Analog data - 8 bits resoluiton";
+CM_ BO_ 1568 "Analog data - 8 bits resoluiton";
+CM_ BO_ 1569 "Digital input - 1 bit ";
+CM_ SG_ 1569 Digital1Act "Actual digital level ";
+CM_ SG_ 1569 Digital1Hgh "High since previous output ";
+CM_ SG_ 1569 Digital1Low "Low since previous output ";
+CM_ SG_ 1569 Digital2Act "Actual digital level ";
+CM_ SG_ 1569 Digital2Hgh "High since previous output ";
+CM_ SG_ 1569 Digital2Low "Low since previous output ";
+CM_ SG_ 1569 Digital3Act "Actual digital level ";
+CM_ SG_ 1569 Digital3Hgh "High since previous output ";
+CM_ SG_ 1569 Digital3Low "Low since previous output ";
+CM_ SG_ 1569 Digital4Act "Actual digital level ";
+CM_ SG_ 1569 Digital4Hgh "High since previous output ";
+CM_ SG_ 1569 Digital4Low "Actual digital level ";
+CM_ BO_ 1570 "Pulse - 32 bits resolution";
+CM_ BO_ 1026 "Digital and PWM outputs";
+CM_ SG_ 1026 DigOut1 "Digital Output 1";
+CM_ SG_ 1026 DigOut2 "Digital Output 2";
+CM_ SG_ 1026 DigOut3 "Digital Output 3";
+CM_ SG_ 1026 DigOut4 "Digital Output 4";
+CM_ SG_ 1026 DigOut5 "Digital Output 5";
+CM_ SG_ 1026 DigOut6 "Digital Output 6";
+CM_ SG_ 1026 DigOut7 "Digital Output 7";
+CM_ SG_ 1026 DigOut8 "Digital Output 8";
+CM_ SG_ 1026 PwmOut1 "Pwm Output 1";
+CM_ SG_ 1026 PwmOut2 "Pwm Output 2";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "ProtocolType" STRING ;
+BA_DEF_ BO_  "MessageIgnore" INT 0 1;
+BA_DEF_ SG_  "SignalIgnore" INT 0 1;
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "ProtocolType" "";
+BA_DEF_DEF_  "MessageIgnore" 0;
+BA_DEF_DEF_  "SignalIgnore" 0;
+BA_ "ProtocolType" "";
+BA_ "BusType" "CAN";
+VAL_ 1296 TLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1296 TRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1296 BLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1296 BRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1312 TLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1312 TRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1312 BLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1312 BRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1328 TLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1328 TRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1328 BLStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+VAL_ 1328 BRStatus 0 "OK" 1 "Err1" 2 "Err2" 3 "Err3" ;
+

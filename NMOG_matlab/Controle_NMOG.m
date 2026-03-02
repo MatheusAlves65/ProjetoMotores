@@ -151,7 +151,7 @@ while opcao ~= 0
              if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             configurarTaxaAquisicao(masterCh);
 
-        case 11 % --- NOVO: MONITORAR TÉRMICOS ---
+        case 11 % --- MONITORAR TÉRMICOS ---
              if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             monitorarModulosTermicos(masterCh);
             
@@ -348,13 +348,11 @@ function configurarLimiaresPlaca(ch)
     if enS == 3, stS = 'OFF '; end
     % 0x403: ENGINE
     enE = bitand(data403(6),15); tempE = data403(7); timeE = data403(8);
-        fprintf('enE: %3d', enE);
      if enE == 1, stE = 'ON '; end
      if enE == 3, stE = 'OFF'; end
     
     % 0x406: INTERCOOLER
     enI = bitand(data406(2),15); tempI = data406(3); timeI = data406(4);
-    fprintf('enI: %3d', enI);
     if enI == 1 
         stI = 'ON';
     elseif  enI == 3
@@ -363,8 +361,11 @@ function configurarLimiaresPlaca(ch)
     
     % 0x406: WATER
     enW = bitand(data406(6),15); tempW = data406(7); timeW = data406(8);
-    fprintf('enW: %3d', enW)
-    stW = 'OFF'; if enW == 1, stW = 'ON '; end
+        if enW == 1 
+        stW = 'ON';
+    elseif  enW == 3
+        stW = 'OFF';
+    end
     
     % --- EXIBIÇÃO ---
     fprintf('\n   1. STARTER: [%s] (Val:%d) | %2d °C | %d s\n', stS, enS, tempS, timeS);
@@ -400,9 +401,10 @@ function configurarLimiaresPlaca(ch)
         % --- ATUALIZAÇÃO E ENVIO ---
         
         % Config 0x403
+        byte0x03 = 3;
         newData403 = data403;
-        newData403(2) = (0x30||(nEn_S && 0x03)); newData403(3) = nT_S; newData403(4) = nt_S;
-        newData403(6) = (0x30||(nEn_E && 0x03)); newData403(7) = nT_E; newData403(8) = nt_E;
+        newData403(2) = bitshift(byte0x03, 4) + nEn_S; newData403(3) = nT_S; newData403(4) = nt_S;
+        newData403(6) = bitshift(byte0x03, 4) + nEn_E; newData403(7) = nT_E; newData403(8) = nt_E;
         fprintf('newData403(2): %02X',newData403(2));
         fprintf('newData403(6): %02X',newData403(6));
         msg1 = canMessage(1027, false, 8); 
@@ -414,8 +416,8 @@ function configurarLimiaresPlaca(ch)
         
         % Config 0x406
         newData406 = data406;
-        newData406(2) = nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
-        newData406(6) = nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
+        newData406(2) = bitshift(byte0x03, 4) + nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
+        newData406(6) = bitshift(byte0x03, 4) + nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
         
         msg2 = canMessage(1030, false, 8); 
         msg2.Data = newData406;
@@ -535,6 +537,7 @@ function executarControle(ch, limM, limA)
                 end
                 
                 stB='OFF'; if bomba, stB='ON '; end
+                clc;
                 fprintf('T:%6.1fs | S%d | Motor:%5.1f|Agua: %5.1f | B:%s | V1:%d | V2:%d\n', ...
                     tNow, estado, tempM,tempA, stB, v1, v2);
                 
@@ -653,8 +656,8 @@ function filtragem_agua(ch)
                     transmit(ch, cmd);
                 catch
                 end
-                
-                fprintf('FILTRAGEM | Tempo: %6.1fs | Mot:%5.1f C | Agu:%5.1f C | BOMBA LIGADA\n', ...
+                clc;
+                fprintf('FILTRAGEM | Tempo: %6.1fs | Motor:%5.1f C | Agua:%5.1f C | BOMBA LIGADA\n', ...
                     tNow, tempM, tempA);
                 
                 lastLog = clock;
@@ -769,8 +772,8 @@ function arrefecimento_func(ch)
                     transmit(ch, cmd);
                 catch
                 end
-                
-                fprintf('ARREFECIM.| T:%6.1fs | M:%5.1f | A:%5.1f | BOMBA + V1 (NA1) ON\n', ...
+                clc;
+                fprintf('ARREFECIM.| Tempo:%6.1fs | Motor:%5.1f | Agua:%5.1f | BOMBA + V1 (NA1) ON\n', ...
                     tNow, tempM, tempA);
                 
                 lastLog = clock;
@@ -885,8 +888,8 @@ function Descarte_func(ch)
                     transmit(ch, cmd);
                 catch
                 end
-                
-                fprintf('DESCARTE  | T:%6.1fs | M:%5.1f | A:%5.1f | TUDO ABERTO (ON)\n', ...
+                clc;
+                fprintf('DESCARTE  | Tempo:%6.1fs | Motor:%5.1f | Agua:%5.1f | TUDO ABERTO (ON)\n', ...
                     tNow, tempM, tempA);
                 
                 lastLog = clock;
