@@ -1,6 +1,6 @@
 Firmware Info
 -------------
-Versão:  v1.1.6
-Build:   2026-03-02 11:09:55
+Versão:  v1.1.9
+Build:   2026-06-23 13:57:07
 Placa:   megaatmega2560
 Tamanho: 47.71 KB

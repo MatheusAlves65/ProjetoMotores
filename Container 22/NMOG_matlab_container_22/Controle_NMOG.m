@@ -10,7 +10,7 @@ try stop(canChannelList); catch; end
 
 % --- CONFIGURAÇÕES GLOBAIS ---
 HARDWARE_DEVICE = 'VN1630A 1';
-HARDWARE_CHANNEL = 3; 
+HARDWARE_CHANNEL = 2; 
 BAUD_RATE = 500000;
 
 % Variáveis de Estado
@@ -956,9 +956,9 @@ function executarTesteReles(ch)
             if reles(i), st = '[ ON  ] ATIVADO'; end
             
             nome = sprintf('Saída D%d', i);
-            if i==5, nome='NA2/NF2'; end
-            if i==6, nome='NA1/NF1'; end
-            if i==8, nome='Bomba'; end
+            if i==3, nome='NA2/NF2'; end
+            if i==4, nome='NA1/NF1'; end
+            if i==5, nome='Bomba'; end
             
             fprintf(' %d. %s -> %s\n', i, st, nome);
         end
