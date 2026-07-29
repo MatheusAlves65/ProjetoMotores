@@ -7,9 +7,11 @@
 #define TIMER_INTERRUPT_DEBUG         1
 #define _TIMERINTERRUPT_LOGLEVEL_     1
 
+
 //───────────────────────────────────────────────────────────────────────────
 // INFORMAÇÃO IMPORTANTE SOBRE O BOOTLOADER
 //───────────────────────────────────────────────────────────────────────────
+// Os MCUs deste projeto tiveram o bootloader USB REMOVIDO
 // Os MCUs deste projeto tiveram o bootloader USB REMOVIDO
 // Eles NÃO podem receber uploads via USB e devem ser atualizados via CAN
 // Para atualizar o firmware, use o comando:
