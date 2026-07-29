@@ -1,0 +1,87 @@
+#include <SPI.h>
+#include <mcp_can.h>
+
+// --- CONFIGURAÇÃO DE PINOS DO SEU PROJETO ---
+const int SPI_CS_PIN = 33;  // Pino CS configurado no seu main.cpp
+const int CAN_INT_PIN = 3;  // Pino de interrupção (INT) do MCP2515
+
+MCP_CAN CAN0(SPI_CS_PIN);
+
+void setup() {
+    Serial.begin(115200);
+    while (!Serial); // Aguarda o monitor serial abrir
+
+    Serial.println("========================================");
+    Serial.println("   Iniciando CAN Sniffer (Escuta)       ");
+    Serial.println("========================================");
+
+    pinMode(CAN_INT_PIN, INPUT);
+
+    // --- INICIALIZAÇÃO DO MÓDULO CAN ---
+    // ATENÇÃO: Configurei para 500KBPS conforme sua última mensagem.
+    // Verifique se o cristal da sua plaquinha é 8MHz (MCP_8MHZ) ou 16MHz (MCP_16MHZ).
+    if(CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
+        Serial.println("✅ MCP2515 Iniciado com Sucesso a 500kbps!");
+    } else {
+        Serial.println("❌ Erro ao iniciar o MCP2515. Verifique a fiacao SPI.");
+        while(1); // Trava aqui se der erro
+    }
+
+    // Modo NORMAL permite que o Arduino envie o "ACK" para a EGT-4/Vector
+    CAN0.setMode(MCP_NORMAL); 
+
+    Serial.println("Escutando o barramento CAN...");
+    Serial.println("ID (HEX)    | EXT | LEN | DADOS (HEX)");
+    Serial.println("------------|-----|-----|-------------------------");
+}
+
+void loop() {
+    // Verifica se o pino de interrupção foi acionado (LOW = tem mensagem nova)
+    if (!digitalRead(CAN_INT_PIN)) {
+        
+        long unsigned int rxId;
+        unsigned char len = 0;
+        unsigned char rxBuf[8];
+        
+        // Lê a mensagem do buffer do chip
+        CAN0.readMsgBuf(&rxId, &len, rxBuf);
+        
+        // Identifica se a mensagem tem ID Estendido (29 bits)
+        bool isExtended = (rxId & 0x80000000) == 0x80000000;
+        
+        // Limpa a flag de estendido para mostrar apenas o ID real da mensagem
+        unsigned long cleanId = rxId & 0x1FFFFFFF;
+
+        // --- IMPRESSÃO NO MONITOR SERIAL ---
+        
+        // 1. Imprime o ID
+        Serial.print("0x");
+        if(cleanId < 0x10) Serial.print("000");
+        else if(cleanId < 0x100) Serial.print("00");
+        else if(cleanId < 0x1000) Serial.print("0");
+        Serial.print(cleanId, HEX);
+        
+        // Espaçamento para alinhar a tabela
+        if(cleanId <= 0xFFF) Serial.print("    "); 
+        
+        // 2. Imprime o tipo de ID (Estendido ou Padrão)
+        Serial.print(" | ");
+        if(isExtended) Serial.print("SIM");
+        else Serial.print("NAO");
+        
+        // 3. Imprime o tamanho da mensagem (DLC)
+        Serial.print(" |  ");
+        Serial.print(len);
+        Serial.print("  | ");
+        
+        // 4. Imprime os dados (Payload)
+        for(int i = 0; i < len; i++) {
+            if(rxBuf[i] < 0x10) {
+                Serial.print("0"); // Adiciona zero à esquerda (ex: 0A, 05)
+            }
+            Serial.print(rxBuf[i], HEX);
+            Serial.print(" ");
+        }
+        Serial.println(); // Pula para a próxima linha
+    }
+}

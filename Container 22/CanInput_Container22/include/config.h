@@ -25,9 +25,9 @@ struct aquisitionConfigStructure {
 };
 
 struct tempReadStructure {
-	int8_t CJtemp = 25;
-	int8_t TLstatus, TRstatus, BLstatus, BRstatus = 0;
-	int16_t TLtemp, TRtemp, BLtemp, BRtemp = 0;
+	int16_t raw1, raw2, raw3, raw4 = 0;
+	float Channel1, Channel2, Channel3, Channel4 = 0;
+	uint8_t Ch1status, Ch2status, Ch3status, Ch4status = 0;
 };
 
 #define TempFrameId 0x123

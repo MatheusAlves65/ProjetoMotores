@@ -11,7 +11,7 @@ try stop(canChannelList); catch; end
 % --- CONFIGURAÇÕES GLOBAIS ---
 HARDWARE_DEVICE = 'VN1630A 1';
 HARDWARE_CHANNEL = 2; 
-BAUD_RATE = 500000;
+BAUD_RATE = 1000000;
 
 % Variáveis de Estado
 masterCh = [];

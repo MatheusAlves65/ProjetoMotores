@@ -147,17 +147,14 @@ safetyConfigStructure tconfigbuf; // Buffer temporário para receber config
 // LEITURA DE TEMPERATURA
 //───────────────────────────────────────────────────────────────────────────
 // Estrutura para armazenar dados dos sensores de temperatura
-// Provavelmente contém:
+//  Contém:
 // struct tempReadStructure {
-//     int16_t BLtemp;   // Temperatura do termopar (Bare Lead)
-//     int16_t CJtemp;   // Temperatura de junção fria (Cold Junction)
-//     uint8_t BLstatus; // Status do sensor (1=OK, 0=erro)
+//     int16_t raw1, raw2, raw3, raw4;  // Valores brutos do sensor
+//     float Channel1, Channel2, Channel3, Channel4; // Temperaturas em °C
+//     uint8_t Ch1status, Ch2status, Ch3status, Ch4status; // Status dos sensores
 // };
 //───────────────────────────────────────────────────────────────────────────
-tempReadStructure temp1s;  // Dados do sensor 1 (implementado)
-tempReadStructure temp2s;  // Dados do sensor 2 (não implementado)
-tempReadStructure temp3s;  // Dados do sensor 3 (não implementado)
-tempReadStructure temp4s;  // Dados do sensor 4 (não implementado)
+tempReadStructure Egt_4;  // Dados do sensor 1 (implementado)
 
 //───────────────────────────────────────────────────────────────────────────
 // CONFIGURAÇÃO DE AQUISIÇÃO DE DADOS
@@ -235,18 +232,15 @@ bool starttimer4 = 0;  // Timer4 está ativo?
 //───────────────────────────────────────────────────────────────────────────
 // volatile = pode mudar durante ISR (Interrupt Service Routine)
 //───────────────────────────────────────────────────────────────────────────
-volatile int16_t temp1 = 120;   // Temp bruta sensor 1 (não usado)
-volatile int16_t temp2 = 120;   // Temp bruta sensor 2 (não usado)
-volatile int16_t temp3 = 120;   // Temp bruta sensor 3 (não usado)
-volatile int16_t temp4 = 120;   // Temp bruta sensor 4 (não usado)
-volatile float temp1f = 0;      // Temp filtrada sensor 1 (°C)
-volatile float temp2f = 0;      // Temp filtrada sensor 2 (°C)
-volatile float temp3f = 0;      // Temp filtrada sensor 3 (°C)
-volatile float temp4f = 0;      // Temp filtrada sensor 4 (°C)
+volatile float temp1f = 0;  // Temperatura do sensor no channel 1 (°C)
+volatile float temp2f = 0;  // Temperatura do sensor no channel 2 (°C)
+volatile float temp3f = 0;  // Temperatura do sensor no channel 3 (°C)
+volatile float temp4f = 0;  // Temperatura do sensor no channel 4 (°C)
 volatile float prevtempf1 = 0;  // Temp anterior para filtro 1
 volatile float prevtempf2 = 0;  // Temp anterior para filtro 2
 volatile float prevtempf3 = 0;  // Temp anterior para filtro 3
 volatile float prevtempf4 = 0;  // Temp anterior para filtro 4
+
 
 //═══════════════════════════════════════════════════════════════════════════
 // SISTEMA DE PERSISTÊNCIA - EEPROM
@@ -642,7 +636,6 @@ void setup()
 	//───────────────────────────────────────────────────────────────────────
 	// INICIALIZAÇÃO DOS TIMERS DE HARDWARE
 	//───────────────────────────────────────────────────────────────────────
-	// ITimer3 e ITimer5 são usados para monitoramento de temperatura
 	// São inicializados aqui, mas attachInterrupt() só é chamado quando
 	// a temperatura ultrapassa o limite
     ITimer2.init();  // Timer 2 para sensor de temperatura 3 Intercooler
@@ -654,9 +647,9 @@ void setup()
 	// INICIALIZAÇÃO DO MÓDULO CAN (MCP2515)
 	//───────────────────────────────────────────────────────────────────────
 	// MCP_ANY: aceita mensagens standard e extended
-	// CAN_500KBPS: velocidade do barramento CAN
+	// CAN_1000KBPS: velocidade do barramento CAN
 	// MCP_8MHZ: frequência do cristal do MCP2515
-	if(CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK){
+	if(CAN0.begin(MCP_ANY, CAN_1000KBPS, MCP_8MHZ) == CAN_OK){
 		Serial.println("MCP2515 Initialized Successfully!");
 		Serial.println("TEste se esta funcionando");
 	} else {
@@ -952,24 +945,45 @@ void loop()
                 Serial.println(" > Resposta 0x425 enviada");
             }
 
-            // 0x510 - LEITURA DE TEMPERATURA
-            if (currentFullId == 0x510){
-                temp1s = tempRead(rxBuf);
-                temp2s = tempRead(rxBuf); 
-                temp3s = tempRead(rxBuf);
-                temp4s = tempRead(rxBuf);
-                temp1f = filterSensorValue1(temp1s.TLtemp); //Starter
-                temp2f = filterSensorValue2(temp2s.TRtemp);
-                temp3f = filterSensorValue3(temp3s.BLtemp);
-                temp4f = filterSensorValue4(temp4s.BRtemp);
-                timetempmess = millis();
-            }
-            /*if(currentFullId == 0x520){
-                temp3s = tempRead(rxBuf);
-                temp3f = filterSensorValue3(temp3s.TLtemp);
-                timetempmess = millis();
-            }*/
 
+            //0x240000- Leitura de temperatura EGT4 Fueltech
+            if(currentFullId == 0x02400000){
+                Egt_4 = tempRead(rxBuf);
+
+                
+                if(Egt_4.Ch1status == 1){
+                    temp1f = filterSensorValue1(Egt_4.Channel1);
+
+                }
+                else{
+                    temp1f = 1050; // Valor alto para indicar erro
+                    //Serial.println("ERRO: Canal 1 EGT4 desconectado ou com falha");
+                }
+                if(Egt_4.Ch2status == 1){
+                    temp2f = filterSensorValue2(Egt_4.Channel2);
+                }
+                else{
+                    temp2f = 1050; // Valor alto para indicar erro
+                    //Serial.println("ERRO: Canal 2 EGT4 desconectado ou com falha");
+                }
+                if(Egt_4.Ch3status == 1){
+                    temp3f = filterSensorValue3(Egt_4.Channel3);
+                }
+                else{
+                    temp3f = 1050; // Valor alto para indicar erro
+                    //Serial.println("ERRO: Canal 3 EGT4 desconectado ou com falha");
+                }
+                if(Egt_4.Ch4status == 1){
+                    temp4f = filterSensorValue4(Egt_4.Channel4);
+                }
+                else{
+                    temp4f = 1050; // Valor alto para indicar erro
+                    //Serial.println("ERRO: Canal 4 EGT4 desconectado ou com falha");
+                }
+
+                timetempmess = millis();
+                
+            }
             if (currentFullId == 0x406){
                 if(len>0){
                     Serial.println("cmd: 0x406 (Intercooler)");
@@ -1006,25 +1020,7 @@ void loop()
         } 
     }
 
-    //═══════════════════════════════════════════════════════════════════════
-    // SISTEMA DE AQUISIÇÃO PERIÓDICA
-    //═══════════════════════════════════════════════════════════════════════
-    if(((millis() - timeaquisition) >= aquisc.timer) && 
-       (aquisc.Aquics_Enable || aquisc.Aquics_Enable_Continuous)){
-        
-        timeaquisition = millis();
-        if (aquisc.Aquics_Enable == 1) aquisc.Aquics_Enable = 0;
-        
-        for (size_t i = 0; i < 3; i++){ 
-            CAN0.sendMsgBuf(remoteIDs[i], 0, NULL);
-            delayMicroseconds(100); 
-        }
-        
-        static byte aquisData[2];
-        aquisData[0] = (downpipePress * 255) / 20;
-        aquisData[1] = (valvPos * 255) / 100;
-        CAN0.sendMsgBuf(0x426, 8, aquisData);
-    } 
+
 
     //═══════════════════════════════════════════════════════════════════════
     // MONITOR DE SEGURANÇA E TIMERS
@@ -1032,7 +1028,7 @@ void loop()
     
     // --- MONITOR TEMP 1 ---
     if(temp1c.Monit_Enable == 1){
-        if(temp1f >= temp1c.maxtemp){
+        if(temp1f >= temp1c.maxtemp && temp1f != 1050){
             if(starttimer1 == 0){
                 Serial.println("!!! ALERTA: T1 LIMITE ATINGIDO Acionando D1 !!!");
                 digitalWrite(D1, LOW); // LED ON em alerta
@@ -1055,7 +1051,7 @@ void loop()
 
     // --- MONITOR TEMP 2 ---
     if(temp2c.Monit_Enable == 1){
-        if(temp2f >= temp2c.maxtemp){
+        if(temp2f >= temp2c.maxtemp && temp2f != 1050){
             if(starttimer2 == 0){
                 Serial.println("!!! ALERTA: T2 LIMITE ATINGIDO Acionando D2 !!!");
                 digitalWrite(D2, LOW); // LED ON em alerta
@@ -1076,17 +1072,17 @@ void loop()
     }
         // --- MONITOR TEMP 3 ---
     if(temp3c.Monit_Enable == 1){
-        if(temp3f >= temp3c.maxtemp){
+        if(temp3f >= temp3c.maxtemp && temp3f != 1050){
             if(starttimer3 == 0){
                 Serial.println("!!! ALERTA: T3 LIMITE ATINGIDO Acionando D3 !!!");
-                digitalWrite(D2, LOW); // LED ON em alerta
+                digitalWrite(D3, LOW); // LED ON em alerta
                 ITimer2.attachInterruptInterval(temp3c.timer, TimerHandler3);
                 starttimer3 = 1;
             }
         } else {
             if(starttimer3 == 1) {
                 Serial.println("INFO: T3 Normalizado D3 Desligado");
-                digitalWrite(D2, HIGH); // LED ON em alerta
+                digitalWrite(D3, HIGH); // LED ON em alerta
                 ITimer2.detachInterrupt();
                 starttimer3 = 0;
             }
@@ -1097,7 +1093,7 @@ void loop()
     }
     // --- MONITOR TEMP 4 ---
     if(temp4c.Monit_Enable == 1){
-        if(temp4f >= temp4c.maxtemp){
+        if(temp4f >= temp4c.maxtemp && temp4f != 1050){
             if(starttimer4 == 0){
                 Serial.println("!!! ALERTA: T4 LIMITE ATINGIDO Acionando D4 !!!");
                 //digitalWrite(D8, LOW); // Bomba ON 

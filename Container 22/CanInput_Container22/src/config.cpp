@@ -88,14 +88,18 @@ void sendaquisitionConfig(aquisitionConfigStructure aquisc, byte *txBuf){
 
 tempReadStructure tempRead(byte *buf){
     tempReadStructure temp;
-    temp.CJtemp = buf[0] - 128;
-    temp.TLstatus = (buf[1] & 0x03);
-    temp.TLtemp = (((buf[2] & 0x3f) << 6) | (buf[1] >> 2)) - 2048;
-    temp.TRstatus = (buf[2] >> 6);
-    temp.TRtemp = (((buf[4] & 0x0F) << 8) | buf[3]) - 2048;
-    temp.BLstatus = ((buf[4] >> 4) & 0x03);
-    temp.BLtemp = (((buf[6] & 0x03) << 10) | (buf[5] << 2) | (buf[4] >> 6)) - 2048;
-    temp.BRstatus = ((buf[6] >> 2) & 0x03);
-    temp.BRtemp = ((buf[7] << 4) | (buf[6] >> 4)) - 2048;
+    temp.raw1 = (int16_t)((buf[0] << 8) | buf[1]);
+    temp.raw2 = (int16_t)((buf[2] << 8) | buf[3]);
+    temp.raw3 = (int16_t)((buf[4] << 8) | buf[5]);
+    temp.raw4 = (int16_t)((buf[6] << 8) | buf[7]);
+    temp.Ch1status = (temp.raw1 == 8400)?0 : 1;
+    temp.Ch2status = (temp.raw2 == 8400)? 0 : 1;
+    temp.Ch3status = (temp.raw3 == 8400)? 0 : 1;
+    temp.Ch4status = (temp.raw4 == 8400)? 0 : 1;
+
+    temp.Channel1= temp.raw1 *0.125;
+    temp.Channel2= temp.raw2 *0.125;
+    temp.Channel3= temp.raw3 *0.125;
+    temp.Channel4= temp.raw4 *0.125;
     return temp;
 }
