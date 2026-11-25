@@ -1,10 +1,9 @@
-%% SISTEMA DE CONTROLE ARC - PAINEL DE GERENCIAMENTO (FINAL V4)
+%% SISTEMA DE CONTROLE ARC - PAINEL DE GERENCIAMENTO (EGT-4 FUELTECH)
 % Funcionalidades:
-% - Controle de Temperatura (Limiares 0x403)
-% - Configuração Geral de Aquisição (Taxa + Start/Stop) - UNIFICADO
-% - Máquina de Estados e Relés
-% - Handshake Completo (9 Módulos)
-
+% - Leitura passiva EGT-4 (Broadcast ID: 0x02400000)
+% - Controle de Temperatura Independente e Histerese (0x403 a 0x406)
+% - Configuração Geral de Aquisição (0x409)
+% - Máquina de Estados e Relés Manuais (0x402)
 clear; clc;
 try stop(canChannelList); catch; end 
 
@@ -12,18 +11,18 @@ try stop(canChannelList); catch; end
 HARDWARE_DEVICE = 'VN1630A 1';
 HARDWARE_CHANNEL = 2; 
 BAUD_RATE = 1000000;
+EGT_ID = hex2dec('02400000'); % 37748736 em Decimal (Broadcast FuelTech)
 
 % Variáveis de Estado
 masterCh = [];
 sistemaValidado = false;
-hLineMot = []; hLineAgu = []; 
 
 % Loop do Menu Principal
 opcao = -1;
 while opcao ~= 0
     disp(' ');
     disp('==================================================');
-    disp('       ARC - SISTEMA DE CONTROLE DE ARREFECIMENTO ');
+    disp('       ARC - CONTROLE DE ARREFECIMENTO (EGT-4)    ');
     disp('==================================================');
     
     if ~isempty(masterCh) && isa(masterCh, 'can.Channel')
@@ -40,10 +39,10 @@ while opcao ~= 0
     disp('5. MODO ARREFECIMENTO (Bomba + NA1)');
     disp('6. MODO DESCARTE (Tudo Aberto)');
     disp('7. MODO SNIFFER');
-    disp('8. TESTE MANUAL DE RELÉS');
-    disp('9. CONFIGURAR LIMIARES DE SEGURANÇA (0x403)');
-    disp('10. CONFIGURAR AQUISIÇÃO GERAL (0x404)');
-    disp('11. MONITORAR MÓDULOS TÉRMICOS (510, 520, 530)'); % NOVA OPÇÃO
+    disp('8. TESTE MANUAL DE RELÉS (0x402)');
+    disp('9. CONFIGURAR SEGURANÇA E HISTERESE (0x403-0x406)');
+    disp('10. CONFIGURAR TAXA DE AQUISIÇÃO (0x409)');
+    disp('11. MONITORAR TEMPERATURAS (EGT-4)'); 
     disp('0. SAIR');
     disp('==================================================');
     
@@ -66,65 +65,66 @@ while opcao ~= 0
             
         case 2 % --- HANDSHAKE ---
             if isempty(masterCh), disp('ERRO: Conecte primeiro.'); continue; end
-            disp('>>> Verificando rede (Solicitando RTRs)...');
+            disp('>>> Verificando rede (Aguardando Broadcast & RTRs)...');
             if masterCh.MessagesAvailable > 0, receive(masterCh, masterCh.MessagesAvailable); end
             
-            idsCheck = hex2dec({'401','510','520','530','610','611','620','621','622'});
+            % Envia RTR apenas para os módulos de configuração
+            idsCheckConfig = hex2dec({'403','404','405','406','409'});
             try
-                for k=1:length(idsCheck)
-                    msg = canMessage(idsCheck(k), false, 0); msg.Remote = true;
+                for k=1:length(idsCheckConfig)
+                    msg = canMessage(idsCheckConfig(k), false, 0); msg.Remote = true;
                     transmit(masterCh, msg); pause(0.02); 
                 end
             catch, disp('AVISO: Falha no envio.'); end
-            pause(1.0);
+            
+            pause(1.5); % Tempo para receber o broadcast da FuelTech (EGT) e as RTRs
             
             if masterCh.MessagesAvailable > 0
                 msgs = receive(masterCh, masterCh.MessagesAvailable);
-                idsFound = unique([msgs(~[msgs.Remote] & ismember([msgs.ID], idsCheck)).ID]);
-                fprintf('\nRESUMO DA REDE (%d/%d):\n', length(idsFound), length(idsCheck));
-                checkID(idsFound, 1025, 'ARDUINO (0x401)');
-                checkID(idsFound, 1296, 'CANTemp1TC (0x510)');
-                checkID(idsFound, 1312, 'CANTemp2TC (0x520)');
-                checkID(idsFound, 1328, 'CANTemp3TC (0x530)');
-                checkID(idsFound, 1552, 'CANIn1AI1To4 (0x610)');
-                checkID(idsFound, 1553, 'CANIn1AI5To8 (0x611)');
-                checkID(idsFound, 1568, 'CANIn2AI1To2 (0x620)');
-                checkID(idsFound, 1569, 'CANIn2DI1To4 (0x621)');
-                checkID(idsFound, 1570, 'CANIn2PI1To2 (0x622)');
+                idsFound = unique([msgs.ID]);
+                
+                disp('RESUMO DA REDE:');
+                checkID(idsFound, EGT_ID, 'EGT-4 FUELTECH (0x02400000)');
+                checkID(idsFound, hex2dec('423'), 'ENGINE CONFIG (0x423)');
+                checkID(idsFound, hex2dec('424'), 'HEAT EXCHANGE CONFIG (0x424)');
+                checkID(idsFound, hex2dec('425'), 'STARTER CONFIG (0x425)');
+                checkID(idsFound, hex2dec('426'), 'INTERCOOLER CONFIG (0x426)');
+                checkID(idsFound, hex2dec('429'), 'AQUISITION CONFIG (0x429)');
+                
+                if ismember(EGT_ID, idsFound)
+                    sistemaValidado = true; disp('-> EGT-4 DETECTADO. SISTEMA VALIDADO.');
+                else
+                    sistemaValidado = false; disp('-> AVISO: EGT-4 Ausente (Temperaturas offline).');
+                end
             else
                 disp('-> NENHUMA RESPOSTA RECEBIDA.');
             end
             
         case 3 % --- AUTOMÁTICO ---
             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
-            if ~sistemaValidado
-                resp = input('AVISO: Handshake pendente. Continuar? (s/n): ', 's');
-                if lower(resp) ~= 's', continue; end
-            end
             disp(' ');
             useDefault = input('Usar padrões (90C/45C)? (s/n): ', 's');
             if lower(useDefault) == 'n'
-                limMotor = input('Limite MOTOR (ex: 85): ');
-                limAgua  = input('Limite ÁGUA  (ex: 50): ');
+                limMotor = input('Limite MOTOR (T2) (ex: 85): ');
+                limAgua  = input('Limite ÁGUA (T4) (ex: 50): ');
             else, limMotor = 90; limAgua = 45; end
-            executarControle(masterCh,limMotor, limAgua); 
+            executarControle(masterCh, limMotor, limAgua, EGT_ID); 
             
         case 4 % --- FILTRAGEM ---
             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
-            filtragem_agua(masterCh);
+            filtragem_agua(masterCh, EGT_ID);
             
         case 5 % --- ARREFECIMENTO ---
             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
-            arrefecimento_func(masterCh);
+            arrefecimento_func(masterCh, EGT_ID);
            
         case 6 % --- DESCARTE ---
             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
-            Descarte_func(masterCh);
+            Descarte_func(masterCh, EGT_ID);
             
         case 7 % --- SNIFFER ---
             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             disp('>>> SNIFFER ATIVO (Pressione "x" na janela para sair)...');
-            % (Código do sniffer mantido simples aqui ou chame função se tiver)
             figKey = figure('Name','Pressione X para Sair','NumberTitle','off','MenuBar','none','Position',[100 100 300 50]);
             set(figKey, 'CurrentCharacter', char(0));
             while true
@@ -132,7 +132,7 @@ while opcao ~= 0
                 if masterCh.MessagesAvailable > 0
                     msgs = receive(masterCh, masterCh.MessagesAvailable);
                     for k=1:length(msgs)
-                        fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
+                        fprintf('ID: 0x%08X | Ext: %d | Data: %s\n', msgs(k).ID, msgs(k).Extended, sprintf('%02X ', msgs(k).Data));
                     end
                 end
                 pause(0.05);
@@ -140,20 +140,20 @@ while opcao ~= 0
             if isvalid(figKey), close(figKey); end
             
         case 8 % --- TESTE DE RELÉS ---
-             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             executarTesteReles(masterCh);
             
         case 9 % --- CONFIGURAR LIMIARES ---
-             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             configurarLimiaresPlaca(masterCh);
             
         case 10 % --- CONFIGURAÇÃO GERAL ---
-             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
             configurarTaxaAquisicao(masterCh);
-
+            
         case 11 % --- MONITORAR TÉRMICOS ---
-             if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
-            monitorarModulosTermicos(masterCh);
+            if isempty(masterCh), disp('ERRO: Sem Conexão.'); continue; end
+            monitorarModulosTermicos(masterCh, EGT_ID);
             
         case 0 % --- SAIR ---
             disp('Encerrando...');try stop(masterCh);catch, end
@@ -173,934 +173,805 @@ function checkID(foundList, id, name)
     else, fprintf('[..] %s (Sem resposta)\n', name); end
 end
 
-%% --- FUNÇÃO 10: CONFIGURAR AQUISIÇÃO COMPLETA (0x404 + 0x405) ---
+%% --- FUNÇÃO 10: CONFIGURAR AQUISIÇÃO (0x409) ---
 function configurarTaxaAquisicao(ch)
     disp('--------------------------------------------------');
-    disp('    CONFIGURAÇÃO DE AQUISIÇÃO E CONTROLE (0x404/0x405)');
+    disp('    CONFIGURAÇÃO DE AQUISIÇÃO E CONTROLE (0x409)');
     disp('--------------------------------------------------');
     
-    % --- PASSO 1: LEITURA ATUAL ---
-    disp('>>> Lendo parâmetros atuais da placa...');
-    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end % Limpa buffer
+    if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end
     
     try
-        % 1. Envia RTR para 0x404 (Config)
-        msgRTR1 = canMessage(1028, false, 0); % 1028 = 0x404
-        msgRTR1.Remote = true; 
-        transmit(ch, msgRTR1);
-        
-        pause(0.1); % Pequeno intervalo
-        
-        % 2. Envia RTR para 0x405 (Status)
-        msgRTR2 = canMessage(1029, false, 0); % 1029 = 0x405
-        msgRTR2.Remote = true; 
-        transmit(ch, msgRTR2);
-        
-    catch
-        disp('Erro ao enviar RTR. Verifique a conexão.');
-    end
+        msgRTR = canMessage(1033, false, 0); % 0x409
+        msgRTR.Remote = true; 
+        transmit(ch, msgRTR);
+    catch, disp('Erro ao enviar RTR.'); end
     
-    pause(0.5); % Aguarda resposta
+    pause(0.5); 
     
-    % Valores Padrão
-    data404 = [0, 100, 1, 1, 0, 0, 0, 0]; % Timer=100ms (Big Endian)
-    data405 = [0, 0, 0, 0, 0, 0, 0, 0];   % Parado
+    data = [0, 100, 0, 0, 0, 0, 0, 0]; % Default se não ler
     
     if ch.MessagesAvailable > 0
         msgs = receive(ch, ch.MessagesAvailable);
         for k=1:length(msgs)
-            if ~msgs(k).Remote
-                if msgs(k).ID == 1060, data404 = msgs(k).Data; end % Resp 0x424
-                if msgs(k).ID == 1061, data405 = msgs(k).Data; end % Resp 0x425
+            if ~msgs(k).Remote && msgs(k).ID == 1065 % 0x429
+                data = msgs(k).Data;
             end
         end
     end
     
-    % --- DECODIFICAÇÃO (BIG ENDIAN) ---
-    % O Arduino manda MSB no Byte 0 e LSB no Byte 1
-    currTimer = double(data404(1))*256 + double(data404(2));
-    
-    currAnalog = data404(3); % Byte 2
-    currCont   = data404(4); % Byte 3
-    
-    % Status 0x405 (Bits 6-7 do Byte 0)
-    currStatus = bitshift(data405(1), -6); 
-    
-    % Status Texto
-    stAnalog = 'OFF'; if currAnalog == 1, stAnalog = 'ON '; end
-    stCont   = 'OFF'; if currCont == 1,   stCont   = 'ON '; end
-    stGeral  = 'PARADO '; if currStatus == 1, stGeral  = 'RODANDO'; end
+    currTimer = double(data(1))*256 + double(data(2));
+    currAnalog = data(3); 
+    currCont = bitshift(data(4), -2); 
     
     fprintf('\n   1. Taxa (Timer)..........: %d ms\n', currTimer);
-    fprintf('   2. Leitura Analógica.....: [%s] (Val: %d)\n', stAnalog, currAnalog);
-    fprintf('   3. Aquisição Contínua....: [%s] (Val: %d)\n', stCont, currCont);
-    fprintf('   4. STATUS GERAL..........: [%s] (Val: %d)\n', stGeral, currStatus);
+    fprintf('   2. Leitura Analógica.....: (Val: %d)\n', currAnalog);
+    fprintf('   3. Aquisição Contínua....: (Val: %d)\n', currCont);
     disp('--------------------------------------------------');
     
-    if lower(input('Deseja reconfigurar tudo? (s/n): ', 's')) == 's'
-        disp('--- Digite os novos valores ---');
-        
-        % Inputs 0x404
+    if lower(input('Deseja reconfigurar? (s/n): ', 's')) == 's'
         newTimer  = input('   Novo Tempo (ms) [10-3000]: ');
         newAnalog = input('   Habilitar Analógico? (1/0): ');
         newCont   = input('   Habilitar Contínuo?  (1/0): ');
         
-        % Input 0x405
-        newStart  = input('   STATUS DO SISTEMA (1=START, 0=STOP): ');
+        newData = data;
+        newData(1) = bitshift(newTimer, -8); 
+        newData(2) = bitand(newTimer, 255);  
+        newData(3) = newAnalog;
+        newData(4) = bitshift(bitand(newCont, 1), 2);
         
-        % --- ENVIO 0x404 (CONFIGURAÇÃO) ---
-        newData404 = data404;
-        % Envia Timer em Big Endian para bater com a leitura
-        newData404(1) = bitshift(newTimer, -8); % Byte 0: MSB
-        newData404(2) = bitand(newTimer, 255);  % Byte 1: LSB
-        newData404(3) = newAnalog;
-        newData404(4) = newCont;
-        
-        msgConf = canMessage(1028, false, 8);
-        msgConf.Data = newData404;
+        msgConf = canMessage(1033, false, 8); % 0x409
+        msgConf.Data = newData;
         transmit(ch, msgConf);
-        fprintf('>>> Config 0x404 enviada: %s\n', sprintf('%02X ', newData404));
-        
-        pause(0.1);
-        
-        % --- ENVIO 0x405 (COMANDO) ---
-        valToSend = bitshift(newStart, 6);
-        
-        msgCmd = canMessage(1029, false, 8);
-        msgCmd.Data = [valToSend 0 0 0 0 0 0 0];
-        transmit(ch, msgCmd);
-        
-        if newStart == 1
-            disp('>>> COMANDO START (0x405) ENVIADO! Aquisição iniciada.');
-        else
-            disp('>>> COMANDO STOP (0x405) ENVIADO. Aquisição parada.');
-        end
+        disp('>>> Configuração 0x409 enviada!');
     else
         disp('Nenhuma alteração realizada.');
     end
 end
 
-%% --- FUNÇÃO 9: CONFIGURAR LIMIARES E HABILITAÇÃO (STARTER, ENGINE, INTERC, WATER) ---
+%% --- FUNÇÃO 9: CONFIGURAR LIMIARES E HISTERESE ---
 function configurarLimiaresPlaca(ch)
     disp('--------------------------------------------------');
-    disp('    CONFIGURAÇÃO DE SEGURANÇA (STATUS, TEMP, TEMPO)');
-    disp('    (1=Habilitado/ON, 3=Desabilitado/OFF)');
+    disp('    CONFIGURAÇÃO DE SEGURANÇA E HISTERESE');
+    disp('    (1 = Habilitado/ON, 0 = Desabilitado/OFF)');
     disp('--------------------------------------------------');
     
-    % --- 1. LEITURA DO 0x403 (STARTER / ENGINE) ---
-    disp('>>> Lendo 0x403 (Starter/Engine)...');
     if ch.MessagesAvailable > 0, receive(ch, ch.MessagesAvailable); end
     
+    % Envia RTR para os 4 módulos independentes
+    idsReq = [1029, 1027, 1030, 1028]; % 0x405 (T1), 0x403 (T2), 0x406 (T3), 0x404 (T4)
+    idsResp = [1061, 1059, 1062, 1060]; % 0x425, 0x423, 0x426, 0x424
+    nomes = {'STARTER (T1)', 'ENGINE (T2)', 'INTERCOOLER (T3)', 'WATER/HEAT (T4)'};
+    
     try
-        msgRTR = canMessage(1027, false, 0); % 0x403
-        msgRTR.Remote = true; transmit(ch, msgRTR);
-    catch, disp('Erro ao enviar RTR 0x403.'); end
+        for k=1:4, msg = canMessage(idsReq(k),false,0); msg.Remote=true; transmit(ch,msg); pause(0.05); end
+    catch, disp('Erro ao enviar RTR.'); end
+    
     pause(0.5);
     
-    % Padrão 0x403 (Bytes 2 e 6 são Enable)
-    data403 = [12, 3, 80, 5, 0, 3, 105, 5]; 
-    leu403 = false;
+    % Matriz para armazenar as 4 configurações (8 bytes cada)
+    configs = zeros(4, 8); 
     
     if ch.MessagesAvailable > 0
         msgs = receive(ch, ch.MessagesAvailable);
-        for k=1:length(msgs)
-            if ~msgs(k).Remote && msgs(k).ID == 1059 % Resp 0x423
-                data403 = msgs(k).Data;
-                fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
-                leu403 = true;
-                break;
+        for i=1:length(msgs)
+            if ~msgs(i).Remote
+                for k=1:4
+                    if msgs(i).ID == idsResp(k), configs(k, :) = msgs(i).Data; end
+                end
             end
         end
     end
     
-    % --- 2. LEITURA DO 0x406 (INTERCOOLER / WATER) ---
-    disp('>>> Lendo 0x406 (Intercooler/Water)...');
-    try
-        msgRTR2 = canMessage(1030, false, 0); % 0x406
-        msgRTR2.Remote = true; transmit(ch, msgRTR2);
-    catch, disp('Erro ao enviar RTR 0x406.'); end
-    pause(0.5);
-    
-    % Padrão 0x406 (Bytes 2 e 6 são Enable)
-    data406 = [12, 3, 50, 5, 0, 3, 95, 5]; 
-    leu406 = false;
-    
-    if ch.MessagesAvailable > 0
-        msgs = receive(ch, ch.MessagesAvailable);
-        for k=1:length(msgs)
-            if ~msgs(k).Remote && msgs(k).ID == 1062 % Resp 0x426
-                data406 = msgs(k).Data;
-                fprintf('0x%03X   | %s\n', msgs(k).ID, sprintf('%02X ', msgs(k).Data));
-                leu406 = true;
-                break;
-            end
-        end
+    % Exibição do Status Atual
+    for k=1:4
+        d = configs(k, :);
+        en = bitand(d(2), 3); % Isola os 2 últimos bits do byte 1
+        st = 'OFF'; if en == 1, st = 'ON '; end
+        
+        maxT = d(4);
+        maxTm = double(d(5)) * 100;
+        lowT = d(6);
+        lowTm = double(d(7)) * 100;
+        
+        fprintf(' %d. %-15s: [%s] | Alta: %d C (%d ms) | Baixa: %d C (%d ms)\n', ...
+            k, nomes{k}, st, maxT, maxTm, lowT, lowTm);
     end
-    
-    % --- DECODIFICAÇÃO E STATUS ---
-    % Função auxiliar simples para texto (1=ON, 3=OFF)
-    getTxt = @(x) char("ON " * (x==1) + "OFF" * (x~=1));
-    
-    % 0x403: STARTER
-    enS = bitand(data403(2),15); tempS = data403(3); timeS = data403(4);
-    stS = 'OFF';
-    if enS == 1, stS = 'ON '; end
-    if enS == 3, stS = 'OFF '; end
-    % 0x403: ENGINE
-    enE = bitand(data403(6),15); tempE = data403(7); timeE = data403(8);
-     if enE == 1, stE = 'ON '; end
-     if enE == 3, stE = 'OFF'; end
-    
-    % 0x406: INTERCOOLER
-    enI = bitand(data406(2),15); tempI = data406(3); timeI = data406(4);
-    if enI == 1 
-        stI = 'ON';
-    elseif  enI == 3
-        stI = 'OFF';
-    end
-    
-    % 0x406: WATER
-    enW = bitand(data406(6),15); tempW = data406(7); timeW = data406(8);
-        if enW == 1 
-        stW = 'ON';
-    elseif  enW == 3
-        stW = 'OFF';
-    end
-    
-    % --- EXIBIÇÃO ---
-    fprintf('\n   1. STARTER: [%s] (Val:%d) | %2d °C | %d s\n', stS, enS, tempS, timeS);
-    fprintf('   2. ENGINE : [%s] (Val:%d) | %3d °C | %d s\n', stE, enE, tempE, timeE);
-    fprintf('   3. INTERC.: [%s] (Val:%d) | %3d °C | %d s\n', stI, enI, tempI, timeI);
-    fprintf('   4. WATER  : [%s] (Val:%d) | %3d °C | %d s\n', stW, enW, tempW, timeW);
     disp('--------------------------------------------------');
     
-    if lower(input('Alterar configurações? (s/n): ', 's')) == 's'
-        disp('--- Digite os novos valores ---');
-        disp(' (Para Enable: 1 = Ligar, 3 = Desligar)');
-        
-        % --- INPUTS STARTER ---
-        nEn_S = input('   STARTER Habilitado? (1/3): ');
-        nT_S  = input('   STARTER Limite [C]: ');
-        nt_S  = input('   STARTER Tempo  [s]: ');
-        
-        % --- INPUTS ENGINE ---
-        nEn_E = input('   ENGINE  Habilitado? (1/3): ');
-        nT_E  = input('   ENGINE  Limite [C]: ');
-        nt_E  = input('   ENGINE  Tempo  [s]: ');
-        
-        % --- INPUTS INTERCOOLER ---
-        nEn_I = input('   INTERC. Habilitado? (1/3): ');
-        nT_I  = input('   INTERC. Limite [C]: ');
-        nt_I  = input('   INTERC. Tempo  [s]: ');
-        
-        % --- INPUTS WATER ---
-        nEn_W = input('   WATER   Habilitado? (1/3): ');
-        nT_W  = input('   WATER   Limite [C]: ');
-        nt_W  = input('   WATER   Tempo  [s]: ');
-        
-        % --- ATUALIZAÇÃO E ENVIO ---
-        
-        % Config 0x403
-        byte0x03 = 3;
-        newData403 = data403;
-        newData403(2) = bitshift(byte0x03, 4) + nEn_S; newData403(3) = nT_S; newData403(4) = nt_S;
-        newData403(6) = bitshift(byte0x03, 4) + nEn_E; newData403(7) = nT_E; newData403(8) = nt_E;
-        fprintf('newData403(2): %02X',newData403(2));
-        fprintf('newData403(6): %02X',newData403(6));
-        msg1 = canMessage(1027, false, 8); 
-        msg1.Data = newData403;
-        transmit(ch, msg1);
-        fprintf('>>> Enviado 0x403: %s\n', sprintf('%02X ', newData403));
-        
-        pause(0.1);
-        
-        % Config 0x406
-        newData406 = data406;
-        newData406(2) = bitshift(byte0x03, 4) + nEn_I; newData406(3) = nT_I; newData406(4) = nt_I;
-        newData406(6) = bitshift(byte0x03, 4) + nEn_W; newData406(7) = nT_W; newData406(8) = nt_W;
-        
-        msg2 = canMessage(1030, false, 8); 
-        msg2.Data = newData406;
-        transmit(ch, msg2);
-        fprintf('>>> Enviado 0x406: %s\n', sprintf('%02X ', newData406));
-        
-        disp('>>> Configuração Concluída.');
+    if lower(input('Alterar alguma configuração? (s/n): ', 's')) == 's'
+        modIdx = input(' Qual módulo deseja alterar? (1 a 4): ');
+        if modIdx >= 1 && modIdx <= 4
+            disp(['--- Configurando ' nomes{modIdx} ' ---']);
+            nEn  = input('   Habilitar Monitoramento? (1=ON, 0=OFF): ');
+            nMax = input('   Temp Alta (Disparo) [C]: ');
+            nTMax = input('   Tempo Alta [ms]: ');
+            nLow = input('   Temp Baixa (Normaliza) [C]: ');
+            nTLow = input('   Tempo Baixa [ms]: ');
+            
+            % Monta payload (Mantendo compatibilidade com C)
+            newData = zeros(1, 8, 'uint8');
+            newData(1) = hex2dec('12');
+            newData(2) = bitshift(3, 4) + bitand(nEn, 3); % 0x30 | Enable
+            newData(3) = 0;
+            newData(4) = nMax;
+            newData(5) = nTMax / 100;
+            newData(6) = nLow;
+            newData(7) = nTLow / 100;
+            newData(8) = 0;
+            
+            msgConf = canMessage(idsReq(modIdx), false, 8);
+            msgConf.Data = newData;
+            transmit(ch, msgConf);
+            fprintf('>>> Configuração enviada para %s!\n', nomes{modIdx});
+        else
+            disp('Módulo inválido.');
+        end
     else
         disp('Nenhuma alteração realizada.');
     end
 end
-%% --- FUNÇÃO 1: MÁQUINA DE ESTADOS (CORRIGIDA E SEGURA) ---
-function executarControle(ch, limM, limA)
+
+
+
+%% --- MÁQUINAS DE ESTADO E MONITORAMENTO (LENDO EGT-4) ---
+function executarControle(ch, limM, limA, egtID)
     disp('>>> CONTROLE AUTOMÁTICO INICIADO');
-    disp('    Lógica idêntica ao Teste Manual.');
-    disp('    -------------------------------------------------');
-    disp('    PARA VOLTAR AO MENU: Feche a janela "CONTROLE ATIVO"');
-    disp('    -------------------------------------------------');
-    
-    % --- JANELA DE CONTROLE ---
     figKey = figure('Name','CONTROLE ATIVO - Feche para Voltar','NumberTitle','off',...
-                    'MenuBar','none','ToolBar','none',...
-                    'Position',[100 100 400 100], 'Color', [0.9 0.4 0.4]); 
-    
-    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU',...
-              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.4 0.4],...
+                    'MenuBar','none','ToolBar','none','Position',[100 100 400 100], ...
+                    'Color', [0.9 0.4 0.4]); 
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR',...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.4 0.4], ...
               'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
-              
     set(figKey, 'CurrentCharacter', char(0));
-    
-    % --- GATILHO DE SEGURANÇA ---
     cleanupObj = onCleanup(@() desligarSeguro(ch));
     
-    % Estados
-    S1=1; S2=2; S3=3; S4=4;
+    estado = 2; 
+    lastLog = clock; 
+    startTime = now;
+    histM = limM - 3;
+    histA = limA - 5;
     
-    % Inicia no Estado 2 (Bomba Ligada)
-    estado = S2; 
-    
-    tempM = 0; tempA = 0;
-    lastLog = clock; lastReq = clock; startTime = now;
-    histM = limM - 3; histA = limA - 5;
+    % Inicializa temperaturas e textos
+    tempENG = 0; tempHex = 0; tempINT = 0; TempSTART = 0;
+    txt1 = ' -- [ERRO]';
+    txt2 = ' -- [ERRO]';
+    txt3 = ' -- [ERRO]';
+    txt4 = ' -- [ERRO]';
     
     try
         while true
-            % --- SAÍDA ---
-            if ~isvalid(figKey)
-                disp('>>> Janela fechada. Voltando ao Menu...');
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
                 break; 
-            end
-            
-            if lower(get(figKey, 'CurrentCharacter')) == 'x'
-                disp('>>> Comando de saída recebido. Voltando ao Menu...');
-                break;
             end
             
             tNow = (now - startTime) * 86400;
             
-            % --- LEITURA ---
-            if etime(clock, lastReq) > 0.2
-                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
-                lastReq = clock;
-            end
-            
+            % --- LEITURA EGT-4 (PASSIVA) ---
             if ch.MessagesAvailable > 0
                 msgs = receive(ch, ch.MessagesAvailable);
-                for i=1:length(msgs)
-                    if ~msgs(i).Remote && msgs(i).ID == 1296
-                        d = uint16(msgs(i).Data);
-                         rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
-                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
+                idx = find([msgs.ID] == egtID, 1, 'last');
+                if ~isempty(idx)
+                    d = msgs(idx).Data;
+                    
+                    rawT1 = typecast(uint8([d(2) d(1)]), 'int16'); 
+                    rawT2 = typecast(uint8([d(4) d(3)]), 'int16');
+                    rawT3 = typecast(uint8([d(6) d(5)]), 'int16');
+                    rawT4 = typecast(uint8([d(8) d(7)]), 'int16');
+                    
+                    % Detecta erro: 8400 raw = 1050°C
+                    erroEGT = false;
+                    
+                    if rawT1 == 8400
+                        tempENG = 1050;
+                        txt1 = ' -- [ERRO EGT]';
+                        erroEGT = true;
+                    else
+                        tempENG = double(rawT1) * 0.125;
+                        txt1 = sprintf('%6.1f C', tempENG);
+                    end
+                    
+                    if rawT2 == 8400
+                        tempHex = 1050;
+                        txt2 = ' -- [ERRO EGT]';
+                        erroEGT = true;
+                    else
+                        tempHex = double(rawT2) * 0.125;
+                        txt2 = sprintf('%6.1f C', tempHex);
+                    end
+                    
+                    if rawT3 == 8400
+                        tempINT = 1050;
+                        txt3 = ' -- [ERRO EGT]';
+                        erroEGT = true;
+                    else
+                        tempINT = double(rawT3) * 0.125;
+                        txt3 = sprintf('%6.1f C', tempINT);
+                    end
+                    
+                    if rawT4 == 8400
+                        TempSTART = 1050;
+                        txt4 = ' -- [ERRO EGT]';
+                        erroEGT = true;
+                    else
+                        TempSTART = double(rawT4) * 0.125;
+                        txt4 = sprintf('%6.1f C', TempSTART);
+                    end
+                    
+                    % Se algum canal estiver em erro (1050°C), não faz nada
+                    if erroEGT
+                        fprintf('\n*** CANAL EGT COM ERRO (1050°C) - NENHUMA SAÍDA ACIONADA ***\n');
+                        % Mantém bomba, v1, v2 = 0
+                        bomba = 0; v1 = 0; v2 = 0;
+                    else
+                        % --- LÓGICA DE ESTADOS (só roda se EGT OK) ---
+                        bomba = 0; v1 = 0; v2 = 0; d1 = 0; d2 = 0;
+                        switch estado
+                            case 1 % S1
+                                if tempENG > 0
+                                    estado = 2; 
+                                end
+                            case 2 % S2
+                                bomba = 1;
+                                if tempENG >= limM
+                                    estado = 3; 
+                                end
+                            case 3 % S3
+                                bomba = 1; 
+                                v1 = 1; 
+                                if tempHex >= limA
+                                    estado = 4; 
+                                end
+                                if tempENG < histM
+                                    estado = 2; 
+                                end
+                            case 4 % S4
+                                bomba = 1; 
+                                v1 = 1; 
+                                v2 = 1;
+                                if tempENG < histM && tempHex < histA
+                                    estado = 3; 
+                                end
+                        end
+                        
+                        % Alarme / descarte se superaquecimento crítico
+                        if tempENG > (limM + 15)
+                            d1 = 1; 
+                            d2 = 1; 
+                        end
                     end
                 end
             end
             
-            % --- LÓGICA DE ESTADOS ---
-            bomba=0; v1=0; v2=0; d1=0; d2=0;
-            
-            switch estado
-                case S1 % Repouso
-                    if tempM > 0, estado = S2; end
-                case S2 % Filtragem
-                    bomba=1; 
-                    if tempM >= limM, estado = S3; end
-                case S3 % Circulação
-                    bomba=1; v1=1; 
-                    if tempA >= limA, estado = S4; end
-                    if tempM < histM, estado = S2; end
-                case S4 % Descarte
-                    bomba=1; v1=1; v2=1;
-                    if tempM < histM && tempA < histA, estado = S3; end
-            end
-            
-            if tempM > (limM + 15), d1=1; d2=1; end
-            
-            % --- ENVIO (LÓGICA MANUAL) ---
+            % --- ENVIO DE RELÉS (0x402 / 1026) ---
             if etime(clock, lastLog) > 0.5
-                b1 = 0; b2 = 0;
+                % Monta vetor "reles" conforme estado desejado
+                reles = zeros(1,8);
+                reles(3) = v2;
+                reles(4) = v1;
+                reles(5) = bomba;
+                % d1/d2 podem ser usados em D1/D2 se desejar
                 
-                % Byte 1 
-                if d1 == 0, b1 = bitor(b1, 64); end 
-                if d2 == 0, b1 = bitor(b1, 16); end 
-                b1 = bitor(b1, 4); b1 = bitor(b1, 1);
+                % Constrói b1 e b2 exatamente como no teste de relés
+                b1 = 0;
+                if reles(1) == 0, b1 = bitor(b1, 64); end  % D1
+                if reles(2) == 0, b1 = bitor(b1, 16); end  % D2
+                if reles(3) == 0, b1 = bitor(b1, 4);  end  % D3 (NA2/NF2)
+                if reles(4) == 0, b1 = bitor(b1, 1);  end  % D4 (NA1/NF1)
                 
-                % Byte 2
-                if v2 == 0, b2 = bitor(b2, 64); end 
-                if v1 == 0, b2 = bitor(b2, 16); end 
-                b2 = bitor(b2, 4); 
-                if bomba == 0, b2 = bitor(b2, 1); end 
+                b2 = 0;
+                if reles(5) == 0, b2 = bitor(b2, 64); end  % D5 (Bomba)
+                if reles(6) == 0, b2 = bitor(b2, 16); end  % D6
+                if reles(7) == 0, b2 = bitor(b2, 4);  end  % D7
+                if reles(8) == 0, b2 = bitor(b2, 1);  end  % D8
                 
                 try
-                    cmd = canMessage(1026, false, 8); 
-                    cmd.Data = [b1 b2 0 0 0 0 0 0];
-                    transmit(ch, cmd);
-                catch
+                    msg = canMessage(1026, false, 8);
+                    msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+                    transmit(ch, msg);
+                    
+                    if erroEGT
+                        fprintf('ENVIANDO CAN: b1=%02X b2=%02X | ERRO EGT - SAÍDAS DESLIGADAS\n', b1, b2);
+                    else
+                        fprintf('ENVIANDO CAN: b1=%02X b2=%02X | Estado=%d | Bomba=%d V1=%d V2=%d\n', ...
+                                b1, b2, estado, bomba, v1, v2);
+                    end
+                catch ME
+                    fprintf('ERRO ao transmitir CAN: %s\n', ME.message);
                 end
                 
-                stB='OFF'; if bomba, stB='ON '; end
-                clc;
-                fprintf('T:%6.1fs | S%d | Motor:%5.1f|Agua: %5.1f | B:%s | V1:%d | V2:%d\n', ...
-                    tNow, estado, tempM,tempA, stB, v1, v2);
+                clc; 
+                if erroEGT
+                    fprintf('CONTROLE | ERRO EGT (1050°C) - AGUARDANDO SINAL VÁLIDO\n');
+                    fprintf('           | T1:%s | T2:%s | T3:%s | T4:%s\n', txt1, txt2, txt3, txt4);
+                else
+                    fprintf('CONTROLE | T:%6.1fs | Motor(T1):%s | Hex(T2):%s | INT(T3):%s | Start(T4):%s\n', ...
+                            tNow, txt1, txt2, txt3, txt4);
+                    fprintf('           | Estado=%d | Bomba=%d V1=%d V2=%d\n', estado, bomba, v1, v2);
+                end
                 
                 lastLog = clock;
             end
+            
             pause(0.02);
         end
     catch ME
-        disp(['Erro no loop: ' ME.message]);
+        disp(['Erro em executarControle: ' ME.message]);
     end
     
-    if isvalid(figKey), close(figKey); end
+    % --- DESLIGAR TUDO AO SAIR ---
+    try
+        msgSair = canMessage(1026, false, 8);
+        msgSair.Data = [85, 85, 0, 0, 0, 0, 0, 0];  % todas OFF
+        transmit(ch, msgSair);
+        fprintf('CAN: todas as saídas desligadas (b1=55, b2=55)\n');
+    catch ME
+        fprintf('ERRO ao desligar saídas: %s\n', ME.message);
+    end
+    
+    if isvalid(figKey)
+        close(figKey); 
+    end
 end
 
-% --- FUNÇÃO DE SEGURANÇA (CORRIGIDA) ---
-function desligarSeguro(ch)
-    % Verifica canal
-    if ~isempty(ch) && isvalid(ch) && ch.Running
-        try
-            % CORREÇÃO: Cria mensagem primeiro, atribui dados depois
-            msg = canMessage(1026, false, 8);
-            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; % 85 = 01010101 (Desliga tudo)
-            
-            transmit(ch, msg);
-            pause(0.05);
-            
-            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
-        catch ME
-            fprintf('\nAVISO: Erro ao enviar desligamento: %s\n', ME.message);
-        end
-    else
-        fprintf('\nAVISO: Canal fechado. Não foi possível desligar hardware.\n');
-    end
-end
-%% --- FUNÇÃO 4: MODO FILTRAGEM (SOMENTE BOMBA LIGADA) ---
-function filtragem_agua(ch)
-    disp('>>> MODO FILTRAGEM INICIADO');
-    disp('    Estado: BOMBA ON | VÁLVULAS OFF');
-    disp('    -------------------------------------------------');
-    disp('    PARA VOLTAR AO MENU: Feche a janela "FILTRAGEM ATIVA"');
-    disp('    -------------------------------------------------');
-    
-    % --- JANELA DE CONTROLE ---
-    figKey = figure('Name','FILTRAGEM ATIVA - Feche para Voltar','NumberTitle','off',...
-                    'MenuBar','none','ToolBar','none',...
-                    'Position',[100 100 400 100], 'Color', [0.4 0.4 0.9]); % Azulado para diferenciar
-    
-    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR A FILTRAGEM',...
-              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.4 0.9],...
-              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
-              
+%% Função Filtragem
+function filtragem_agua(ch, egtID)
+    figKey = figure('Name','FILTRAGEM','NumberTitle','off','MenuBar','none', ...
+                    'Position',[100 100 400 100], 'Color', [0.4 0.4 0.9]); 
+    uicontrol('Style','text', 'String', 'FECHE PARA PARAR (BOMBA ON)', ...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.4 0.9], ...
+              'ForegroundColor', 'white');
     set(figKey, 'CurrentCharacter', char(0));
     
-    % --- GATILHO DE SEGURANÇA ---
-    cleanupObj = onCleanup(@() desligarSeguro_filt(ch));
+    % onCleanup já chama desligarSeguro(ch) quando a função terminar
+    cleanupObj = onCleanup(@() desligarSeguro(ch));
     
-    tempM = 0; tempA = 0;
-    lastLog = clock; lastReq = clock; startTime = now;
+    lastLog = clock; 
+    startTime = now;
+    
+    % Inicializa textos
+    txt1 = ' -- [ERRO]';
+    txt2 = ' -- [ERRO]';
+    txt3 = ' -- [ERRO]';
+    txt4 = ' -- [ERRO]';
+    
+    % --- ESTADO DESEJADO: só bomba (D5) ON, resto OFF ---
+    reles = zeros(1,8);  % todas OFF
+    reles(5) = 1;        % bomba ON
     
     try
         while true
-            % --- SAÍDA ---
-            if ~isvalid(figKey)
-                disp('>>> Janela fechada. Voltando ao Menu...');
+            % Verifica se a figura foi fechada ou se recebeu 'x'
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
                 break; 
             end
             
-            if lower(get(figKey, 'CurrentCharacter')) == 'x'
-                disp('>>> Comando de saída recebido. Voltando ao Menu...');
-                break;
-            end
-            
-            tNow = (now - startTime) * 86400;
-            
-            % --- LEITURA (Apenas para monitoramento) ---
-            if etime(clock, lastReq) > 0.2
-                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
-                lastReq = clock;
-            end
-            
+            % Lê mensagens CAN de temperatura
             if ch.MessagesAvailable > 0
                 msgs = receive(ch, ch.MessagesAvailable);
-                for i=1:length(msgs)
-                    if ~msgs(i).Remote && msgs(i).ID == 1296
-                        d = uint16(msgs(i).Data);
-                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
-                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
-                    end
+                idx = find([msgs.ID] == egtID, 1, 'last');
+                if ~isempty(idx)
+                    d = msgs(idx).Data;
+                    r1 = typecast(uint8([d(2) d(1)]), 'int16');
+                    r2 = typecast(uint8([d(4) d(3)]), 'int16');
+                    r3 = typecast(uint8([d(6) d(5)]), 'int16');
+                    r4 = typecast(uint8([d(8) d(7)]), 'int16');
+                    
+                    t1 = double(r1) * 0.125;
+                    t2 = double(r2) * 0.125;
+                    t3 = double(r3) * 0.125;
+                    t4 = double(r4) * 0.125;
+                    
+                    % 8400 (bruto) = 1050°C, representa erro/desconectado
+                    txt1 = sprintf('%6.1f C', t1); if r1 == 8400, txt1 = ' -- [ERRO]'; end % Engine
+                    txt2 = sprintf('%6.1f C', t2); if r2 == 8400, txt2 = ' -- [ERRO]'; end % HEx
+                    txt3 = sprintf('%6.1f C', t3); if r3 == 8400, txt3 = ' -- [ERRO]'; end % INT
+                    txt4 = sprintf('%6.1f C', t4); if r4 == 8400, txt4 = ' -- [ERRO]'; end % STARTER
                 end
             end
             
-            % --- ENVIO (LÓGICA INVERSA MANUAL) ---
+            % A cada 0,5 s, envia comando CAN com SOMENTE a bomba ligada
             if etime(clock, lastLog) > 0.5
-                b1 = 0; b2 = 0;
+                % --- EXATAMENTE COMO NO TESTE DE RELÉS ---
+                b1 = 0;
+                if reles(1) == 0, b1 = bitor(b1, 64); end 
+                if reles(2) == 0, b1 = bitor(b1, 16); end
+                if reles(3) == 0, b1 = bitor(b1, 4);  end
+                if reles(4) == 0, b1 = bitor(b1, 1);  end 
                 
-                % --- BYTE 1: TUDO DESLIGADO ---
-                % Bits: 0, 2, 4, 6 colocados em 1 (OFF)
-                b1 = bitor(b1, 64); % D1 OFF
-                b1 = bitor(b1, 16); % D2 OFF
-                b1 = bitor(b1, 4);  % D3 OFF
-                b1 = bitor(b1, 1);  % D4 OFF
+                b2 = 0;
+                if reles(5) == 0, b2 = bitor(b2, 64); end 
+                if reles(6) == 0, b2 = bitor(b2, 16); end
+                if reles(7) == 0, b2 = bitor(b2, 4);  end
+                if reles(8) == 0, b2 = bitor(b2, 1);  end
                 
-                % --- BYTE 2: SÓ BOMBA LIGADA ---
-                b2 = bitor(b2, 64); % V2 (NA2) OFF
-                b2 = bitor(b2, 16); % V1 (NA1) OFF
-                b2 = bitor(b2, 4);  % D7 OFF
-                
-                % BOMBA (Bit 0): 
-                % Como queremos LIGADA, NÃO fazemos o bitor com 1.
-                % Deixamos o bit 0 como '0'.
-                
+                % Envia mensagem CAN
                 try
-                    cmd = canMessage(1026, false, 8); 
-                    cmd.Data = [b1 b2 0 0 0 0 0 0];
-                    transmit(ch, cmd);
-                catch
+                    msg = canMessage(1026, false, 8);
+                    msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+                    transmit(ch, msg);
+                    
+                    fprintf('ENVIANDO CAN: b1=%02X b2=%02X (Bomba ON)\n', b1, b2);
+                catch ME
+                    fprintf('ERRO ao transmitir CAN: %s\n', ME.message);
                 end
-                clc;
-                fprintf('FILTRAGEM | Tempo: %6.1fs | Motor:%5.1f C | Agua:%5.1f C | BOMBA LIGADA\n', ...
-                    tNow, tempM, tempA);
                 
+                clc; 
+                fprintf('FILTRAGEM | T:%6.1fs | Motor(T1):%s | Hex(T2):%s | INT(T3):%s | Start(T4):%s | BOMBA ON\n', ...
+                        (now-startTime)*86400, txt1, txt2, txt3, txt4);
                 lastLog = clock;
             end
+            
             pause(0.02);
         end
     catch ME
-        disp(['Erro no loop: ' ME.message]);
+        fprintf('ERRO geral em filtragem_agua: %s\n', ME.message);
     end
     
-    if isvalid(figKey), close(figKey); end
-end
-
-% --- REUTILIZAÇÃO DA FUNÇÃO DE SEGURANÇA ---
-% (Copie isso se não estiver no final do arquivo, ou deixe apenas uma vez no final do script principal)
-function desligarSeguro_filt(ch)
-    if ~isempty(ch) && isvalid(ch) && ch.Running
-        try
-            msg = canMessage(1026, false, 8);
-            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
-            transmit(ch, msg); pause(0.05);
-            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
-        catch, end
+    % --- DESLIGAR TUDO AO SAIR (BOMBA OFF) ---
+    try
+        msgSair = canMessage(1026, false, 8);
+        msgSair.Data = [85, 85, 0, 0, 0, 0, 0, 0];  % todas OFF
+        transmit(ch, msgSair);
+        fprintf('CAN: todas as saídas desligadas (b1=55, b2=55)\n');
+    catch ME
+        fprintf('ERRO ao desligar saídas: %s\n', ME.message);
+    end
+    
+    if isvalid(figKey)
+        close(figKey); 
     end
 end
-
-%% --- FUNÇÃO 5: MODO ARREFECIMENTO (BOMBA + V1 LIGADOS) ---
-function arrefecimento_func(ch)
-    disp('>>> MODO ARREFECIMENTO INICIADO');
-    disp('    Estado: BOMBA ON | NA1 (Circulação) ON | NA2 OFF');
-    disp('    -------------------------------------------------');
-    disp('    PARA VOLTAR AO MENU: Feche a janela "ARREFECIMENTO ATIVO"');
-    disp('    -------------------------------------------------');
-    
-    % --- JANELA DE CONTROLE ---
-    figKey = figure('Name','ARREFECIMENTO ATIVO - Feche para Voltar','NumberTitle','off',...
-                    'MenuBar','none','ToolBar','none',...
-                    'Position',[100 100 400 100], 'Color', [0.4 0.8 0.4]); % Esverdeado
-    
-    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR',...
-              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.8 0.4],...
-              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
-              
+%% Função arrefecimento
+function arrefecimento_func(ch, egtID)
+    figKey = figure('Name','ARREFECIMENTO','NumberTitle','off','MenuBar','none', ...
+                    'Position',[100 100 400 100], 'Color', [0.4 0.8 0.4]); 
+    uicontrol('Style','text', 'String', 'FECHE PARA PARAR (BOMBA+NA1/NF1 ON)', ...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.4 0.8 0.4], ...
+              'ForegroundColor', 'black');
     set(figKey, 'CurrentCharacter', char(0));
+    cleanupObj = onCleanup(@() desligarSeguro(ch));
     
-    % --- GATILHO DE SEGURANÇA ---
-    cleanupObj = onCleanup(@() desligarSeguro_arref(ch));
+    lastLog = clock; 
+    startTime = now;
     
-    tempM = 0; tempA = 0;
-    lastLog = clock; lastReq = clock; startTime = now;
+    % Inicializa textos
+    txt1 = ' -- [ERRO]';
+    txt2 = ' -- [ERRO]';
+    txt3 = ' -- [ERRO]';
+    txt4 = ' -- [ERRO]';
+    
+    % --- ESTADO DESEJADO: Bomba (D5) e NA1/NF1 (D4) ON, resto OFF ---
+    % reles(i) = 1 -> ON (bit 0 no CAN)
+    % reles(i) = 0 -> OFF (bit 1 no CAN)
+    reles = zeros(1,8);  % todas OFF
+    reles(4) = 1;        % NA1/NF1 ON
+    reles(5) = 1;        % Bomba ON
     
     try
         while true
-            % --- VERIFICAÇÃO DE SAÍDA ---
-            if ~isvalid(figKey)
-                disp('>>> Janela fechada. Voltando ao Menu...');
+            % Verifica se a figura foi fechada ou se recebeu 'x'
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
                 break; 
             end
             
-            if lower(get(figKey, 'CurrentCharacter')) == 'x'
-                disp('>>> Comando de saída recebido. Voltando ao Menu...');
-                break;
-            end
-            
-            tNow = (now - startTime) * 86400;
-            
-            % --- LEITURA ---
-            if etime(clock, lastReq) > 0.2
-                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
-                lastReq = clock;
-            end
-            
+            % Lê mensagens CAN de temperatura
             if ch.MessagesAvailable > 0
                 msgs = receive(ch, ch.MessagesAvailable);
-                for i=1:length(msgs)
-                    if ~msgs(i).Remote && msgs(i).ID == 1296
-                        d = uint16(msgs(i).Data);
-                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
-                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
-                    end
+                idx = find([msgs.ID] == egtID, 1, 'last');
+                if ~isempty(idx)
+                    d = msgs(idx).Data;
+                    r1 = typecast(uint8([d(2) d(1)]), 'int16');
+                    r2 = typecast(uint8([d(4) d(3)]), 'int16');
+                    r3 = typecast(uint8([d(6) d(5)]), 'int16');
+                    r4 = typecast(uint8([d(8) d(7)]), 'int16');
+                    
+                    t1 = double(r1) * 0.125;
+                    t2 = double(r2) * 0.125;
+                    t3 = double(r3) * 0.125;
+                    t4 = double(r4) * 0.125;
+                    
+                    % 8400 (bruto) = 1050°C, representa erro/desconectado
+                    txt1 = sprintf('%6.1f C', t1); if r1 == 8400, txt1 = ' -- [ERRO]'; end % Engine
+                    txt2 = sprintf('%6.1f C', t2); if r2 == 8400, txt2 = ' -- [ERRO]'; end % HEx
+                    txt3 = sprintf('%6.1f C', t3); if r3 == 8400, txt3 = ' -- [ERRO]'; end % INT
+                    txt4 = sprintf('%6.1f C', t4); if r4 == 8400, txt4 = ' -- [ERRO]'; end % STARTER
                 end
             end
             
-            % --- ENVIO (LÓGICA INVERSA MANUAL) ---
+            % A cada 0,5 s, envia comando CAN com Bomba + NA1/NF1 ON
             if etime(clock, lastLog) > 0.5
-                b1 = 0; b2 = 0;
+                % --- MESMA LÓGICA DO TESTE DE RELÉS ---
+                b1 = 0;
+                if reles(1) == 0, b1 = bitor(b1, 64); end  % D1 OFF
+                if reles(2) == 0, b1 = bitor(b1, 16); end  % D2 OFF
+                if reles(3) == 0, b1 = bitor(b1, 4);  end  % D3 OFF
+                if reles(4) == 0, b1 = bitor(b1, 1);  end  % D4 (NA1/NF1)
                 
-                % --- BYTE 1: TUDO DESLIGADO (Manda 1) ---
-                b1 = bitor(b1, 64); % D1 OFF
-                b1 = bitor(b1, 16); % D2 OFF
-                b1 = bitor(b1, 4);  % D3 OFF
-                b1 = bitor(b1, 1);  % D4 OFF
+                b2 = 0;
+                if reles(5) == 0, b2 = bitor(b2, 64); end  % D5 (Bomba)
+                if reles(6) == 0, b2 = bitor(b2, 16); end  % D6 OFF
+                if reles(7) == 0, b2 = bitor(b2, 4);  end  % D7 OFF
+                if reles(8) == 0, b2 = bitor(b2, 1);  end  % D8 OFF
                 
-                % --- BYTE 2: CONFIGURAÇÃO ARREFECIMENTO ---
-                
-                % V2 (NA2/Descarte - Bit 6): DESLIGADA -> Manda 1
-                b2 = bitor(b2, 64); 
-                
-                % V1 (NA1/Circulação - Bit 4): LIGADA -> Manda 0 (Não faz nada)
-                % (Não adicionamos 16 aqui, deixando o bit em 0)
-                
-                % D7 (Bit 2): DESLIGADO -> Manda 1
-                b2 = bitor(b2, 4);
-                
-                % BOMBA (Bit 0): LIGADA -> Manda 0 (Não faz nada)
-                % (Não adicionamos 1 aqui, deixando o bit em 0)
+                % Com reles(4)=1 e reles(5)=1:
+                % b1 = 64+16+4 = 84 (0x54) -> D4 bit 0 = 0 (ON)
+                % b2 = 16+4+1 = 21 (0x15) -> D5 bit 6 = 0 (ON)
                 
                 try
-                    cmd = canMessage(1026, false, 8); 
-                    cmd.Data = [b1 b2 0 0 0 0 0 0];
-                    transmit(ch, cmd);
-                catch
+                    msg = canMessage(1026, false, 8);
+                    msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+                    transmit(ch, msg);
+                    
+                    fprintf('ENVIANDO CAN: b1=%02X b2=%02X (Bomba + NA1/NF1 ON)\n', b1, b2);
+                catch ME
+                    fprintf('ERRO ao transmitir CAN: %s\n', ME.message);
                 end
-                clc;
-                fprintf('ARREFECIM.| Tempo:%6.1fs | Motor:%5.1f | Agua:%5.1f | BOMBA + V1 (NA1) ON\n', ...
-                    tNow, tempM, tempA);
                 
+                clc; 
+                fprintf('ARREFECIM | T:%6.1fs | Motor(T1):%s | Hex(T2):%s | INT(T3):%s | Start(T4):%s | BOMBA + NA1/NF1 ON\n', ...
+                        (now-startTime)*86400, txt1, txt2, txt3, txt4);
                 lastLog = clock;
             end
+            
             pause(0.02);
         end
     catch ME
-        disp(['Erro no loop: ' ME.message]);
+        fprintf('ERRO geral em arrefecimento_func: %s\n', ME.message);
     end
     
-    if isvalid(figKey), close(figKey); end
-end
-
-
-function desligarSeguro_arref(ch)
-    if ~isempty(ch) && isvalid(ch) && ch.Running
-        try
-            msg = canMessage(1026, false, 8);
-            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
-            transmit(ch, msg); pause(0.05);
-            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
-        catch, end
+    % --- DESLIGAR TUDO AO SAIR ---
+    try
+        msgSair = canMessage(1026, false, 8);
+        msgSair.Data = [85, 85, 0, 0, 0, 0, 0, 0];  % todas OFF
+        transmit(ch, msgSair);
+        fprintf('CAN: todas as saídas desligadas (b1=55, b2=55)\n');
+    catch ME
+        fprintf('ERRO ao desligar saídas: %s\n', ME.message);
+    end
+    
+    if isvalid(figKey)
+        close(figKey); 
     end
 end
-%% DESCARTE
-%% --- FUNÇÃO 6: MODO DESCARTE (TUDO LIGADO) ---
-function Descarte_func(ch)
-    disp('>>> MODO DESCARTE INICIADO');
-    disp('    Estado: BOMBA ON | V1 ON | V2 ON (Esvaziando...)');
-    disp('    -------------------------------------------------');
-    disp('    PARA VOLTAR AO MENU: Feche a janela "DESCARTE ATIVO"');
-    disp('    -------------------------------------------------');
-    
-    % --- JANELA DE CONTROLE ---
-    % Cor Laranja/Vermelha para indicar atenção (Descarte)
-    figKey = figure('Name','DESCARTE ATIVO - Feche para Voltar','NumberTitle','off',...
-                    'MenuBar','none','ToolBar','none',...
+%% Função descarte
+function Descarte_func(ch, egtID)
+    figKey = figure('Name','DESCARTE','NumberTitle','off','MenuBar','none', ...
                     'Position',[100 100 400 100], 'Color', [0.9 0.6 0.2]); 
-    
-    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA PARAR O DESCARTE',...
-              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.6 0.2],...
-              'FontSize', 12, 'FontWeight', 'bold', 'ForegroundColor', 'white');
-              
+    uicontrol('Style','text', 'String', 'FECHE PARA PARAR (BOMBA+V1+V2 ON)', ...
+              'Position',[20 20 360 60], 'BackgroundColor',[0.9 0.6 0.2], ...
+              'ForegroundColor', 'black');
     set(figKey, 'CurrentCharacter', char(0));
+    cleanupObj = onCleanup(@() desligarSeguro(ch));
     
-    % --- GATILHO DE SEGURANÇA ---
-    cleanupObj = onCleanup(@() desligarSeguro_desc(ch));
+    lastLog = clock; 
+    startTime = now;
     
-    tempM = 0; tempA = 0;
-    lastLog = clock; lastReq = clock; startTime = now;
+    % Inicializa textos
+    txt1 = ' -- [ERRO]';
+    txt2 = ' -- [ERRO]';
+    txt3 = ' -- [ERRO]';
+    txt4 = ' -- [ERRO]';
+    
+    % --- ESTADO DESEJADO: Bomba (D5), NA1/NF1 (D4) e NA2/NF2 (D3) ON, resto OFF ---
+    % reles(i) = 1 -> ON (bit 0 no CAN)
+    % reles(i) = 0 -> OFF (bit 1 no CAN)
+    reles = zeros(1,8);  % todas OFF
+    reles(3) = 1;        % NA2/NF2 ON
+    reles(4) = 1;        % NA1/NF1 ON
+    reles(5) = 1;        % Bomba ON
     
     try
         while true
-            % --- VERIFICAÇÃO DE SAÍDA ---
-            if ~isvalid(figKey)
-                disp('>>> Janela fechada. Voltando ao Menu...');
+            % Verifica se a figura foi fechada ou se recebeu 'x'
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
                 break; 
             end
             
-            if lower(get(figKey, 'CurrentCharacter')) == 'x'
-                disp('>>> Comando de saída recebido. Voltando ao Menu...');
-                break;
-            end
-            
-            tNow = (now - startTime) * 86400;
-            
-            % --- LEITURA ---
-            if etime(clock, lastReq) > 0.2
-                try, transmit(ch, canMessage(1296, false, 0, 'Remote', true)); catch, end
-                lastReq = clock;
-            end
-            
+            % Lê mensagens CAN de temperatura
             if ch.MessagesAvailable > 0
                 msgs = receive(ch, ch.MessagesAvailable);
-                for i=1:length(msgs)
-                    if ~msgs(i).Remote && msgs(i).ID == 1296
-                        d = uint16(msgs(i).Data);
-                        rawBR = bitshift(bitand(d(7),240), -4) + bitshift(d(8),4);
-                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        tempM = double(rawTR) - 2048; tempA = double(rawBR) - 2048;
-                    end
+                idx = find([msgs.ID] == egtID, 1, 'last');
+                if ~isempty(idx)
+                    d = msgs(idx).Data;
+                    r1 = typecast(uint8([d(2) d(1)]), 'int16');
+                    r2 = typecast(uint8([d(4) d(3)]), 'int16');
+                    r3 = typecast(uint8([d(6) d(5)]), 'int16');
+                    r4 = typecast(uint8([d(8) d(7)]), 'int16');
+                    
+                    t1 = double(r1) * 0.125;
+                    t2 = double(r2) * 0.125;
+                    t3 = double(r3) * 0.125;
+                    t4 = double(r4) * 0.125;
+                    
+                    % 8400 (bruto) = 1050°C, representa erro/desconectado
+                    txt1 = sprintf('%6.1f C', t1); if r1 == 8400, txt1 = ' -- [ERRO]'; end % Engine
+                    txt2 = sprintf('%6.1f C', t2); if r2 == 8400, txt2 = ' -- [ERRO]'; end % HEx
+                    txt3 = sprintf('%6.1f C', t3); if r3 == 8400, txt3 = ' -- [ERRO]'; end % INT
+                    txt4 = sprintf('%6.1f C', t4); if r4 == 8400, txt4 = ' -- [ERRO]'; end % STARTER
                 end
             end
             
-            % --- ENVIO (LÓGICA INVERSA MANUAL) ---
+            % A cada 0,5 s, envia comando CAN com Bomba + NA1/NF1 + NA2/NF2 ON
             if etime(clock, lastLog) > 0.5
-                b1 = 0; b2 = 0;
+                % --- MESMA LÓGICA DO TESTE DE RELÉS ---
+                b1 = 0;
+                if reles(1) == 0, b1 = bitor(b1, 64); end  % D1 OFF
+                if reles(2) == 0, b1 = bitor(b1, 16); end  % D2 OFF
+                if reles(3) == 0, b1 = bitor(b1, 4);  end  % D3 (NA2/NF2)
+                if reles(4) == 0, b1 = bitor(b1, 1);  end  % D4 (NA1/NF1)
                 
-                % --- BYTE 1: TUDO DESLIGADO (Manda 1) ---
-                b1 = bitor(b1, 64); % D1 OFF
-                b1 = bitor(b1, 16); % D2 OFF
-                b1 = bitor(b1, 4);  % D3 OFF
-                b1 = bitor(b1, 1);  % D4 OFF
+                b2 = 0;
+                if reles(5) == 0, b2 = bitor(b2, 64); end  % D5 (Bomba)
+                if reles(6) == 0, b2 = bitor(b2, 16); end  % D6 OFF
+                if reles(7) == 0, b2 = bitor(b2, 4);  end  % D7 OFF
+                if reles(8) == 0, b2 = bitor(b2, 1);  end  % D8 OFF
                 
-                % --- BYTE 2: TUDO LIGADO (Bomba + V1 + V2) ---
-                
-                % V2 (NA2/Descarte - Bit 6): Queremos ON (0).
-                % NÃO fazemos bitor. Deixa 0.
-                
-                % V1 (NA1/Circulação - Bit 4): Queremos ON (0).
-                % NÃO fazemos bitor. Deixa 0.
-                
-                % D7 (Bit 2): Queremos OFF (1).
-                b2 = bitor(b2, 4);
-                
-                % BOMBA (Bit 0): Queremos ON (0).
-                % NÃO fazemos bitor. Deixa 0.
+                % Com reles(3)=1, reles(4)=1, reles(5)=1:
+                % b1 = 64+16 = 80 (0x50) -> D3 e D4 ON, D1 e D2 OFF
+                % b2 = 16+4+1 = 21 (0x15) -> D5 ON, D6-D8 OFF
                 
                 try
-                    cmd = canMessage(1026, false, 8); 
-                    cmd.Data = [b1 b2 0 0 0 0 0 0];
-                    transmit(ch, cmd);
-                catch
+                    msg = canMessage(1026, false, 8);
+                    msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+                    transmit(ch, msg);
+                    
+                    fprintf('ENVIANDO CAN: b1=%02X b2=%02X (Bomba + NA1/NF1 + NA2/NF2 ON)\n', b1, b2);
+                catch ME
+                    fprintf('ERRO ao transmitir CAN: %s\n', ME.message);
                 end
-                clc;
-                fprintf('DESCARTE  | Tempo:%6.1fs | Motor:%5.1f | Agua:%5.1f | TUDO ABERTO (ON)\n', ...
-                    tNow, tempM, tempA);
                 
+                clc; 
+                fprintf('DESCARTE | T:%6.1fs | Motor(T1):%s | Hex(T2):%s | INT(T3):%s | Start(T4):%s | BOMBA + NA1/NF1 + NA2/NF2 ON\n', ...
+                        (now-startTime)*86400, txt1, txt2, txt3, txt4);
                 lastLog = clock;
             end
+            
             pause(0.02);
         end
     catch ME
-        disp(['Erro no loop: ' ME.message]);
+        fprintf('ERRO geral em Descarte_func: %s\n', ME.message);
     end
     
-    if isvalid(figKey), close(figKey); end
+    % --- DESLIGAR TUDO AO SAIR ---
+    try
+        msgSair = canMessage(1026, false, 8);
+        msgSair.Data = [85, 85, 0, 0, 0, 0, 0, 0];  % todas OFF
+        transmit(ch, msgSair);
+        fprintf('CAN: todas as saídas desligadas (b1=55, b2=55)\n');
+    catch ME
+        fprintf('ERRO ao desligar saídas: %s\n', ME.message);
+    end
+    
+    if isvalid(figKey)
+        close(figKey); 
+    end
 end
-
-function desligarSeguro_desc(ch)
+%% Desligar 
+function desligarSeguro(ch)
     if ~isempty(ch) && isvalid(ch) && ch.Running
         try
-            msg = canMessage(1026, false, 8);
-            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            msg = canMessage(1026, false, 8, [85 85 0 0 0 0 0 0]);
             transmit(ch, msg); pause(0.05);
-            fprintf('\n>>> HARDWARE DESLIGADO (Retornando ao Menu).\n');
+            fprintf('\n>>> HARDWARE DESLIGADO.\n');
         catch, end
     end
 end
 
-%% --- FUNÇÃO 8: TESTE DE RELÉS (LÓGICA INVERSA: 0=LIGA, 1=DESLIGA) ---
+%% --- FUNÇÃO 8: TESTE MANUAL DE RELÉS ---
+%% --- TESTE DE RELÉS ---
 function executarTesteReles(ch)
-    % Estado visual: 0 = OFF na tela, 1 = ON na tela
-    reles = zeros(1, 8); 
-    sairTeste = false;
-    
+    reles = zeros(1, 8); sairTeste = false;
     while ~sairTeste
         clc; disp('=== TESTE DE RELÉS (ID 0x402) - LÓGICA INVERSA ===');
         disp(' Nota: Enviando 0 para LIGAR e 1 para DESLIGAR o hardware');
-        
-        % --- MONTAGEM DOS BYTES (Lógica Invertida) ---
-        % Se o relé deve estar DESLIGADO (0), enviamos bit 1.
-        % Se o relé deve estar LIGADO (1), enviamos bit 0.
-        
         b1 = 0;
-        % Byte 1 (Relés 1 a 4)
-        if reles(1) == 0, b1 = bitor(b1, 64); end % Se OFF na tela, manda 1
+        if reles(1) == 0, b1 = bitor(b1, 64); end 
         if reles(2) == 0, b1 = bitor(b1, 16); end
         if reles(3) == 0, b1 = bitor(b1, 4);  end
         if reles(4) == 0, b1 = bitor(b1, 1);  end 
-        
         b2 = 0;
-        % Byte 2 (Relés 5 a 8)
         if reles(5) == 0, b2 = bitor(b2, 64); end 
         if reles(6) == 0, b2 = bitor(b2, 16); end 
         if reles(7) == 0, b2 = bitor(b2, 4);  end 
         if reles(8) == 0, b2 = bitor(b2, 1);  end 
         
-        % Envio da mensagem
-        msg = canMessage(1026, false, 8); 
-        msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
-        try, transmit(ch, msg); catch, end
+        % CORREÇÃO AQUI: Cria e depois atribui os dados
+        try
+            msg = canMessage(1026, false, 8);
+            msg.Data = [b1, b2, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msg); 
+        catch
+        end
         
         fprintf('ENVIANDO (Hex): %02X %02X (Bits 1 = Desligado)\n', b1, b2);
         disp('----------------------------------------');
-        
-        % --- EXIBIÇÃO VISUAL (Mantém lógica normal para o usuário) ---
         for i = 1:8
-            st = '[ OFF ]'; 
-            if reles(i), st = '[ ON  ] ATIVADO'; end
-            
+            st = '[ OFF ]'; if reles(i), st = '[ ON  ] ATIVADO'; end
             nome = sprintf('Saída D%d', i);
-            if i==3, nome='NA2/NF2'; end
-            if i==4, nome='NA1/NF1'; end
             if i==5, nome='Bomba'; end
-            
+            if i==4, nome='NA1/NF1'; end
+            if i==3, nome='NA2/NF2'; end
             fprintf(' %d. %s -> %s\n', i, st, nome);
         end
-        
         disp('----------------------------------------');
         disp(' 9. LIGAR TUDO'); disp('10. DESLIGAR TUDO'); disp(' x. VOLTAR');
-        
         inp = input('Opção: ', 's');
-        
         if strcmpi(inp, 'x')
-            % AO SAIR: Mandar TUDO 1 para garantir que desligue
-            % 64 + 16 + 4 + 1 = 85 (0x55)
-            msg.Data = [85, 85, 0, 0, 0, 0, 0, 0]; 
-            transmit(ch, msg); 
+            % CORREÇÃO AQUI NO BOTÃO DE SAÍDA
+            msgSair = canMessage(1026, false, 8);
+            msgSair.Data = [85, 85, 0, 0, 0, 0, 0, 0];
+            transmit(ch, msgSair); 
             sairTeste = true;
         else
             val = str2double(inp);
             if ~isnan(val)
                 if val >= 1 && val <= 8
-                    reles(val) = ~reles(val); % Inverte estado visual
+                    reles(val) = ~reles(val); 
                 elseif val == 9
-                    reles(:) = 1; % Visualmente tudo 1 (Envia 0)
+                    reles(:) = 1; 
                 elseif val == 10
-                    reles(:) = 0; % Visualmente tudo 0 (Envia 1)
+                    reles(:) = 0; 
                 end
             end
         end
     end
 end
 
-
-%% --- FUNÇÃO 11: MONITORAR TÉRMICOS COM STATUS (OK/ERRO) ---
-function monitorarModulosTermicos(ch)
-    clc;
-    disp('==================================================');
-    disp('    MONITORAMENTO TÉRMICO + STATUS DOS SENSORES');
-    disp('==================================================');
-    
-    % Configuração de Tempo
-    delayStr = input('Tempo de atualização (segundos) [Padrão: 0.5]: ', 's');
-    delayVal = str2double(delayStr);
-    if isnan(delayVal) || delayVal < 0.1, delayVal = 0.5; end
-    
-    fprintf('>>> Iniciando (%.2fs)... Para SAIR, feche a janela.\n', delayVal);
-    
-    % Janela de Saída
-    figKey = figure('Name','MONITOR TÉRMICO - Feche para Voltar','NumberTitle','off',...
-                    'MenuBar','none','ToolBar','none',...
-                    'Position',[100 100 550 100], 'Color', [0.8 0.8 0.8]); 
-    
-    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR AO MENU',...
-              'Position',[20 20 510 60], 'BackgroundColor',[0.8 0.8 0.8],...
-              'FontSize', 12, 'FontWeight', 'bold');
-              
+%% --- FUNÇÃO 11: MONITORAR TÉRMICOS (EGT-4) ---
+function monitorarModulosTermicos(ch, egtID)
+    figKey = figure('Name','MONITOR EGT-4','NumberTitle','off','MenuBar','none','Position',[100 100 550 100], 'Color', [0.8 0.8 0.8]); 
+    uicontrol('Style','text', 'String', 'FECHE ESTA JANELA (X) PARA VOLTAR', 'Position',[20 20 510 60], 'BackgroundColor',[0.8 0.8 0.8], 'FontSize', 12, 'FontWeight', 'bold');
     set(figKey, 'CurrentCharacter', char(0));
     
-    % IDs e Textos de Status
-    idsTermicos = [1296, 1312, 1328];
-    nomesModulos = {'M1 (Main)', 'M2 (Aux)', 'M3 (Aux)'};
-    statusTxt = {'OK ', 'Er1', 'Er2', 'Er3'}; % 0=OK, 1..3=Erros
-    
+    delayVal = 0.5;
     try
         while true
-            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x'
-                disp('>>> Voltando ao Menu...'); break;
-            end
+            if ~isvalid(figKey) || lower(get(figKey, 'CurrentCharacter')) == 'x', break; end
             
-            % Envia RTRs
-            for k=1:length(idsTermicos)
-                try, transmit(ch, canMessage(idsTermicos(k), false, 0, 'Remote', true)); catch, end
-            end
+            % Não precisamos mais de RTR. A EGT-4 manda por conta própria.
+            pause(delayVal); 
             
-            pause(0.1); 
             if ch.MessagesAvailable > 0
                 msgs = receive(ch, ch.MessagesAvailable);
+                idx = find([msgs.ID] == egtID, 1, 'last');
                 
                 clc;
-                fprintf('=== LEITURAS (Atualizacao: %.2fs) ===\n', delayVal);
-                % Cabeçalho mais largo para caber o Status
-                fprintf('%-10s | CJ(C) | %-13s | %-13s | %-13s | %-13s\n', ...
-                        'MODULO', 'TL(C°)', 'TR(C°)', 'BL(C°)', 'BR(C°)');
-                disp('------------------------------------------------------------------------------------------');
+                disp('========================================================================');
+                fprintf('    MONITORAMENTO FUELTECH EGT-4 (Broadcast)\n');
+                disp('========================================================================');
                 
-                for k=1:3
-                    targetID = idsTermicos(k);
-                    idx = find([msgs.ID] == targetID & ~[msgs.Remote], 1, 'last');
+                if ~isempty(idx)
+                    d = msgs(idx).Data;
                     
-                    if ~isempty(idx)
-                        d = uint16(msgs(idx).Data);
-                        
-                        % --- DECODIFICAÇÃO COMPLETA (VALOR + STATUS) ---
-                        
-                        % Cold Junction (Byte 0)
-                        cj = double(int8(d(1)));
-                        
-                        % 1. STARTER (TL)
-                        % Status: Byte 2 (Bits 0-1) | Temp: Byte 2(2-7) + Byte 3(0-5)
-                        stTL  = bitand(d(2), 3); 
-                        rawTL = bitshift(d(2), -2) + bitshift(bitand(d(3), 63), 6);
-                        
-                        % 2. ENGINE (TR)
-                        % Status: Byte 3 (Bits 6-7) | Temp: Byte 4 + Byte 5(0-3)
-                        stTR  = bitshift(d(3), -6);
-                        rawTR = d(4) + bitshift(bitand(d(5), 15), 8);
-                        
-                        % 3. INTERCOOLER (BL)
-                        % Status: Byte 5 (Bits 4-5) | Temp: Byte 5(6-7)+Byte 6+Byte 7(0-1)
-                        stBL  = bitand(bitshift(d(5), -4), 3);
-                        rawBL = bitshift(bitand(d(5), 192), -6) + bitshift(d(6), 2) + bitshift(bitand(d(7), 3), 10);
-                        
-                        % 4. WATER (BR)
-                        % Status: Byte 7 (Bits 2-3) | Temp: Byte 7(4-7)+Byte 8
-                        stBR  = bitand(bitshift(d(7), -2), 3);
-                        rawBR = bitshift(bitand(d(7), 240), -4) + bitshift(d(8), 4);
-                        
-                        % Conversão (-2048 Offset)
-                        valTL = double(rawTL) - 2048;
-                        valTR = double(rawTR) - 2048;
-                        valBL = double(rawBL) - 2048;
-                        valBR = double(rawBR) - 2048;
-                        
-                        % Formatação com Status [Val + St]
-                        % Ex: " 90.5 [OK ]"
-                        txtTL = sprintf('%5.1f [%s]', valTL, statusTxt{stTL+1});
-                        txtTR = sprintf('%5.1f [%s]', valTR, statusTxt{stTR+1});
-                        txtBL = sprintf('%5.1f [%s]', valBL, statusTxt{stBL+1});
-                        txtBR = sprintf('%5.1f [%s]', valBR, statusTxt{stBR+1});
-                        
-                        fprintf('%-10s | %5.1f | %-13s | %-13s | %-13s | %-13s\n', ...
-                            nomesModulos{k}, cj, txtTL, txtTR, txtBL, txtBR);
-                    else
-                        fprintf('%-10s |  --   |      --       |      --       |      --       |      --      \n', nomesModulos{k});
-                    end
+                    % Extração Big-Endian convertendo de uint8 para int16 (Complemento de 2)
+                    r1 = typecast(uint8([d(2) d(1)]), 'int16');
+                    r2 = typecast(uint8([d(4) d(3)]), 'int16');
+                    r3 = typecast(uint8([d(6) d(5)]), 'int16');
+                    r4 = typecast(uint8([d(8) d(7)]), 'int16');
+                    
+                    t1 = double(r1) * 0.125;
+                    t2 = double(r2) * 0.125;
+                    t3 = double(r3) * 0.125;
+                    t4 = double(r4) * 0.125;
+                    
+                    % 8400 (bruto) = 1050°C, representa erro/desconectado segundo o C
+                    txt1 = sprintf('%6.1f C', t1); if r1 == 8400, txt1 = ' -- [ERRO]'; end
+                    txt2 = sprintf('%6.1f C', t2); if r2 == 8400, txt2 = ' -- [ERRO]'; end
+                    txt3 = sprintf('%6.1f C', t3); if r3 == 8400, txt3 = ' -- [ERRO]'; end
+                    txt4 = sprintf('%6.1f C', t4); if r4 == 8400, txt4 = ' -- [ERRO]'; end
+                    
+                    fprintf('  > ENG. TEMP. (T1)......: %s\n', txt1);
+                    fprintf('  > HEX. TEMP. (T2).......: %s\n', txt2);
+                    fprintf('  > INT. TEMP. (T3)..: %s\n', txt3);
+                    fprintf('  > START. TEMP. (T4)...: %s\n', txt4);
+                else
+                    disp('  Aguardando dados da EGT-4... (Sem sinal no barramento)');
                 end
-                disp('------------------------------------------------------------------------------------------');
-                fprintf('(Legenda: [OK ]=Normal, [ErX]=Erro Sensor)\n');
-                fprintf('Starter = TL1, Engine = TR1, Intercooler = BL1, Water = BR1\n ')
+                disp('------------------------------------------------------------------------');
+                fprintf('\n(Pressione X na janela cinza para sair)\n');
             end
-            pause(delayVal);
         end
-    catch ME
-        disp(['Erro: ' ME.message]);
-    end
+    catch ME, disp(['Erro: ' ME.message]); end
     if isvalid(figKey), close(figKey); end
 end

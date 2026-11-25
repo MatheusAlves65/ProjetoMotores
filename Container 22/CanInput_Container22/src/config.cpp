@@ -1,6 +1,5 @@
 #include "config.h"
 
-//All of the functions present here have been validated for their use cases
 void readDigital(byte *buf, int digitalCommand[8]){
     digitalCommand[3] = buf[0] & 0x03;
     digitalCommand[2] = (buf[0] >> 2) & 0x03;
@@ -64,11 +63,6 @@ void sendsafetyConfig (safetyConfigStructure tempc, byte *txBuf){
 
 aquisitionConfigStructure aquisitionConfig (byte *buf){
     aquisitionConfigStructure aquisc;
-    Serial.println("Parsing aquisitionConfigStructure from buffer:");
-    for(int i=0; i<8; i++) {
-        Serial.print(buf[i], HEX);
-        Serial.print(" ");
-    }
     aquisc.timer = (buf[0] << 8) | buf[1];
     aquisc.analog = (buf[2] & 0x01);
     aquisc.Aquics_Enable_Continuous = (buf[3] & 0x03);
@@ -80,10 +74,7 @@ void sendaquisitionConfig(aquisitionConfigStructure aquisc, byte *txBuf){
     txBuf[1] = aquisc.timer & 0xFF;         
     txBuf[2] = aquisc.analog & 0x01;
     txBuf[3] = aquisc.Aquics_Enable_Continuous & 0x03;
-    txBuf[4] = 0x00;
-    txBuf[5] = 0x00;
-    txBuf[6] = 0x00;
-    txBuf[7] = 0x00;
+    txBuf[4] = 0x00; txBuf[5] = 0x00; txBuf[6] = 0x00; txBuf[7] = 0x00;
 }
 
 tempReadStructure tempRead(byte *buf){
@@ -92,14 +83,15 @@ tempReadStructure tempRead(byte *buf){
     temp.raw2 = (int16_t)((buf[2] << 8) | buf[3]);
     temp.raw3 = (int16_t)((buf[4] << 8) | buf[5]);
     temp.raw4 = (int16_t)((buf[6] << 8) | buf[7]);
-    temp.Ch1status = (temp.raw1 == 8400)?0 : 1;
-    temp.Ch2status = (temp.raw2 == 8400)? 0 : 1;
-    temp.Ch3status = (temp.raw3 == 8400)? 0 : 1;
-    temp.Ch4status = (temp.raw4 == 8400)? 0 : 1;
+    
+    temp.Ch1status = (temp.raw1 == 8400) ? 0 : 1;
+    temp.Ch2status = (temp.raw2 == 8400) ? 0 : 1;
+    temp.Ch3status = (temp.raw3 == 8400) ? 0 : 1;
+    temp.Ch4status = (temp.raw4 == 8400) ? 0 : 1;
 
-    temp.Channel1= temp.raw1 *0.125;
-    temp.Channel2= temp.raw2 *0.125;
-    temp.Channel3= temp.raw3 *0.125;
-    temp.Channel4= temp.raw4 *0.125;
+    temp.Channel1 = temp.raw1 * 0.125;
+    temp.Channel2 = temp.raw2 * 0.125;
+    temp.Channel3 = temp.raw3 * 0.125;
+    temp.Channel4 = temp.raw4 * 0.125;
     return temp;
 }

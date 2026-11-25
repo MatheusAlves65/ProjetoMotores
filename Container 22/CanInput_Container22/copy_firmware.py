@@ -16,8 +16,8 @@ AUTO_INCREMENT = True
 class FirmwareVersion:
     def __init__(self, file_path):
         self.file_path = Path(file_path)
-        self.major = 1
-        self.minor = 0
+        self.major = 2
+        self.minor = 1
         self.patch = 0
         self.load()
 
