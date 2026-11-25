@@ -1,0 +1,115 @@
+🧱 High-Level Architecture
+
+The project is divided into layers, from hardware-dependent to application logic
+
+Application (WHAT the system does)
+└── Drivers (Device-specific logic)
+    └── HAL (HOW the hardware is accessed)
+        └── Arduino / MCU
+
+This separation makes the code:
+1-easier to maintain
+2-portable to other MCUs
+3-easier to test
+
+📁 Root Files
+platformio.ini
+Purpose: Build and board configuration
+1-Selects MCU and framework
+2-Enables C compilation
+3-Controls compiler flags
+
+📁 src/ — Source Code (implementation)
+
+This is where all .c files live.
+🔹 main.c
+
+Role: System entry point
+1-Arduino calls setup() once
+2-Arduino calls loop() repeatedly
+3-Acts as the bridge between Arduino runtime and your application
+➡ No application logic here — only system startup and scheduling.
+
+📁 app/ — Application Layer
+Purpose:
+Defines system behavior and logic flow
+What belongs here:
+1-State machines
+2-Control logic
+3-High-level algorithms
+4-Timing and sequencing
+
+What does NOT belong here:
+❌ GPIO
+❌ Registers
+❌ Arduino API calls
+➡ The app asks for actions, it does not care how they are done.
+
+📁 drivers/ — Device Drivers
+Purpose:
+Handle specific peripherals (LEDs, buttons, sensors, displays)
+Responsibilities:
+1-Encapsulate device behavior
+2-Use HAL functions
+3-Hide hardware details from the app
+➡ The driver knows:
+which pin is used
+how the device behaves
+➡ The application does NOT.
+
+📁 hal/ — Hardware Abstraction Layer
+Purpose:
+Abstract the MCU / framework specifics
+Responsibilities:
+1-Wrap Arduino functions
+2-Provide portable APIs
+
+Allow easy migration to:
+ESP32
+STM32
+Bare-metal
+➡ If you change platform, only HAL changes.
+
+📁 config/ — Configuration Layer
+Purpose:
+Centralize board-specific definitions
+Contains:
+1- Pin mappings
+2-Feature switches
+3-Compile-time configuration
+
+📁 include/ — Global Headers
+Purpose:
+Project-wide definitions
+Typical contents:
+1-Common types
+2-Versioning
+3-Global macros
+
+📁 lib/ — External Libraries
+Purpose:
+1-Third-party or reusable modules
+2-PlatformIO automatically includes them
+3-Keeps vendor code separate from your code
+
+📁 test/ — Unit Tests
+Purpose:
+Automated testing (optional but recommended)
+1-Driver tests
+2-Logic tests
+3-Hardware-mock tests
+
+✅ Why This Structure Is Important
+Benefit	        Explanation
+Scalability	    Easy to grow to large projects
+Portability	    Change MCU without rewriting logic
+Testability	    Drivers and app can be tested independently
+Readability	    New engineers understand faster
+Professional	Matches industry practices
+
+🧠 Mental Model
+main.c → system startup
+app → what the system does
+drivers → how devices behave
+hal → how hardware is accessed
+config → what hardware exists
