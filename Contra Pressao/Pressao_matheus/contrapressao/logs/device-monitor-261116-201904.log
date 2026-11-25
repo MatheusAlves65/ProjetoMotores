@@ -1,0 +1,97 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# >> Digite a tensao da bateria medida no multimetro (V) e Enter (minimo 11.8 V):
+# Bateria: 12.75 V -> ok
+# Zero NAO feito: 0.241 V = SEM SINAL do sensor (esperado ~1,0 V a 0 bar). Confira alimentacao, GND comum e o fio do GPIO32
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de fechamento invalido (batente nao encontrado ou valores fora da faixa)
+#   amostras 901 | patamar final 2553 mV | IS em t=100/500/1000 ms: 453/680/2850 mV
+#   batente NAO achado (curso mais longo que 1740 ms? fonte fraca?)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: autocalibracao
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | pwm <%> <ms> | ?
+T,tempo_ms,pressao_bar,pos_%
+T,7898,0.000,0.0
+T,7998,0.000,0.0
+T,8098,0.000,0.0
+T,8198,0.000,0.0
+T,8298,0.000,0.0
+T,8398,0.000,0.0
+T,8498,0.000,0.0
+T,8598,0.000,0.0
+T,8698,0.000,0.0
+T,8798,0.000,0.0
+T,8898,0.000,0.0
+T,8998,0.000,0.0
+T,9098,0.000,0.0
+T,9198,0.000,0.0
+T,9298,0.000,0.0
+T,9398,0.000,0.0
+T,9498,0.000,0.0
+T,9598,0.000,0.0
+T,9698,0.000,0.0
+T,9798,0.000,0.0
+T,9898,0.000,0.0
+T,9998,0.000,0.0
+T,10098,0.000,0.0
+T,10198,0.000,0.0
+T,10298,0.000,0.0
+T,10398,0.000,0.0
+T,10498,0.000,0.0
+T,10598,0.000,0.0
+T,10698,0.000,0.0
+T,10798,0.000,0.0
+# Comando desconhecido: t0 (use ?)
+T,10898,0.000,0.0
+T,10998,0.000,0.0
+T,11098,0.000,0.0
+T,11198,0.000,0.0
+T,11298,0.000,0.0
+T,11398,0.000,0.0
+T,11498,0.000,0.0
+T,11598,0.000,0.0
+T,11698,0.000,0.0
+T,11798,0.000,0.0
+T,11898,0.000,0.0
+T,11998,0.000,0.0
+T,12098,0.000,0.0
+T,12198,0.000,0.0
+T,12298,0.000,0.0
+T,12398,0.000,0.0
+T,12498,0.000,0.0
+T,12598,0.000,0.0
+T,12698,0.000,0.0
+T,12798,0.000,0.0
+T,12898,0.000,0.0
+# telemetria a cada 0 ms
+# Comando desconhecido: m100 (use ?)
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de abertura invalido (batente nao encontrado ou valores fora da faixa)
+#   amostras 901 | patamar final 2595 mV | IS em t=100/500/1000 ms: 229/647/2814 mV
+#   batente NAO achado (curso mais longo que 1740 ms? fonte fraca?)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Recusado: PWM 0, ou valvula sem calibracao/em falha ('h')
+# Recusado: PWM 0, ou valvula sem calibracao/em falha ('h')
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de abertura invalido (batente nao encontrado ou valores fora da faixa)
+#   amostras 901 | patamar final 2543 mV | IS em t=100/500/1000 ms: 236/520/2565 mV
+#   batente NAO achado (curso mais longo que 1740 ms? fonte fraca?)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.

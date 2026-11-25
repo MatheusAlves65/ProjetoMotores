@@ -1,0 +1,77 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# >> Digite a tensao da bateria medida no multimetro (V) e Enter (minimo 11.8 V):
+# Bateria: 12.75 V -> ok
+# Zero do sensor de pressao: 0.9974 V
+# Autocalibracao DESLIGADA (AUTOCALIBRAR_NA_PARTIDA = 0): usando valores padrao
+#   k_IS fechar 1037, abrir 992 mV/A | Ke fechar 0.0332, abrir 0.0410 V/(%/s)
+#   Indo ao batente aberto para referenciar a posicao. Use 'h' para calibrar.
+# MANUAL: valvula em 0.0 %
+# ---------------- estado
+# modo M | setpoint 0.000 bar | pressao 0.003 bar (ok) | temp 25.0 C
+# sensor: 0.999 V na saida = 599 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+# valvula: ref 0.0 % | pos 0.0 % | calibrada | falha: ok
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9974 V
+# bateria: 12.75 V (ok, minimo 11.8 V) | limite de fechamento 90 %
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | degrau <de%> <para%> [tempo_s] |
+#           pwm <0..255> <ms> | rampa <1|-1> [PWM/s] [max] | ?
+T,tempo_ms,pressao_bar,pos_%,pwm
+T,5182,0.004,0.0,-200
+T,5282,-0.002,0.0,-200
+T,5382,-0.007,0.0,-200
+T,5482,0.000,0.0,-200
+T,5582,-0.004,0.0,-200
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+T,5682,-0.001,0.0,0
+T,5782,-0.001,0.0,0
+T,5882,0.001,0.0,0
+T,5982,-0.005,0.0,0
+T,6082,0.020,0.0,0
+T,6182,0.010,0.0,0
+T,6282,0.010,0.0,0
+T,6382,0.006,0.0,0
+T,6482,0.010,0.0,0
+T,6582,-0.001,0.0,0
+T,6682,0.015,0.0,0
+T,6782,-0.001,0.0,0
+T,6882,0.006,0.0,0
+T,6982,0.002,0.0,0
+T,7082,-0.003,0.0,0
+T,7182,0.006,0.0,0
+T,7282,0.004,0.0,0
+T,7382,0.001,0.0,0
+T,7482,0.004,0.0,0
+T,7582,0.005,0.0,0
+T,7682,-0.003,0.0,0
+T,7782,0.000,0.0,0
+T,7882,0.000,0.0,0
+T,7982,0.001,0.0,0
+T,8082,0.005,0.0,0
+T,8182,0.006,0.0,0
+T,8282,0.005,0.0,0
+T,8382,0.006,0.0,0
+T,8482,0.014,0.0,0
+T,8582,0.009,0.0,0
+T,8682,0.012,0.0,0
+T,8782,0.007,0.0,0
+T,8882,0.004,0.0,0
+T,8982,-0.005,0.0,0
+T,9082,0.004,0.0,0
+T,9182,0.000,0.0,0
+T,9282,0.010,0.0,0
+T,9382,0.009,0.0,0
+# telemetria a cada 0 ms
+# Comando desconhecido: ?] (use ?)
+# ---------------- estado
+# modo M | setpoint 0.000 bar | pressao 0.003 bar (ok) | temp 25.0 C
+# sensor: 0.999 V na saida = 599 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+# valvula: ref 0.0 % | pos 0.0 % | calibrada | falha: ok
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9974 V
+# bateria: 12.75 V (ok, minimo 11.8 V) | limite de fechamento 90 %
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | degrau <de%> <para%> [tempo_s] |
+#           pwm <0..255> <ms> | rampa <1|-1> [PWM/s] [max] | ?

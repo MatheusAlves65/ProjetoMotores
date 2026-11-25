@@ -1,0 +1,81 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# Zero NAO feito: 0.237 V = SEM SINAL do sensor (esperado ~1,0 V a 0 bar). Confira alimentacao, GND comum e o fio do GPIO32
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: IS (falha sinalizada pela BTS7960)
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | diag | ?
+T,tempo_ms,modo,setpoint_bar,pressao_bar,temp_C,ref_%,pos_%,pwm,corrente_A,P,I,D,p_bruta_bar
+T,4178,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4278,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4378,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4478,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4578,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4678,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4778,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4878,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4978,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5078,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5178,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5278,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5378,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5478,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5578,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5678,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5778,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5878,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5978,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6078,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6178,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6278,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6378,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6478,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6578,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6678,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6778,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6878,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6978,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7078,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7178,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7278,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7378,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7478,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7578,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7678,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7778,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7878,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7978,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8078,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8178,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8278,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8378,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8478,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8578,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8678,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8778,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,8878,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+# telemetria a cada 0 ms
+# DIAG: le os pinos parado e aciona o motor 300 ms para cada lado.
+#   Observe se a VALVULA SE MEXE nos dois sentidos.
+#   parado   GPIO35 IS_FECHAR 142 mV | GPIO34 IS_ABRIR 142 mV | GPIO32 pressao 142 mV | GPIO33 vbat 476 mV
+#   fechando PWM +200 | IS_FECHAR GPIO35:  142/2574/3134 mV | IS_ABRIR GPIO34:  142/ 142/ 142 mV  (min/media/max)
+#   abrindo  PWM -200 | IS_FECHAR GPIO35:  142/ 142/ 142 mV | IS_ABRIR GPIO34:  142/ 196/1524 mV  (min/media/max)
+#   Esperado: parado ~0-150 mV nos IS; movendo, o IS do lado ativo sobe
+#   (centenas de mV a ~2 V) e o do outro lado fica ~0-150 mV. >3000 mV = saturado/falha.
+# DIAG: le os pinos parado e aciona o motor 300 ms para cada lado.
+#   Observe se a VALVULA SE MEXE nos dois sentidos.
+#   parado   GPIO35 IS_FECHAR 142 mV | GPIO34 IS_ABRIR 142 mV | GPIO32 pressao 142 mV | GPIO33 vbat 488 mV
+#   fechando PWM +200 | IS_FECHAR GPIO35:  142/ 775/2823 mV | IS_ABRIR GPIO34:  142/ 142/ 142 mV  (min/media/max)
+#   abrindo  PWM -200 | IS_FECHAR GPIO35:  142/ 142/ 142 mV | IS_ABRIR GPIO34:  142/ 185/1469 mV  (min/media/max)
+#   Esperado: parado ~0-150 mV nos IS; movendo, o IS do lado ativo sobe
+#   (centenas de mV a ~2 V) e o do outro lado fica ~0-150 mV. >3000 mV = saturado/falha.

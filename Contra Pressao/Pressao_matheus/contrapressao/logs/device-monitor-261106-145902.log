@@ -1,0 +1,89 @@
+ts Jun
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:50] begin(): nvs_open failed: NOT_FOUND
+
+# Zero do sensor de pressao: 1.0045 V
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de fechamento invalido (batente nao encontrado ou valores fora da faixa)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao -0.002 bar (ok) | temp 25.0 C
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: autocalibracao
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 1.0045 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | ?
+T,tempo_ms,modo,setpoint_bar,pressao_bar,temp_C,ref_%,pos_%,pwm,corrente_A,P,I,D
+T,4122,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4222,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4322,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4422,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4522,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4622,F,0.000,0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4722,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4822,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,4922,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5022,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5122,F,0.000,0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5222,F,0.000,0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5322,F,0.000,0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5422,F,0.000,0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5522,F,0.000,0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5622,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5722,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5822,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,5922,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,6022,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,6122,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,6222,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,6322,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de abertura invalido (batente nao encontrado ou valores fora da faixa)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+T,10867,F,0.000,-0.004,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,10966,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11066,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11166,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11266,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11366,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11466,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11566,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11666,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11766,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11866,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,11966,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12066,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12166,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12266,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12366,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12466,F,0.000,0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12566,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12666,F,0.000,-0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12766,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12866,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,12966,F,0.000,-0.001,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,13066,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,13166,F,0.000,-0.002,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+T,13266,F,0.000,-0.004,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0
+# telemetria a cada 0 ms
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de fechamento invalido (batente nao encontrado ou valores fora da faixa)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Comando desconhecido: a (use ?)
+# Comando desconhecido: a1 (use ?)
+# Recusado: valvula sem calibracao ou em falha (use 'h')
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao -0.002 bar (ok) | temp 25.0 C
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: autocalibracao
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 1.0045 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | ?
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de fechamento invalido (batente nao encontrado ou valores fora da faixa)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.

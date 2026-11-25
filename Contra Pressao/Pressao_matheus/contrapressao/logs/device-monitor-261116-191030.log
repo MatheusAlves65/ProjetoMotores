@@ -1,0 +1,119 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# >> Digite a tensao da bateria medida no multimetro (V) e Enter (minimo 11.8 V):
+# Bateria: 12.75 V -> ok
+# Zero do sensor de pressao: 0.9255 V
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.041 bar (ok) | temp 25.0 C
+# sensor: 0.942 V na saida = 565 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.925 V)
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: IS (falha sinalizada pela BTS7960)
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9255 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | tc | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | ?
+T,tempo_ms,pos_%,pressao_bar
+T,13192,0.0,0.037
+T,13292,0.0,0.045
+T,13392,0.0,0.054
+T,13492,0.0,0.051
+T,13592,0.0,0.050
+T,13692,0.0,0.028
+T,13792,0.0,0.039
+T,13892,0.0,0.041
+T,13992,0.0,0.039
+T,14092,0.0,0.038
+T,14192,0.0,0.061
+T,14292,0.0,0.059
+T,14392,0.0,0.052
+T,14492,0.0,0.035
+T,14592,0.0,0.040
+T,14692,0.0,0.041
+T,14792,0.0,0.046
+T,14892,0.0,0.042
+T,14992,0.0,0.046
+T,15092,0.0,0.045
+T,15192,0.0,0.050
+T,15292,0.0,0.046
+T,15392,0.0,0.039
+T,15492,0.0,0.037
+T,15592,0.0,0.044
+T,15692,0.0,0.046
+T,15792,0.0,0.045
+T,15892,0.0,0.041
+T,15992,0.0,0.042
+T,16092,0.0,0.042
+T,16192,0.0,0.047
+T,16292,0.0,0.046
+T,16392,0.0,0.044
+T,16492,0.0,0.053
+T,16592,0.0,0.046
+T,16692,0.0,0.045
+T,16792,0.0,0.047
+T,16892,0.0,0.040
+T,16992,0.0,0.059
+T,17092,0.0,0.049
+T,17192,0.0,0.042
+T,17292,0.0,0.041
+T,17392,0.0,0.048
+T,17492,0.0,0.044
+T,17592,0.0,0.045
+T,17692,0.0,0.040
+T,17792,0.0,0.052
+T,17892,0.0,0.037
+T,17992,0.0,0.024
+T,18092,0.0,0.038
+T,18192,0.0,0.049
+T,18292,0.0,0.039
+T,18392,0.0,0.040
+T,18492,0.0,0.058
+T,18592,0.0,0.046
+T,18692,0.0,0.049
+T,18792,0.0,0.042
+T,18892,0.0,0.048
+T,18992,0.0,0.046
+T,19092,0.0,0.035
+T,19192,0.0,0.037
+T,19292,0.0,0.043
+T,19392,0.0,0.052
+T,19492,0.0,0.035
+T,19592,0.0,0.045
+T,19692,0.0,0.040
+T,19792,0.0,0.044
+T,19892,0.0,0.047
+T,19992,0.0,0.011
+T,20092,0.0,0.020
+T,20192,0.0,0.036
+T,20292,0.0,0.046
+T,20392,0.0,0.043
+T,20492,0.0,0.031
+T,20592,0.0,0.036
+T,20692,0.0,0.039
+T,20792,0.0,0.043
+# telemetria a cada 0 ms
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.030 bar (ok) | temp 25.0 C
+# sensor: 0.942 V na saida = 565 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.925 V)
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: IS (falha sinalizada pela BTS7960)
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9255 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | tc | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | ?
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.

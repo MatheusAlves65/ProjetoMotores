@@ -1,0 +1,42 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# Zero NAO feito: 0.237 V = SEM SINAL do sensor (esperado ~1,0 V a 0 bar). Confira alimentacao, GND comum e o fio do GPIO32
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# Curso de fechamento invalido (batente nao encontrado ou valores fora da faixa)
+#   amostras 901 | patamar final 142 mV | IS em t=100/500/1000 ms: 142/142/142 mV
+#   batente NAO achado (curso mais longo que 1740 ms? fonte fraca?)
+# FALHA valvula: autocalibracao -> abrindo a valvula
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: autocalibracao
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | diag | ?
+T,tempo_ms,modo,setpoint_bar,pressao_bar,temp_C,ref_%,pos_%,pwm,corrente_A,P,I,D,p_bruta_bar
+T,5162,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5262,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5362,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5462,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5562,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5662,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5762,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5862,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5962,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6062,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6162,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6262,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6362,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6462,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6562,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6662,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6762,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6862,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6962,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7062,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7162,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000

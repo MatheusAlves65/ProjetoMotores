@@ -1,0 +1,26 @@
+
+=== CALIBRACAO DA VALVULA ===
+PWM atual: 200/255 (78%)
+a = abrir | f = fechar | + = PWM +25 | - = PWM -25 | m = menu
+d = diagnostico do sinal IS (segura no batente por 3 s)
+
+=== DIAGNOSTICO DO IS ===
+Fechando com PWM 255 e segurando no batente por 3 s...
+t_ms | pino_R(mV) pino_L(mV) | IS_R(V) IS_L(V)
+  15 |    2810        142   |  4.214   0.213
+ 229 |     752        142   |  1.129   0.213
+ 444 |     834        142   |  1.251   0.213
+ 659 |    3134        142   |  4.701   0.213
+ 874 |    3134        142   |  4.701   0.213
+1089 |    3134        142   |  4.701   0.213
+1304 |    3134        142   |  4.701   0.213
+1519 |    3134        142   |  4.701   0.213
+1734 |    3134        142   |  4.701   0.213
+1949 |    3134        142   |  4.701   0.213
+2164 |    3134        142   |  4.701   0.213
+2379 |    3134        142   |  4.701   0.213
+2594 |    3134        142   |  4.701   0.213
+2809 |    3134        142   |  4.701   0.213
+Esperado no batente com PWM 255 (válvula de 4,2 ohm, IS de 10k):
+  pino_R ~1500-1900 mV, pino_L no piso (~140 mV = 0 V).
+Acima de ~3000 mV o pino satura: confira os diodos de protecao.

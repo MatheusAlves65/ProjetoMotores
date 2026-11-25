@@ -1,0 +1,75 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# Zero NAO feito: 0.237 V = SEM SINAL do sensor (esperado ~1,0 V a 0 bar). Confira alimentacao, GND comum e o fio do GPIO32
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Em falha: a valvula fica aberta. Use 'h' para recalibrar.
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: IS (falha sinalizada pela BTS7960)
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | diag | ?
+T,tempo_ms,modo,setpoint_bar,pressao_bar,temp_C,ref_%,pos_%,pwm,corrente_A,P,I,D,p_bruta_bar
+T,4184,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4284,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4384,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4484,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4584,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4684,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4784,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4884,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,4984,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5084,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5184,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5284,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5384,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5484,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5584,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5684,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5784,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5884,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,5984,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6084,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6184,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6284,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6384,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6484,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6584,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6684,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6784,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6884,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,6984,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7084,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7184,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7284,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7384,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7484,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+T,7584,F,0.000,0.000,25.0,0.0,0.0,0,0.00,0.0,0.0,0.0,0.000
+# telemetria a cada 0 ms
+# ---------------- estado
+# modo F | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | SEM CALIBRACAO | falha: IS (falha sinalizada pela BTS7960)
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | diag | ?
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Autocalibracao: abre, fecha e abre de novo (~4 s)...
+# FALHA valvula: IS (falha sinalizada pela BTS7960) -> motor desligado
+# Modo FALHA: PID desligado, valvula aberta. Use 'h' para recalibrar.
+# Zero recusado: 0.2367 V esta longe do zero da calibracao (motor ligado?)
+# DIAG: le os pinos parado e aciona o motor 300 ms para cada lado.
+#   Observe se a VALVULA SE MEXE nos dois sentidos.
+#   parado   GPIO35 IS_FECHAR 142 mV | GPIO34 IS_ABRIR 142 mV | GPIO32 pressao 142 mV | GPIO33 vbat 499 mV
+#   fechando PWM +200 | IS_FECHAR GPIO35:  870/2590/3134 mV | IS_ABRIR GPIO34:  142/ 142/ 142 mV  (min/media/max)
+#   abrindo  PWM -200 | IS_FECHAR GPIO35:  142/ 142/ 142 mV | IS_ABRIR GPIO34:  142/ 226/2816 mV  (min/media/max)
+#   Esperado: parado ~0-150 mV nos IS; movendo, o IS do lado ativo sobe
+#   (centenas de mV a ~2 V) e o do outro lado fica ~0-150 mV. >3000 mV = saturado/falha.

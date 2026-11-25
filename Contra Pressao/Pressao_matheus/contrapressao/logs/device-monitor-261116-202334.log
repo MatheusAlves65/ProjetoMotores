@@ -1,0 +1,133 @@
+
+# ===== Controle de contrapressao =====[   541][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kp NOT_FOUND
+
+[   552][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: ki NOT_FOUND
+[   559][E][Preferences.cpp:503] getBytesLength(): nvs_get_blob len fail: kd NOT_FOUND
+# >> Digite a tensao da bateria medida no multimetro (V) e Enter (minimo 11.8 V):
+# Bateria: 12.75 V -> ok
+# Zero NAO feito: 0.240 V = SEM SINAL do sensor (esperado ~1,0 V a 0 bar). Confira alimentacao, GND comum e o fio do GPIO32
+# Autocalibracao DESLIGADA (AUTOCALIBRAR_NA_PARTIDA = 0): usando valores padrao
+#   k_IS fechar 1037, abrir 992 mV/A | Ke fechar 0.0332, abrir 0.0410 V/(%/s)
+#   Indo ao batente aberto para referenciar a posicao. Use 'h' para calibrar.
+# MANUAL: valvula em 0.0 %
+# ---------------- estado
+# modo M | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.339 V na saida = 203 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | calibrada | falha: ok
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | pwm <0..255> <ms> | ?
+T,tempo_ms,pressao_bar,pos_%
+T,7586,0.000,0.0
+T,7686,0.000,0.0
+T,7786,0.000,0.0
+T,7886,0.000,0.0
+T,7986,0.000,0.0
+T,8086,0.000,0.0
+T,8186,0.000,0.0
+T,8286,0.000,0.0
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+T,8386,0.000,0.0
+T,8486,0.000,0.0
+T,8586,0.000,0.0
+T,8686,0.000,0.0
+T,8786,0.000,0.0
+T,8886,0.000,0.0
+T,8986,0.000,0.0
+T,9086,0.000,0.0
+T,9186,0.000,0.0
+T,9286,0.000,0.0
+T,9386,0.000,0.0
+T,9486,0.000,0.0
+T,9586,0.000,0.0
+T,9686,0.000,0.0
+T,9786,0.000,0.0
+T,9886,0.000,0.0
+T,9986,0.000,0.0
+T,10086,0.000,0.0
+T,10186,0.000,0.0
+T,10286,0.000,0.0
+T,10386,0.000,0.0
+T,10486,0.000,0.0
+T,10586,0.000,0.0
+T,10686,0.000,0.0
+T,10786,0.000,0.0
+T,10886,0.000,0.0
+T,10986,0.000,0.0
+T,11086,0.000,0.0
+T,11186,0.000,0.0
+T,11286,0.000,0.0
+T,11386,0.000,0.0
+T,11486,0.000,0.0
+T,11586,0.000,0.0
+T,11686,0.000,0.0
+T,11786,0.000,0.0
+T,11886,0.000,0.0
+T,11986,0.000,0.0
+T,12086,0.000,0.0
+T,12186,0.000,0.0
+T,12286,0.000,0.0
+# telemetria a cada 0 ms
+# ---------------- estado
+# modo M | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 0.0 % | pos 0.0 % | calibrada | falha: ok
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | pwm <0..255> <ms> | ?
+# PWM direto: +77/255 (fechando) por 10000 ms
+# PWM direto: motor parou no meio do curso (PWM baixo demais ou travou) | posicao estimada 24.4 %
+# PWM direto: +80/255 (fechando) por 10000 ms
+# PWM direto: motor parou no meio do curso (PWM baixo demais ou travou) | posicao estimada 28.2 %
+# Uso: pwm <0..255> <ms>   (+ fecha, - abre). Ex.: pwm 150 300, pwm -120 500
+# PWM direto: +50/255 (fechando) por 1000 ms
+# PWM direto: motor parou no meio do curso (PWM baixo demais ou travou) | posicao estimada 28.2 %
+# PWM direto: +150/255 (fechando) por 10000 ms
+# Batente fechado: estimativa estava em 102.0 % (erro +2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 100.0 %
+# Comando desconhecido: spwm -100 1000 (use ?)
+# PWM direto: -100/255 (abrindo) por 1000 ms
+# PWM direto: tempo concluido | posicao estimada 21.1 %
+# Comando desconhecido: ␛[A (use ?)
+# PWM direto: -150/255 (abrindo) por 10000 ms
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 0.0 %
+# PWM direto: +100/255 (fechando) por 10000 ms
+# PWM direto: tempo concluido | posicao estimada 100.0 %
+# Batente fechado: estimativa estava em 102.0 % (erro +2.0 %)
+# PWM direto: +95/255 (fechando) por 10000 ms
+# Batente fechado: estimativa estava em 102.0 % (erro +2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 100.0 %
+# Comando desconhecido: spwm -95 10000 (use ?)
+# PWM direto: -95/255 (abrindo) por 10000 ms
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 0.0 %
+# PWM direto: -95/255 (abrindo) por 10000 ms
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 0.0 %
+# PWM direto: -120/255 (abrindo) por 10000 ms
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+# PWM direto: chegou ao batente | posicao estimada 0.0 %
+# PWM direto: +80/255 (fechando) por 10000 ms
+# PWM direto: motor parou no meio do curso (PWM baixo demais ou travou) | posicao estimada 29.4 %
+# PWM direto: +95/255 (fechando) por 10000 ms
+# PWM direto: motor parou no meio do curso (PWM baixo demais ou travou) | posicao estimada 39.5 %
+# PWM direto: -100/255 (abrindo) por 1000 ms
+# PWM direto: tempo concluido | posicao estimada 0.0 %
+# Batente aberto: estimativa estava em -2.0 % (erro -2.0 %)
+# PWM direto: +98/255 (fechando) por 10000 ms
+# Batente fechado: estimativa estava em 101.7 % (erro +1.7 %)
+# PWM direto: chegou ao batente | posicao estimada 100.0 %
+# ---------------- estado
+# modo M | setpoint 0.000 bar | pressao 0.000 bar (INVALIDA) | temp 25.0 C
+# sensor: 0.237 V na saida = 142 mV no GPIO32 | faixa valida 0.60..5.15 V (0 bar = 0.997 V)
+#   sem sinal no pino: confira alimentacao do sensor, GND comum com o ESP32, fio de sinal e divisor
+# valvula: ref 100.0 % | pos 100.0 % | calibrada | falha: ok
+# PID: kp 50.000  ki 20.000  kd 0.000 | zero do sensor 0.9970 V
+# bateria: 12.75 V (ok, minimo 11.8 V)
+# comandos: m <pos> | a <bar> | s | kp/ki/kd <v> | salvar | t <ms> | h | z | b <V> | diag |
+#           ensaio [passo%] [tempo_s] [max%] | pwm <0..255> <ms> | ?
