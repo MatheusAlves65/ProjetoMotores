@@ -1,0 +1,1 @@
+"C:\Users\evand\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/bin/avrdude" "-CC:\Users\evand\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf" -v -V -patmega328p -carduino "-PCOM24" -b57600 -D "-Uflash:w:C:\Users\evand\OneDrive\Documents\PlatformIO\Projects\ControlPad_v02\.pio\build\arduino_nano\firmware.hex:i"
